@@ -21,3 +21,4 @@ class MenuItem(object):
         self.action = action
         
 from pyinstruments.instruments.ivi_scope_gui import IviScopeGui
+from pyinstruments.instruments.ivi_spec_an_gui import IviSpecAnGui

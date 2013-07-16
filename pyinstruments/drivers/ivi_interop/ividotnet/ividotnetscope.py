@@ -10,13 +10,19 @@ from pyinstruments.wrappers import Wrapper
 from numpy import array
 
 class IviDotNetScope(IviDotNetDriver):
+    """
+    Implements the minimal wrapper around Ividotnet interop when the instrument 
+    is a scope. Mostly translates strange arrays by numpy arrays...
+    """
+    
     _supported_software_modules =  ["Tkdpo2k3k4k", \
                                    "lcscope", \
                                    "TekScope", \
                                    "AgInfiniiVision"]
     
     def instrument_type(self):
-        return "scope"
+        """returns the type string as in the Ivi specs"""
+        return "Scope"
     
     @property
     def Channels(self):

@@ -1,5 +1,5 @@
 """
-class to add gui-capabilities to IVI-compliant scopes
+class to add gui-capabilities to IVI-compliant spectrum analyzers
 """
 
 from guiwrappersutils import GuiWrapper
@@ -10,10 +10,10 @@ from pyinstruments.factories import use_for_ivi
 from pyinstruments.instruments.iviguiinstruments import IviGuiInstrument
 from numpy import array,linspace
 
-@use_for_ivi("scope")
+@use_for_ivi("Scope")
 class IviScopeGui(Wrapper, GuiWrapper, IviGuiInstrument):
     """
-    class to add gui-capabilities to IVI-compliant scopes
+    class to add gui-capabilities to IVI-compliant spectrum analyzers
     """
     
     def __init__(self, *args, **kwds):
@@ -44,6 +44,11 @@ class IviScopeGui(Wrapper, GuiWrapper, IviGuiInstrument):
         class to add gui-capabilities to the sub object Channel
         """
         
+        def __init__(self, *args, **kwds):
+            super(IviScopeGui.ChannelGui,self).__init__(*args,**kwds)
+            GuiWrapper.__init__(self)
+            GuiFetchable.__init__(self)
+        
         def FetchXY(self):
             """returns an array with the X and Y columns filled.
             """
@@ -55,12 +60,6 @@ class IviScopeGui(Wrapper, GuiWrapper, IviGuiInstrument):
                                    n, \
                                    endpoint = False), \
                           y_values])
-            
-        
-        def __init__(self, *args, **kwds):
-            super(IviScopeGui.ChannelGui,self).__init__(*args,**kwds)
-            GuiWrapper.__init__(self)
-            GuiFetchable.__init__(self)
         
         def _setupUi(self, widget):
             """sets up the graphical user interface"""

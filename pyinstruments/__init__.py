@@ -10,10 +10,8 @@ If the driver is ivi-compliant, then it is embedded in an instrument which provi
 basic graphical user interface capabilities.
 """
 
-if __name__ == "__main__":
-    from PyQt4.QtGui import QApplication as _qapplication
-    _APP = _qapplication([]) ### should be done before importing clr and 
-                             ### all that stuff to avoid an error message
+from guidata import qapplication as __qapplication
+_APP = __qapplication()
     
 from pyinstruments.factories import instrument,use_for_ivi
 import pyinstruments.instruments
