@@ -2,24 +2,29 @@
 class to add gui-capabilities to IVI-compliant spectrum analyzers
 """
 
-from guiwrappersutils import GuiWrapper
 from pyinstruments.instruments.gui_fetchable import GuiFetchable
 from pyinstruments.wrappers import Wrapper
-from pyinstruments.instruments.ivi_instrument import  IntermediateCollection
+from pyinstruments.instruments.ivi_instrument import \
+                                                IntermediateCollection
 from pyinstruments.factories import use_for_ivi
 from pyinstruments.instruments.iviguiinstruments import IviGuiInstrument
+
+from guiwrappersutils import GuiWrapper
 from numpy import array,linspace
 
 @use_for_ivi("Scope")
-class IviScopeGui(Wrapper, GuiWrapper, IviGuiInstrument):
+class IviScopeGui(Wrapper, IviGuiInstrument):
     """
     class to add gui-capabilities to IVI-compliant spectrum analyzers
     """
     
     def __init__(self, *args, **kwds):
         super(IviScopeGui,self).__init__(*args,**kwds)
-        GuiWrapper.__init__(self)
-    
+        IviGuiInstrument.__init__(self)
+        self._wrap_attribute("Channels", \
+                        IntermediateCollection(self.Channels, \
+                        IviScopeGui.ChannelGui))
+        
     def _setupUi(self, widget):
         """sets up the graphical user interface"""
 
@@ -33,11 +38,6 @@ class IviScopeGui(Wrapper, GuiWrapper, IviGuiInstrument):
                                   enveloppe = 3, \
                                   average = 4)
         widget._setup_tabs_for_collection("Channels")
-
-    @property
-    def Channels(self):
-        return IntermediateCollection(self._wrapped.Channels, \
-                                      IviScopeGui.ChannelGui)
 
     class ChannelGui(Wrapper, GuiWrapper, GuiFetchable):
         """
@@ -65,7 +65,10 @@ class IviScopeGui(Wrapper, GuiWrapper, IviGuiInstrument):
             """sets up the graphical user interface"""
             
             widget._setup_gui_element("Enabled")
-            widget._setup_gui_element("Coupling", AC = 0, DC = 1, GND = 2)
+            widget._setup_gui_element("Coupling", \
+                                      AC = 0, \
+                                      DC = 1, \
+                                      GND = 2)
             widget._setup_gui_element("InputFrequencyMax")
             widget._setup_gui_element("InputImpedance")
             widget._setup_gui_element("Offset")

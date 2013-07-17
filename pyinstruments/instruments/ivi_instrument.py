@@ -3,7 +3,7 @@ sub-classes of IviInstrument can be used to wrap drivers complying to IVI
 specifications.
 """
 
-class IviInstrument(object):
+class IviInstrument:
     pass
 
 class IntermediateCollection:
@@ -43,7 +43,8 @@ class IntermediateCollection:
 
     def values(self):
         """see dict.values()"""
-        return [self.wrapper_class(val) for val in self.driver_col.values()]
+        
+        return [self[key] for key in self.keys()]
             
     def iteritems(self):
         """see dict.iteritems()"""

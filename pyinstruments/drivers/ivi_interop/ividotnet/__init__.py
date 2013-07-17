@@ -7,3 +7,4 @@ from pyinstruments.drivers.ivi_interop.ividotnet.config_store_utils import \
 from ividotnet import IviDotNetDriver
 from ividotnetscope import IviDotNetScope
 from ividotnetspecan import IviDotNetSpecAn
+from ividotnetna import IviDotNetNA

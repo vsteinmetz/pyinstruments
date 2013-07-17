@@ -3,17 +3,30 @@ Instruments that offer the possibility to display a Graphical User Interface
 """
 
 from pyinstruments.instruments import MenuItem
+from pyinstruments.instruments.ivi_instrument import IviInstrument
+from guiwrappersutils import GuiWrapper
 
-class IviGuiInstrument:
+from PyQt4 import QtCore, QtGui
+import os
+
+class IviGuiInstrument(GuiWrapper,IviInstrument):
     """
     Instruments that offer the possibility to display a Graphical User Interface
     """
     
-    #def gui(self):
-     #   """should open a gui window"""
+    def __init__(self):
+        super(IviGuiInstrument, self).__init__()
 
-      #  raise NotImplementedError()
     
+    def gui(self):
+        """opens a gui window"""
+
+        window = super(IviGuiInstrument, self).gui()
+        window.setWindowIcon(QtGui.QIcon(os.path.split(__file__)[0] \
+                                         +"/icons/" + "iconeScope.gif"))
+        window.setWindowTitle(self.logical_name)
+        return window
+            
     def menu_items(self):
         """The objects of type MenuItem returned by this function allow the 
         PyInstrumentsConfigGui to know which menu items to add upon right click

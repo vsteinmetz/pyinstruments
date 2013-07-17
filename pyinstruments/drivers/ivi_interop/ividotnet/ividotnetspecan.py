@@ -17,6 +17,9 @@ class IviDotNetSpecAn(IviDotNetDriver):
     
     _supported_software_modules = ["AgXSAn"]
     
+    def __init__(self, *args, **kwds):
+        super(IviDotNetSpecAn, self).__init__(*args,**kwds)
+    
     def instrument_type(self):
         """returns the type string, as in the Ivi specs"""
         return "SpecAn"

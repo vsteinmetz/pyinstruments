@@ -5,6 +5,7 @@ used to query waveforms.
 
 import numpy
 from hdnavigator import nav
+from PyQt4 import QtCore,QtGui
 
 class GuiFetchable(object):
     """Defines a bunch of useful methods for instruments that can be
@@ -27,14 +28,22 @@ class GuiFetchable(object):
 
     def _setup_fetch_utilities(self, widget):
         """sets up the gui to fetch the waveforms in widget"""
-        widget._setup_gui_element("plot_xy")
-        widget._setup_gui_element("xy_to_clipboard")
         
         widget_nav = nav._create_widget()
+        self.widget_nav = widget_nav
+
+        
         widget.add_below(widget_nav)
-
+        p = widget_nav.palette()
+        p.setColor(widget_nav.backgroundRole(), QtCore.Qt.gray)
+        widget_nav.setPalette(p)
+        widget_nav.setAutoFillBackground(True)
+        
+        widget._setup_horizontal_layout()
+        widget._setup_gui_element("plot_xy")
+        widget._setup_gui_element("xy_to_clipboard")
         widget._setup_gui_element("save_curve")
-
+        widget._exit_layout()
     def plot_xy(self):
         """uses pylab to plot X and Y"""
         import pylab

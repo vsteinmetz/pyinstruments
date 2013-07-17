@@ -11,14 +11,17 @@ from pyinstruments.instruments.iviguiinstruments import IviGuiInstrument
 from numpy import array,linspace
 
 @use_for_ivi("SpecAn")
-class IviSpecAnGui(Wrapper, GuiWrapper, IviGuiInstrument):
+class IviSpecAnGui(Wrapper, IviGuiInstrument):
     """
     class to add gui-capabilities to IVI-compliant spectrum analyzers
     """
     
     def __init__(self, *args, **kwds):
         super(IviSpecAnGui,self).__init__(*args,**kwds)
-        GuiWrapper.__init__(self)
+        IviGuiInstrument.__init__(self)
+        self._wrap_attribute("Traces", \
+                        IntermediateCollection(self.Traces, \
+                        IviSpecAnGui.TraceGui))
     
     def _setupUi(self, widget):
         """sets up the graphical user interface"""
@@ -31,10 +34,6 @@ class IviSpecAnGui(Wrapper, GuiWrapper, IviGuiInstrument):
         widget._setup_gui_element("Average.NumberOfSweeps")        
         widget._setup_tabs_for_collection("Traces")
 
-    @property
-    def Traces(self):
-        return IntermediateCollection(self._wrapped.Traces, self.TraceGui)
-    
 
     class TraceGui(Wrapper, GuiWrapper, GuiFetchable):
         """wrapper for sub-object Trace"""

@@ -14,6 +14,15 @@ class Wrapper(object):
     def __init__(self, wrapped):
         self._wrapped = wrapped
         
+    def _wrap_attribute(self, name, new_attr):
+        """for an attribute self.name in the wrapped object,
+        replaces the attribute as one would expected with
+        self.name = wrapper(self.name).
+        wrapper(self.name) is called only once. 
+        """
+    
+        attr = self.__getattr__(name)
+        super(Wrapper, self).__setattr__(name, new_attr)
     
     def __getattr__(self, name):
         try:

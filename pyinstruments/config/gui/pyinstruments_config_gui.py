@@ -94,7 +94,7 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)  
         self.setWindowIcon(\
-                        QtGui.QIcon(os.path.split(__file__)[0] +"/USB.jpg")) 
+                        QtGui.QIcon(os.path.split(__file__)[0] +"/usb.png")) 
         
     def retranslateUi(self, MainWindow):
         """qt's stuffs..."""
