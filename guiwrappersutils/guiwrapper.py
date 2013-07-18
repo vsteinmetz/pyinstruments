@@ -54,7 +54,7 @@ class GuiWrapperWidget(QtGui.QWidget):
             if n>n_max:
                 break
             self._tab_widget_items.append(item._create_widget())
-            self._tab_widgets[-1].addTab(self._tab_widget_items[-1],name)
+            self._tab_widgets[-1].addTab(self._tab_widget_items[-1], name)
     
     def _setup_horizontal_layout(self):
         self.setup_layout(QtGui.QHBoxLayout())

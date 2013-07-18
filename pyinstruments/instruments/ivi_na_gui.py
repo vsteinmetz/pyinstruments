@@ -53,7 +53,7 @@ class IviNaGui(Wrapper, IviGuiInstrument):
             widget._setup_gui_element("Averaging")
             widget._setup_gui_element("AveragingFactor")
             
-            widget._setup_tabs_for_collection( "Measurements")
+            widget._setup_tabs_for_collection("Measurements")
     
         class GuiMeasurement(Wrapper, GuiWrapper, GuiFetchable):
             """wrapper for sub-sub-object Measurement
@@ -64,20 +64,18 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                                         self).__init__(*args, **kwds)
                 GuiWrapper.__init__(self)
                 GuiFetchable.__init__(self)
-                self.out_port = 2
-                self.in_port = 1
 
         
             def Create(self, out_port = None, in_port = None):
                 """allows to create the measurement with default ports"""
                 
-                if out_port == None:
-                    out_port = self.out_port
-                if in_port == None:
-                    in_port = self.in_port    
-                self._wrapped.Create(out_port, in_port)
+                print "creating"
+                self._wrapped.Create(2, 1)
                 
                 for widget in self._widgets:
+                    widget._gui_elements["Create"].setVisible(False)
+                    widget._setup_gui_element("out_port")
+                    widget._setup_gui_element("in_port")
                     widget._setup_horizontal_layout()
                     widget._setup_gui_element("Format", \
                                           LogMag = 0, \
@@ -114,7 +112,25 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                     widget._exit_layout()
                     
                     
-                
+            @property
+            def in_port(self):
+                in_port, out_port = self.GetSParameter()
+                return in_port
+            
+            @in_port.setter
+            def in_port(self, in_port):
+                self._wrapped.Create(in_port, self.out_port)
+            
+            @property
+            def out_port(self):
+                in_port, out_port = self.GetSParameter()
+                return out_port
+            
+            @out_port.setter
+            def out_port(self, out_port):
+                self._wrapped.Create(self.in_port, out_port)
+            
+            
             def FetchXY(self):
                 return array([self.FetchX(), self.FetchFormatted()])
             
@@ -180,7 +196,5 @@ class IviNaGui(Wrapper, IviGuiInstrument):
             
             def _setupUi(self, widget):
                 widget._setup_horizontal_layout()
-                widget._setup_gui_element("out_port")
-                widget._setup_gui_element("in_port")
                 widget._setup_gui_element("Create")
                 widget._exit_layout()

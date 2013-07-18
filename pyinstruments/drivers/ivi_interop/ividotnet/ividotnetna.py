@@ -57,6 +57,10 @@ class IviDotNetNA(IviDotNetDriver):
         
             def FetchX(self):
                 re = self._wrapped.FetchX()
-                return array(tuple(re))    
+                return array(tuple(re))
+            
+            def GetSParameter(self):
+                (dummy, in_port, out_port) = self._wrapped.GetSParameter(0,0)
+                return (in_port, out_port)
             
             
