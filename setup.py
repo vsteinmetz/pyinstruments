@@ -32,7 +32,8 @@ setup(
               'pyinstruments.factories',
               'hdnavigator',
               'guiwrappersutils',
-              'conf_xml'],
+              'conf_xml',
+              'mypandas'],
     long_description=read('README'),
     classifiers=[
         "Development Status :: 3 - Alpha",
