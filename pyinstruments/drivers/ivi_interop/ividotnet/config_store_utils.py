@@ -63,7 +63,7 @@ class ConfigStore(list):
         soft_mods_dict = col_to_dict(soft_mods)
         sessions = []
         for soft_mod in soft_mods_dict.values():
-            name = "pyHardware_" + soft_mod.Name
+            name = "pyinstrument_" + soft_mod.Name
             ### adds the driverSession first
             driver_ses = get_ivi_driver_session()
             driver_ses.Name = name
@@ -112,7 +112,10 @@ class ConfigStore(list):
 #        self._store.Serialize(self._store.MasterLocation)
 
     def get_sm_for_model(self, model):
-        """returns the list of SoftwareModules supporting a given instrument"""
+        """returns the list of SoftwareModules supporting a given 
+        model
+        """
+        
         ret = []
         for i in self:
             if model in i.supported_instrument_models:
@@ -124,6 +127,7 @@ class ConfigStore(list):
         for soft_mod in self:
             if soft_mod.name == software_module:
                 return soft_mod.supported_instrument_models
+        return []
         
 
 CONFIG_STORE = ConfigStore()      

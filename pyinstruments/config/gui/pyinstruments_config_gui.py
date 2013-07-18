@@ -263,16 +263,17 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
             dotnet_types_menu.append(type_menu)
             dotnet_menu.addMenu(type_menu)
             for module in driver._supported_software_modules:
-                soft_modules.append(module)
-                module_menu = QtGui.QMenu(module)
-                modules_menu.append(module_menu)
-                type_menu.addMenu(module_menu)
-                for model in CONFIG_STORE.get_supported_models(module):
-                    model_action = ChangeModel(model, self)
-                    model_actions.append(model_action)
-                    model_action.triggered.connect( \
-                                    model_action.change_model_to_mine)
-                    module_menu.addAction(model_action)
+                if "pyinstruments_" + module in CONFIG_STORE:
+                    soft_modules.append(module)
+                    module_menu = QtGui.QMenu(module)
+                    modules_menu.append(module_menu)
+                    type_menu.addMenu(module_menu)
+                    for model in CONFIG_STORE.get_supported_models(module):
+                        model_action = ChangeModel(model, self)
+                        model_actions.append(model_action)
+                        model_action.triggered.connect( \
+                                        model_action.change_model_to_mine)
+                        module_menu.addAction(model_action)
         self.exec_menu_at_right_place(menu, point)
         
 

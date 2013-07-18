@@ -46,7 +46,7 @@ def _driver(model, logical_name, address, simulate):
     """returns the driver corresponding to the model, allready initialized"""
     (driv, software_module) = driver_factory(model)
     if issubclass(driv, IviInteropDriver):
-        return driv("pyHardware_" + software_module, \
+        return driv("pyinstruments_" + software_module, \
                      logical_name, \
                      address, \
                      simulate)
