@@ -10,20 +10,29 @@ def read(fname):
 
 setup(
     name = "pyinstruments",
-    version = "0.0.3",
+    version = "0.0.9",
     author = "Samuel Deleglise",
     author_email = "samuel.deleglise@gmail.com",
     description = ("""Control of data acquisition with remote instruments using (IVI-)dotnet, (IVI-)COM, Visa, and serial protocols.
     python dotnet and/or comtypes should be installed"""),
     license = "BSD",
-    keywords = "example documentation tutorial",
-    url = "https://testpypi.python.org/pypi",
+    keywords = "instruments data-acquisition IVI interface",
+    url = "https://github.com/SamuelDeleglise/pyinstruments",
     packages=['pyinstruments',
-              'pyinstruments.pyinstrumentsgui',
-              'pyinstruments.serialwrappers',
-              'pyinstruments.visawrappers',
-              'pyinstruments.ividotnetwrappers',
-              'pyinstruments.ivicommunication'],
+              'pyinstruments.config',
+              'pyinstruments.config.gui',
+              'pyinstruments.drivers',
+              'pyinstruments.drivers.ivi_interop',
+              'pyinstruments.drivers.ivi_interop.ivicom',
+              'pyinstruments.drivers.ivi_interop.ividotnet',
+              'pyinstruments.drivers.serial',
+              'pyinstruments.drivers.visa',
+              'pyinstruments.instruments',
+              'pyinstruments.wrappers',
+              'pyinstruments.factories',
+              'hdnavigator',
+              'guiwrappersutils',
+              'conf_xml'],
     long_description=read('README'),
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -31,11 +40,10 @@ setup(
         "License :: OSI Approved :: BSD License",
     ],
     install_requires=[
-    'guiwrappersutils',
-    'conf_xml'
 ],
     dependency_links = [
         "https://github.com/SamuelDeleglise/guiwrappersutils/tarball/master#egg=guiwrappersutils",
-        "https://github.com/SamuelDeleglise/conf_xml/tarball/master#egg=conf_xml"
+        "https://github.com/SamuelDeleglise/conf_xml/tarball/master#egg=conf_xml",
+        "https://github.com/SamuelDeleglise/hdnavigator/tarball/master#egg=hdnavigator"
         ],
 )

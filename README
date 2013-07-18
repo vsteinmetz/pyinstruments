@@ -1,12 +1,9 @@
-=====================================================
->>  		  pyinstruments			   <<
->>===================================================
 Control of data acquisition with remote instruments
 using different protocols:
-  - Visa
-  - pythondotnet
-  - comtypes
-  - serial
+- Visa
+- pythondotnet
+- comtypes
+- serial
 
 The driver syntax is based on IVI (Interchangeable Virtual Instruments)
 
