@@ -253,7 +253,7 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
             instr = pic[logical_name]
             if(driver_factory(instr["model"]) is not None):
                 if instr["simulate"] or \
-                        instr["address"] in con.get_surrounding_instruments():
+                        instr["address"] in con.existing_addresses(recheck = False):
                     try:
                         instrument_driver = instrument(logical_name)
                     except BaseException as e:

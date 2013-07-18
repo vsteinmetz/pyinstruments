@@ -69,7 +69,6 @@ class IviNaGui(Wrapper, IviGuiInstrument):
             def Create(self, out_port = None, in_port = None):
                 """allows to create the measurement with default ports"""
                 
-                print "creating"
                 self._wrapped.Create(2, 1)
                 
                 for widget in self._widgets:
