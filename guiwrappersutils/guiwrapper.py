@@ -412,6 +412,7 @@ class GuiWrapper(object):
         widget.resize(widget.sizeHint())
         self.value_changed.connect(widget.set_values_in_gui)
         self.value_changed.emit()
+        self._widgets.append(widget)
         return widget
     
     def _set_gui_title(self,title):
@@ -421,7 +422,6 @@ class GuiWrapper(object):
         widget = self._create_widget()
         self.gui_window = GuiWrapperWindow(self,widget)
         self.gui_window.setWindowTitle(self._gui_title)
-        self._widgets.append(widget)
         return self.gui_window
    # def sizeHint(self):
    #     return super(GuiWrapperWidget,self.gui_widget).sizeHint()

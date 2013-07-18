@@ -26,19 +26,23 @@ class GuiFetchable(object):
         nav.value_changed.emit()
         
 
-    def _setup_fetch_utilities(self, widget):
-        """sets up the gui to fetch the waveforms in widget"""
-        
+    def _setup_hdnavigator_widget(self, widget):
+        """sets up a nice widget that helps navigate in the folders"""
+
+
         widget_nav = nav._create_widget()
         self.widget_nav = widget_nav
-
-        
         widget.add_below(widget_nav)
         p = widget_nav.palette()
         p.setColor(widget_nav.backgroundRole(), QtCore.Qt.gray)
         widget_nav.setPalette(p)
         widget_nav.setAutoFillBackground(True)
+    
+    
+    def _setup_fetch_utilities(self, widget):
+        """sets up the gui to fetch the waveforms in widget"""
         
+        self._setup_hdnavigator_widget(widget)
         widget._setup_horizontal_layout()
         widget._setup_gui_element("plot_xy")
         widget._setup_gui_element("xy_to_clipboard")

@@ -36,7 +36,13 @@ class DotNetIntermediateCollection:
                     self.driver_col.get_Name(i+1)
                 except COMException:
                     return i
-                    
+    
+    def __repr__(self):
+        return self.__str__()
+    
+    def __str__(self):
+        return str(self.keys())
+             
 
     def keys(self):
         """see dict.keys()"""

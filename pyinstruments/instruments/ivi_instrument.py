@@ -57,3 +57,9 @@ class IntermediateCollection:
     def __setitem__(self):
         raise NotImplementedError(\
                 "cannot set an item from a driver collection")
+        
+    def __repr__(self):
+        return self.__str__()
+    
+    def __str__(self):
+        return str(self.keys())

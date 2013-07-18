@@ -9,6 +9,7 @@ from pyinstruments.instruments.ivi_instrument import  IntermediateCollection
 from pyinstruments.factories import use_for_ivi
 from pyinstruments.instruments.iviguiinstruments import IviGuiInstrument
 from numpy import array,linspace
+import mypandas
 
 @use_for_ivi("NA")
 class IviNaGui(Wrapper, IviGuiInstrument):
@@ -37,7 +38,9 @@ class IviNaGui(Wrapper, IviGuiInstrument):
             self._wrap_attribute("Measurements", \
                         IntermediateCollection(self.Measurements, \
                         IviNaGui.GuiChannel.GuiMeasurement))
-            
+ 
+        
+        
         def _setupUi(self, widget):
             widget._setup_gui_element("Center")
             widget._setup_gui_element("Span")
@@ -58,13 +61,127 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                                         self).__init__(*args, **kwds)
                 GuiWrapper.__init__(self)
                 GuiFetchable.__init__(self)
-            
+                self.out_port = 2
+                self.in_port = 1
+
+        
+            def Create(self, out_port = None, in_port = None):
+                """allows to create the measurement with default ports"""
+                
+                if out_port == None:
+                    out_port = self.out_port
+                if in_port == None:
+                    in_port = self.in_port    
+                self._wrapped.Create(out_port, in_port)
+                
+                for widget in self._widgets:
+                    widget._setup_horizontal_layout()
+                    widget._setup_gui_element("Format", \
+                                          LogMag = 0, \
+                                          LinMag = 1, \
+                                          Phase = 2, \
+                                          GroupDelay = 3, \
+                                          SWR = 4, \
+                                          Real = 5, \
+                                          Imag = 6, \
+                                          Polar = 7, \
+                                          Smith = 8, \
+                                          SLinear = 9, \
+                                          SLogarithmic = 10, \
+                                          SComplex = 11, \
+                                          SAdmittance = 12, \
+                                          PLinear = 13, \
+                                          PLogarithmic = 14, \
+                                          UPhase = 15, \
+                                          PPhase = 16)
+                    widget._setup_gui_element("AutoScale")
+                    widget._exit_layout()
+                    self._setup_hdnavigator_widget(widget)
+
+                    widget._setup_horizontal_layout()
+                    widget._setup_gui_element("plot_xy_formatted")
+                    widget._setup_gui_element("xy_formatted_to_clipboard")
+                    widget._setup_gui_element("save_curve_formatted")
+                    widget._exit_layout()
+                    
+                    widget._setup_horizontal_layout()
+                    widget._setup_gui_element("plot_xy_square_mod")
+                    widget._setup_gui_element("xy_complex_to_clipboard")
+                    widget._setup_gui_element("save_curve_complex")
+                    widget._exit_layout()
+                    
+                    
+                
             def FetchXY(self):
                 return array([self.FetchX(), self.FetchFormatted()])
             
+            def FetchXYFormatted(self):
+                return array([self.FetchX(), self.FetchFormatted()])
+            
+            def FetchXYComplex(self):
+                return array([self.FetchX(), self.FetchComplex()])
+            
+            def plot_xy_formatted(self):
+                """uses pylab to plot X and Y"""
+                import pylab
+                data = self.FetchXYFormatted()
+                pylab.plot(data[0], data[1])
+                pylab.show()
+                                    
+            def plot_xy_square_mod(self):
+                """uses pylab to plot X and Y"""
+                import pylab
+                data = self.FetchXYComplex()
+                pylab.plot(data[0], abs(data[1])**2)
+                pylab.show()
+                                                            
+            
+            def save_curve_formatted(self):
+                """Saves the curve using the hdnavigator module to find the location"""
+                import myPandas
+                x_y = self.FetchXYFormatted()
+                myPandas.Series(x_y[1], index = x_y[0]).save(nav.next_file)
+                nav.value_changed.emit()
+                
+            def save_curve_complex(self):
+                """Saves the curve using the hdnavigator module to find the location"""
+                import myPandas
+                x_y = self.FetchXYComplex()
+                myPandas.Series(x_y[1], index = x_y[0]).save(nav.next_file)
+                nav.value_changed.emit()
+            
+            def xy_formatted_to_clipboard(self):
+                """copies X Y columnwise in the clipboard"""
+                data = self.FetchXYFormatted()
+                import StringIO
+                string = StringIO.StringIO()
+                fmt = "%.9g"
+                numpy.savetxt(string, data.transpose(), delimiter = "\t", fmt = fmt)
+                
+                from pyinstruments import _APP
+                clip = _APP.clipboard()
+                clip.setText(string.getvalue())
+                
+            def xy_complex_to_clipboard(self):
+                """copies X Y columnwise in the clipboard"""
+                data = self.FetchXYComplex()
+                import StringIO
+                string = StringIO.StringIO()
+                fmt = "%.9g"
+                numpy.savetxt(string, data.transpose(), delimiter = "\t", fmt = fmt)
+                
+                from pyinstruments import _APP
+                clip = _APP.clipboard()
+                clip.setText(string.getvalue())
+            
+            
             def _setupUi(self, widget):
-                widget._setup_gui_element("AutoScale")
-                self._setup_fetch_utilities(widget)
+                widget._setup_horizontal_layout()
+                widget._setup_gui_element("out_port")
+                widget._setup_gui_element("in_port")
+                widget._setup_gui_element("Create")
+                widget._exit_layout()
+                
     
     
     
