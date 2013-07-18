@@ -63,7 +63,7 @@ class ConfigStore(list):
         soft_mods_dict = col_to_dict(soft_mods)
         sessions = []
         for soft_mod in soft_mods_dict.values():
-            name = "pyinstrument_" + soft_mod.Name
+            name = "pyinstruments_" + soft_mod.Name
             ### adds the driverSession first
             driver_ses = get_ivi_driver_session()
             driver_ses.Name = name

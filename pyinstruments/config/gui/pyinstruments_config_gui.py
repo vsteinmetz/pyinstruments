@@ -263,7 +263,7 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
             dotnet_types_menu.append(type_menu)
             dotnet_menu.addMenu(type_menu)
             for module in driver._supported_software_modules:
-                if "pyinstruments_" + module in CONFIG_STORE:
+                if module in map(lambda x: x.name, CONFIG_STORE):
                     soft_modules.append(module)
                     module_menu = QtGui.QMenu(module)
                     modules_menu.append(module_menu)
