@@ -8,8 +8,11 @@ from pyinstruments.wrappers import Wrapper
 from pyinstruments.instruments.ivi_instrument import  IntermediateCollection
 from pyinstruments.factories import use_for_ivi
 from pyinstruments.instruments.iviguiinstruments import IviGuiInstrument
-from numpy import array,linspace
 import mypandas
+from hdnavigator import nav
+
+from numpy import array,linspace
+
 
 @use_for_ivi("NA")
 class IviNaGui(Wrapper, IviGuiInstrument):
@@ -138,16 +141,16 @@ class IviNaGui(Wrapper, IviGuiInstrument):
             
             def save_curve_formatted(self):
                 """Saves the curve using the hdnavigator module to find the location"""
-                import myPandas
+                import mypandas
                 x_y = self.FetchXYFormatted()
-                myPandas.Series(x_y[1], index = x_y[0]).save(nav.next_file)
+                mypandas.Series(x_y[1], index = x_y[0]).save(nav.next_file)
                 nav.value_changed.emit()
                 
             def save_curve_complex(self):
                 """Saves the curve using the hdnavigator module to find the location"""
-                import myPandas
+                import mypandas
                 x_y = self.FetchXYComplex()
-                myPandas.Series(x_y[1], index = x_y[0]).save(nav.next_file)
+                mypandas.Series(x_y[1], index = x_y[0]).save(nav.next_file)
                 nav.value_changed.emit()
             
             def xy_formatted_to_clipboard(self):
@@ -181,77 +184,3 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                 widget._setup_gui_element("in_port")
                 widget._setup_gui_element("Create")
                 widget._exit_layout()
-                
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    @property
-    def Traces(self):
-        return IntermediateCollection(self._wrapped.Traces, self.TraceGui)
-    
-
-    class TraceGui(Wrapper, GuiWrapper, GuiFetchable):
-        """wrapper for sub-object Trace"""
-    
-        def __init__(self, *args, **kwds):
-            super(IviSpecAnGui.TraceGui,self).__init__(*args,**kwds)
-            GuiWrapper.__init__(self)
-            GuiFetchable.__init__(self)
-        
-        def _setupUi(self, widget):
-            """sets up the graphical user interface"""
-            
-            widget._setup_gui_element("DisplayEnabled")
-            widget._setup_gui_element("UpdateEnabled")
-            widget._setup_gui_element("Type", \
-                                    ClearWrite = 1, \
-                                    MaxHold = 2, \
-                                    MinHold = 3, \
-                                    Average = 4)
-            widget._setup_gui_element("DetectorType", \
-                                    Average = 1, \
-                                    Pos = 2, \
-                                    Neg = 3, \
-                                    Samp = 4, \
-                                    AverageAgain = 5, \
-                                    Norm = 6, \
-                                    Qpe = 7, \
-                                    Eav = 8, \
-                                    Rav = 0, \
-                                    Off = 10)
-            self._setup_fetch_utilities(widget)
-            
-        def FetchXY(self):
-            """a custom function (not in the IVI driver) 
-            that returns a numpy array with X and Y"""
-            
-            x = self.FetchX()
-            y = self.FetchY()
-            return array([x, y])

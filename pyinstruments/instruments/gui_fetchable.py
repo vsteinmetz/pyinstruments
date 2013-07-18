@@ -20,9 +20,9 @@ class GuiFetchable(object):
 
     def save_curve(self):
         """Saves the curve using the hdnavigator module to find the location"""
-        import myPandas
+        import mypandas
         x_y = self.FetchXY()
-        myPandas.Series(x_y[1], index = x_y[0]).save(nav.next_file)
+        mypandas.Series(x_y[1], index = x_y[0]).save(nav.next_file)
         nav.value_changed.emit()
         
 
