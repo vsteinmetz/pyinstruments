@@ -6,8 +6,13 @@ from pyinstruments.config.gui.pytreewidget import PyTreeWidget
 from pyinstruments.config.pyinstruments_config import PyInstrumentsConfig
 import pyinstruments.config.connected_instruments as con
 from pyinstruments.factories import driver_factory
+from pyinstruments.factories.factories_utils import \
+                                        list_all_child_classes
+from pyinstruments.drivers.ivi_interop.ividotnet import IviDotNetDriver
 from pyinstruments import instrument
-
+from pyinstruments.drivers.ivi_interop.ividotnet.config_store_utils \
+                                    import CONFIG_STORE
+                                            
 from PyQt4 import QtCore, QtGui
 import os
 
@@ -45,9 +50,10 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
         self.treeWidget.setColumnWidth(3, 100)
         self.refresh()
        
-    def dummy(self):
-        for i in range(10):
-            print con.existing_addresses()
+        self.treeWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.treeWidget.customContextMenuRequested.connect(self.contextMenu)
+       
+
          
     def setupUi(self, MainWindow):
         """sets up the GUI"""
@@ -189,12 +195,99 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
         
         self._refresh(full = False)
 
-    
-    def contextMenuEvent(self, event):
+    def exec_menu_at_right_place(self, menu, point):
+        p = QtCore.QPoint(point)
+        p.setY(p.y() + menu.height())
+        where = self.mapToGlobal(p)
+        menu.exec_(where)     
+        
+    def contextMenuAdresses(self, point):     
+        """
+        context menu when address column right-clicked
+        """
+        
+        def change_address(new_address):
+            pic = PyInstrumentsConfig()
+            itm = self.treeWidget.itemAt(point)
+            pic[itm.val("logical_name")]["address"] =  new_address
+            pic.save()
+            self.refresh()
+        
+        class ChangeAddress(QtGui.QAction):
+            def change_address_to_mine(self):
+                change_address(str(self.text()))
+        
+            
+        menu = QtGui.QMenu(self)
+        addresses = con.existing_addresses(recheck = True)
+        action_addresses = []
+        for address in addresses:
+            action = ChangeAddress(address, self)
+            action_addresses.append(action)
+            action.triggered.connect(action.change_address_to_mine)
+            menu.addAction(action)
+        
+
+        self.exec_menu_at_right_place(menu, point)
+
+
+   
+        
+    def contextMenuModels(self, point):
+        """
+        context menu when models column right-clicked
+        """
+        
+        def change_model(new_model):
+            pic = PyInstrumentsConfig()
+            itm = self.treeWidget.itemAt(point)
+            pic[itm.val("logical_name")]["model"] =  new_model
+            pic.save()
+            self.refresh()
+        
+        class ChangeModel(QtGui.QAction):
+            def change_model_to_mine(self):
+                change_model(str(self.text()))
+        
+        menu = QtGui.QMenu(self)
+        ivi_interop = QtGui.QMenu("ivi_interop", self)
+        dotnet_menu = QtGui.QMenu("dotnet", self)
+        menu.addMenu(dotnet_menu)
+        dotnet_drivers = list_all_child_classes(IviDotNetDriver)
+        dotnet_types_menu = []
+        soft_modules = []
+        modules_menu = []
+        model_actions = []
+        for driver in dotnet_drivers.values():
+            type_menu = QtGui.QMenu(driver.__name__)
+            dotnet_types_menu.append(type_menu)
+            dotnet_menu.addMenu(type_menu)
+            for module in driver._supported_software_modules:
+                soft_modules.append(module)
+                module_menu = QtGui.QMenu(module)
+                modules_menu.append(module_menu)
+                type_menu.addMenu(module_menu)
+                for model in CONFIG_STORE.get_supported_models(module):
+                    model_action = ChangeModel(model, self)
+                    model_actions.append(model_action)
+                    model_action.triggered.connect( \
+                                    model_action.change_model_to_mine)
+                    module_menu.addAction(model_action)
+        self.exec_menu_at_right_place(menu, point)
+        
+
+        
+    def contextMenu(self, point):
         """
         Context Menu (right click on the treeWidget)
         """
         
+        
+        if self.treeWidget.itemAt(point) != None:
+            if self.treeWidget.columnAt(point.x()) == 1:        
+                return self.contextMenuAdresses(point)
+            if self.treeWidget.columnAt(point.x()) == 2:
+                return self.contextMenuModels(point)
         pic = PyInstrumentsConfig()
         
         def remove():
@@ -272,8 +365,8 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
                             custom_action.triggered.connect(run_custom)
                             menu.addAction(custom_action)
 
-        menu.exec_(event.globalPos()) 
-        
+        self.exec_menu_at_right_place(menu, point)
+
     def auto_detect(self):
         """
         autodetects all instruments

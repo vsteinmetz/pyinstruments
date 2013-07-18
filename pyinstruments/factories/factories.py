@@ -33,7 +33,7 @@ def driver_factory(model):
     
     for driver in dictionnary.values():
         try:
-            if driver.supports(model):
+            if model in driver.supported_models():
                 try:
                     software_module = driver.get_software_module(model)
                 except AttributeError:

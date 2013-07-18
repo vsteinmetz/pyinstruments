@@ -23,10 +23,20 @@ class Driver(object):
         
         raise NotImplementedError()        
     
+#   @classmethod
+#    def supports(cls, model):
+#        """given a model string, returns True if instrument is supported,
+#         False otherwise
+#         """
+#         
+#        raise NotImplementedError()
+    
     @classmethod
-    def supports(cls, model):
-        """given a model string, returns True if instrument is supported,
-         False otherwise
-         """
-         
+    def supported_models(cls):
+        """
+        returns the list of models supported by this driver. The
+        model is the string between the first and second "," in the 
+        *IDN? query reply.
+        """
+        
         raise NotImplementedError()

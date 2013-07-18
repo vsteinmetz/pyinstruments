@@ -41,12 +41,20 @@ class IviDotNetDriver(IviInteropDriver):
                 return dot_mod.name
  
     @classmethod
-    def supports(cls, model):
-        """given a model string, returns True if instrument is supported,
-        False otherwise
-        """
-
-        return cls.get_software_module(model) != None
+    def supported_models(cls):
+        """returns all models supported by this driver class"""
+        supported = []
+        for soft_mod in cls._supported_software_modules:
+            supported+= CONFIG_STORE.get_supported_models(soft_mod)
+        return supported
+        
+#    @classmethod
+#    def supports(cls, model):
+#        """given a model string, returns True if instrument is supported,
+#        False otherwise
+#        """
+#
+#        return cls.get_software_module(model) != None
         #software_module = CONFIG_STORE.get_sm_for_model(model)
         #for dot_mod in software_module:
         #    if dot_mod.name in cls._supported_software_modules:

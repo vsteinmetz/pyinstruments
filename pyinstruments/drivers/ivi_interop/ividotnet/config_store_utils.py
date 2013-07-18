@@ -118,6 +118,12 @@ class ConfigStore(list):
             if model in i.supported_instrument_models:
                 ret.append(i)
         return ret
+
+    def get_supported_models(self, software_module):
+        ret = []
+        for soft_mod in self:
+            if soft_mod.name == software_module:
+                return soft_mod.supported_instrument_models
         
 
 CONFIG_STORE = ConfigStore()      
