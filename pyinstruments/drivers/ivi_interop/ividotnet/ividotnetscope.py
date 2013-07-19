@@ -21,11 +21,6 @@ class IviDotNetScope(IviDotNetDriver):
      #                              "AgInfiniiVision"]
     ivi_type = "IviScope"
     
-    @classmethod
-    def instrument_type(cls):
-        """returns the type string as in the Ivi specs"""
-        return cls.ivi_type
-    
     @property
     def Channels(self):
         return DotNetIntermediateCollection(self._wrapped.Channels, self.Channel)

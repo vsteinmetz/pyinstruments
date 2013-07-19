@@ -9,6 +9,7 @@ from pyinstruments.factories import driver_factory, instrument_factory
 from pyinstruments.factories.factories_utils import \
                                         list_all_child_classes
 from pyinstruments.drivers.ivi_interop.ividotnet import IviDotNetDriver
+from pyinstruments.drivers import VisaDriver, SerialDriver
 from pyinstruments import instrument
 from pyinstruments.drivers.ivi_interop.ividotnet.config_store_utils \
                                     import CONFIG_STORE
@@ -250,6 +251,13 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
             def change_model_to_mine(self):
                 change_model(str(self.text()))
         
+        def add_model_in_menu(menu, model):
+            model_action = ChangeModel(model, self)
+            model_actions.append(model_action)
+            model_action.triggered.connect( \
+                            model_action.change_model_to_mine)
+            menu.addAction(model_action)
+        
         menu = QtGui.QMenu(self)
         ivi_interop = QtGui.QMenu("ivi_interop", self)
         dotnet_menu = QtGui.QMenu("dotnet", self)
@@ -270,11 +278,37 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
                     modules_menu.append(module_menu)
                     type_menu.addMenu(module_menu)
                     for model in CONFIG_STORE.get_supported_models(module):
-                        model_action = ChangeModel(model, self)
-                        model_actions.append(model_action)
-                        model_action.triggered.connect( \
-                                        model_action.change_model_to_mine)
-                        module_menu.addAction(model_action)
+                        add_model_in_menu(module_menu, model)
+                        
+        
+        serial_menu = QtGui.QMenu("serial", self)         
+        menu.addMenu(serial_menu)          
+        
+        serial_drivers = list_all_child_classes(SerialDriver)
+        for driver in serial_drivers.values():
+            driver_menu = QtGui.QMenu(driver.__name__)
+            serial_menu.addMenu(driver_menu)
+            for model in driver.supported_models():
+                add_model_in_menu(driver_menu, model)
+                
+        visa_menu = QtGui.QMenu("visa", self)         
+        menu.addMenu(visa_menu)          
+        
+        visa_drivers = list_all_child_classes(VisaDriver)
+        for driver in visa_drivers.values():
+            driver_menu = QtGui.QMenu(driver.__name__)
+            visa_menu.addMenu(driver_menu)
+            for model in driver.supported_models():
+                add_model_in_menu(driver_menu, model)
+                
+#        visa_drivers = list_all_child_classes(VisaDriver)
+#        for driver in visa_driver.values():
+#            driver_menu = QtGui.QMenu(driver.__name__)
+#            model_action = ChangeModel(model, self)
+#            model_actions.append(model_action)
+#            model_action.triggered.connect( \
+#                            model_action.change_model_to_mine)
+#            module_menu.addAction(model_action)
         self.exec_menu_at_right_place(menu, point)
         
 
