@@ -21,26 +21,37 @@ class SerialDriver(Driver):
                  parity = serial.PARITY_EVEN, \
                  stopbits = serial.STOPBITS_TWO, \
                  timeout= 0.5, \
-                 dsrdtr = 1):
-        super(SerialDriver,self).__init__(logical_name,address,simulate)
+                 dsrdtr = 0, \
+                 xonxoff = 0):
+        super(SerialDriver, self).__init__(logical_name, \
+                                           address, \
+                                           simulate)
         self.baudrate = baudrate
         self.bytesize = bytesize
         self.parity = parity
         self.stopbits = stopbits
         self.timeout = timeout
         self.dsrdtr = dsrdtr
+        self.xonxoff = xonxoff
         
-        self.serial = self.get_driver()
+        self.serial = self.get_driver(port = self.address, \
+                 baudrate = self.baudrate, \
+                 bytesize = self.bytesize, \
+                 parity = self.parity, \
+                 stopbits = self.stopbits, \
+                 timeout = self.timeout, \
+                 dsrdtr = self.dsrdtr, \
+                 xonxoff = self.xonxoff)
         
-    def get_driver(self):
-        return serial.Serial(port = self.address, baudrate = self.baudrate, 
-                             bytesize = self.bytesize, parity = self.parity, 
-                             stopbits = self.stopbits, timeout= self.timeout, 
-                             dsrdtr = self.dsrdtr)
+    def get_driver(self, **kwds):
+        print kwds
+        return serial.Serial(**kwds)
 
     def send(self, command):
         self.serial.write(command + self.lf)
         
+    def readline(self):
+        self.serial.readline()
     
     @classmethod
     def supported_models(cls):
