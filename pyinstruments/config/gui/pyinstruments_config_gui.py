@@ -351,8 +351,8 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
                         instr["address"] in \
                             con.existing_addresses(recheck = False):
                     try:
-                        driver, mod = driver_factory(instr["model"])
-                        instrument_driver = instrument_factory(driver)
+                        instrument_driver = instrument_factory( \
+                                                        logical_name)
                     except BaseException as e:
                         print e.message
                     else:
@@ -361,7 +361,8 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
                         except AttributeError:
                             items = []
                         for menu_i in items:
-                            custom_action = QtGui.QAction(menu_i.text, self)
+                            custom_action = QtGui.QAction(menu_i.text, \
+                                                          self)
                             log_n = logical_name
                             action = menu_i.action
                             def run_custom():

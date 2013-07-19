@@ -29,6 +29,10 @@ class IviScopeGui(Wrapper, IviGuiInstrument):
         """sets up the graphical user interface"""
         
         widget._setup_horizontal_layout()
+        widget._setup_gui_element("Acquisition.Start")
+        widget._setup_gui_element("Acquisition.Stop")
+        widget._exit_layout()
+        widget._setup_horizontal_layout()
         widget._setup_gui_element("Acquisition.TimePerRecord")
         widget._setup_gui_element("Acquisition.RecordLength")
         widget._exit_layout()

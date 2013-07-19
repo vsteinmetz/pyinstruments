@@ -66,7 +66,7 @@ def driver(logical_name):
     simulate = dic["simulate"]
     return _driver(model, logical_name, address, simulate)
     
-def instrument_factory(driver):
+def _instrument_factory(driver):
     """Takes a driver and wrapps the appropriate instrument 
     around, using the convention:
             if driver.is_ivi_instrument():
@@ -80,7 +80,21 @@ def instrument_factory(driver):
         return driver
     else:
         return USE_FOR_IVI[driver.instrument_type()]
+
+
+def instrument_factory(logical_name):
+    """
+    returns the non-instanciated class for the instrument.
+    """
     
+    pic = PyInstrumentsConfig()
+    dic = pic[logical_name]
+    address = dic["address"]
+    model = dic["model"]
+    simulate = dic["simulate"]
+    driver, mod = driver_factory(model)
+    instrument_driver = _instrument_factory(driver)    
+    return instrument_driver
     
 def instrument(logical_name):
     """
@@ -106,4 +120,4 @@ def instrument(logical_name):
     """
     
     driv = driver(logical_name)
-    return instrument_factory(driv)(driv)
+    return instrument_factory(logical_name)(driv)
