@@ -13,8 +13,6 @@ class IviDotNetDriver(IviInteropDriver):
     """Base class for ividotnet drivers. Requires a software module in
     addition to the other arguments for Driver"""
     
-    _supported_software_modules =  []
-    
     def get_driver(self):
         """
         function to get the driver using IVI factory functions
@@ -37,14 +35,25 @@ class IviDotNetDriver(IviInteropDriver):
         
         software_module = CONFIG_STORE.get_sm_for_model(model)
         for dot_mod in software_module:
-            if dot_mod.name in cls._supported_software_modules:
+            if dot_mod.name in cls.supported_software_modules():
                 return dot_mod.name
+        return None
+ 
+    ivi_type = ""
+    
+    @classmethod
+    def instrument_type(cls):
+        return cls.ivi_type
+    
+    @classmethod
+    def supported_software_modules(cls):
+        return CONFIG_STORE.get_software_modules(cls.instrument_type())
  
     @classmethod
     def supported_models(cls):
         """returns all models supported by this driver class"""
         supported = []
-        for soft_mod in cls._supported_software_modules:
+        for soft_mod in cls.supported_software_modules():
             supported+= CONFIG_STORE.get_supported_models(soft_mod)
         return supported
         

@@ -67,7 +67,7 @@ def driver(logical_name):
     return _driver(model, logical_name, address, simulate)
     
 def instrument_factory(driver):
-    """Takes an initialized driver and wrapps the appropriate instrument 
+    """Takes a driver and wrapps the appropriate instrument 
     around, using the convention:
             if driver.is_ivi_instrument():
                 returns the ivi_gui_instrument corresponding to

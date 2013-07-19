@@ -15,14 +15,16 @@ class IviDotNetScope(IviDotNetDriver):
     is a scope. Mostly translates strange arrays by numpy arrays...
     """
     
-    _supported_software_modules =  ["Tkdpo2k3k4k", \
-                                   "lcscope", \
-                                   "TekScope", \
-                                   "AgInfiniiVision"]
+    #_supported_software_modules =  ["Tkdpo2k3k4k", \
+     #                              "lcscope", \
+     #                              "TekScope", \
+     #                              "AgInfiniiVision"]
+    ivi_type = "IviScope"
     
-    def instrument_type(self):
+    @classmethod
+    def instrument_type(cls):
         """returns the type string as in the Ivi specs"""
-        return "Scope"
+        return cls.ivi_type
     
     @property
     def Channels(self):

@@ -41,18 +41,21 @@ class IviNaGui(Wrapper, IviGuiInstrument):
             self._wrap_attribute("Measurements", \
                         IntermediateCollection(self.Measurements, \
                         IviNaGui.GuiChannel.GuiMeasurement))
- 
-        
         
         def _setupUi(self, widget):
+            widget._setup_horizontal_layout()
             widget._setup_gui_element("Center")
             widget._setup_gui_element("Span")
+            widget._exit_layout()
+            widget._setup_horizontal_layout()
             widget._setup_gui_element("Start")
             widget._setup_gui_element("Stop")
+            widget._exit_layout()
+            widget._setup_horizontal_layout()
             widget._setup_gui_element("IFBandwidth")
-            widget._setup_gui_element("Averaging")
             widget._setup_gui_element("AveragingFactor")
-            
+            widget._exit_layout()
+            widget._setup_gui_element("Averaging")
             widget._setup_tabs_for_collection("Measurements")
     
         class GuiMeasurement(Wrapper, GuiWrapper, GuiFetchable):
@@ -64,52 +67,56 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                                         self).__init__(*args, **kwds)
                 GuiWrapper.__init__(self)
                 GuiFetchable.__init__(self)
-
+                self.created = False
         
             def Create(self, out_port = None, in_port = None):
                 """allows to create the measurement with default ports"""
                 
+                print "Creating"
                 self._wrapped.Create(2, 1)
-                
-                for widget in self._widgets:
-                    widget._gui_elements["Create"].setVisible(False)
-                    widget._setup_gui_element("out_port")
-                    widget._setup_gui_element("in_port")
-                    widget._setup_horizontal_layout()
-                    widget._setup_gui_element("Format", \
-                                          LogMag = 0, \
-                                          LinMag = 1, \
-                                          Phase = 2, \
-                                          GroupDelay = 3, \
-                                          SWR = 4, \
-                                          Real = 5, \
-                                          Imag = 6, \
-                                          Polar = 7, \
-                                          Smith = 8, \
-                                          SLinear = 9, \
-                                          SLogarithmic = 10, \
-                                          SComplex = 11, \
-                                          SAdmittance = 12, \
-                                          PLinear = 13, \
-                                          PLogarithmic = 14, \
-                                          UPhase = 15, \
-                                          PPhase = 16)
-                    widget._setup_gui_element("AutoScale")
-                    widget._exit_layout()
-                    self._setup_hdnavigator_widget(widget)
-
-                    widget._setup_horizontal_layout()
-                    widget._setup_gui_element("plot_xy_formatted")
-                    widget._setup_gui_element("xy_formatted_to_clipboard")
-                    widget._setup_gui_element("save_curve_formatted")
-                    widget._exit_layout()
-                    
-                    widget._setup_horizontal_layout()
-                    widget._setup_gui_element("plot_xy_square_mod")
-                    widget._setup_gui_element("xy_complex_to_clipboard")
-                    widget._setup_gui_element("save_curve_complex")
-                    widget._exit_layout()
-                    
+                if not self.created:
+                    self.created = True
+                    for widget in self._widgets:
+                        widget._gui_elements["Create"].setVisible(False)
+                        widget._setup_horizontal_layout()
+                        widget._setup_gui_element("out_port")
+                        widget._setup_gui_element("in_port")
+                        widget._exit_layout()
+                        widget._setup_horizontal_layout()
+                        widget._setup_gui_element("Format", \
+                                              LogMag = 0, \
+                                              LinMag = 1, \
+                                              Phase = 2, \
+                                              GroupDelay = 3, \
+                                              SWR = 4, \
+                                              Real = 5, \
+                                              Imag = 6, \
+                                              Polar = 7, \
+                                              Smith = 8, \
+                                              SLinear = 9, \
+                                              SLogarithmic = 10, \
+                                              SComplex = 11, \
+                                              SAdmittance = 12, \
+                                              PLinear = 13, \
+                                              PLogarithmic = 14, \
+                                              UPhase = 15, \
+                                              PPhase = 16)
+                        widget._setup_gui_element("AutoScale")
+                        widget._exit_layout()
+                        self._setup_hdnavigator_widget(widget)
+    
+                        widget._setup_horizontal_layout()
+                        widget._setup_gui_element("plot_xy_formatted")
+                        widget._setup_gui_element("xy_formatted_to_clipboard")
+                        widget._setup_gui_element("save_curve_formatted")
+                        widget._exit_layout()
+                        
+                        widget._setup_horizontal_layout()
+                        widget._setup_gui_element("plot_xy_square_mod")
+                        widget._setup_gui_element("xy_complex_to_clipboard")
+                        widget._setup_gui_element("save_curve_complex")
+                        widget._exit_layout()
+                        
                     
             @property
             def in_port(self):

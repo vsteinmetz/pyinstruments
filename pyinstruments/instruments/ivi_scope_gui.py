@@ -12,7 +12,7 @@ from pyinstruments.instruments.iviguiinstruments import IviGuiInstrument
 from guiwrappersutils import GuiWrapper
 from numpy import array,linspace
 
-@use_for_ivi("Scope")
+@use_for_ivi("IviScope")
 class IviScopeGui(Wrapper, IviGuiInstrument):
     """
     class to add gui-capabilities to IVI-compliant spectrum analyzers
@@ -27,16 +27,24 @@ class IviScopeGui(Wrapper, IviGuiInstrument):
         
     def _setupUi(self, widget):
         """sets up the graphical user interface"""
-
-        widget._setup_gui_element("Acquisition.RecordLength")
+        
+        widget._setup_horizontal_layout()
         widget._setup_gui_element("Acquisition.TimePerRecord")
+        widget._setup_gui_element("Acquisition.RecordLength")
+        widget._exit_layout()
+        widget._setup_horizontal_layout()
+        widget._setup_gui_element("Acquisition.SampleRate")
         widget._setup_gui_element("Acquisition.StartTime")
+        widget._exit_layout()
+        widget._setup_horizontal_layout()
         widget._setup_gui_element("Acquisition.Type", \
                                   normal = 0, \
                                   peakDetect = 1, \
                                   hiRes = 2, \
                                   enveloppe = 3, \
                                   average = 4)
+        widget._setup_gui_element("Acquisition.NumberOfAverages") 
+        widget._exit_layout()
         widget._setup_tabs_for_collection("Channels")
 
     class ChannelGui(Wrapper, GuiWrapper, GuiFetchable):
@@ -63,14 +71,20 @@ class IviScopeGui(Wrapper, IviGuiInstrument):
         
         def _setupUi(self, widget):
             """sets up the graphical user interface"""
-            
+
+            widget._setup_horizontal_layout()            
             widget._setup_gui_element("Enabled")
             widget._setup_gui_element("Coupling", \
                                       AC = 0, \
                                       DC = 1, \
                                       GND = 2)
-            widget._setup_gui_element("InputFrequencyMax")
-            widget._setup_gui_element("InputImpedance")
+            widget._exit_layout()
+            widget._setup_horizontal_layout()     
             widget._setup_gui_element("Offset")
             widget._setup_gui_element("Range")
+            widget._exit_layout()
+            widget._setup_horizontal_layout()     
+            widget._setup_gui_element("InputFrequencyMax")
+            widget._setup_gui_element("InputImpedance")
+            widget._exit_layout()
             self._setup_fetch_utilities(widget)

@@ -19,7 +19,8 @@ class IviInteropDriver(Driver, Wrapper):
         self.software_module = software_module
         super(IviInteropDriver, self).__init__(*args)
         Wrapper.__init__(self, self.get_driver())
-        
+       
+    @classmethod 
     def is_ivi_instrument(self):
         """instruments interfaced in this way are expected to be IVI
         compliant"""

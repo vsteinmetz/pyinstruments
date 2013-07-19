@@ -16,12 +16,17 @@ class IviDotNetNA(IviDotNetDriver):
     is a spectrum analyzer. Mostly translates strange arrays by numpy arrays...
     """
     
-    _supported_software_modules = ["AgNA"]
+    #_supported_software_modules = ["AgNA"]
 
-    def instrument_type(self):
-        """returns the type string, as in the Ivi specs"""
-        return "NA"
+    ivi_type = "NA"
 
+    @classmethod
+    def supported_software_modules(cls):
+        """Network analyzers are an exception, they are not really an 
+        interchangeable instrument
+        """
+        
+        return ["AgNA"]
 
     @property
     def Channels(self):

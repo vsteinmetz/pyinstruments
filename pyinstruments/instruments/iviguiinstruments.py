@@ -26,11 +26,12 @@ class IviGuiInstrument(GuiWrapper,IviInstrument):
                                          +"/icons/" + "iconeScope.gif"))
         window.setWindowTitle(self.logical_name)
         return window
-            
-    def menu_items(self):
+    
+    @classmethod 
+    def menu_items(cls):
         """The objects of type MenuItem returned by this function allow the 
         PyInstrumentsConfigGui to know which menu items to add upon right click
         on an instrument that is handled by this class.
         """
         
-        return [MenuItem("Graphical User Interface ...", self.gui)] 
+        return [MenuItem("Graphical User Interface ...", cls.gui)] 

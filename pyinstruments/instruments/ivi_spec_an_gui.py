@@ -10,7 +10,7 @@ from pyinstruments.factories import use_for_ivi
 from pyinstruments.instruments.iviguiinstruments import IviGuiInstrument
 from numpy import array,linspace
 
-@use_for_ivi("SpecAn")
+@use_for_ivi("IviSpecAn")
 class IviSpecAnGui(Wrapper, IviGuiInstrument):
     """
     class to add gui-capabilities to IVI-compliant spectrum analyzers
@@ -26,12 +26,19 @@ class IviSpecAnGui(Wrapper, IviGuiInstrument):
     def _setupUi(self, widget):
         """sets up the graphical user interface"""
         
-        widget._setup_gui_element("ResolutionBandwidth")
+
+        widget._setup_horizontal_layout()
         widget._setup_gui_element("CenterFrequency")
         widget._setup_gui_element("Span")
+        widget._exit_layout()  
+        widget._setup_horizontal_layout()                
         widget._setup_gui_element("Start")
         widget._setup_gui_element("Stop")
-        widget._setup_gui_element("Average.NumberOfSweeps")        
+        widget._exit_layout()  
+        widget._setup_horizontal_layout()                  
+        widget._setup_gui_element("ResolutionBandwidth")
+        widget._setup_gui_element("Average.NumberOfSweeps")
+        widget._exit_layout() 
         widget._setup_tabs_for_collection("Traces")
 
 
@@ -46,8 +53,11 @@ class IviSpecAnGui(Wrapper, IviGuiInstrument):
         def _setupUi(self, widget):
             """sets up the graphical user interface"""
             
+            widget._setup_horizontal_layout()  
             widget._setup_gui_element("DisplayEnabled")
             widget._setup_gui_element("UpdateEnabled")
+            widget._exit_layout()             
+            widget._setup_horizontal_layout()  
             widget._setup_gui_element("Type", \
                                     ClearWrite = 1, \
                                     MaxHold = 2, \
@@ -64,6 +74,7 @@ class IviSpecAnGui(Wrapper, IviGuiInstrument):
                                     Eav = 8, \
                                     Rav = 0, \
                                     Off = 10)
+            widget._exit_layout() 
             self._setup_fetch_utilities(widget)
             
         def FetchXY(self):

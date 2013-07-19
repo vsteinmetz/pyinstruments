@@ -5,7 +5,7 @@ This module is here to allow GUI interaction with the config file
 from pyinstruments.config.gui.pytreewidget import PyTreeWidget
 from pyinstruments.config.pyinstruments_config import PyInstrumentsConfig
 import pyinstruments.config.connected_instruments as con
-from pyinstruments.factories import driver_factory
+from pyinstruments.factories import driver_factory, instrument_factory
 from pyinstruments.factories.factories_utils import \
                                         list_all_child_classes
 from pyinstruments.drivers.ivi_interop.ividotnet import IviDotNetDriver
@@ -28,6 +28,7 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
         
         super(PyInstrumentsConfigGui, self).__init__(parent)
         self.setupUi(self)
+        self._instruments = dict()
         self.show()
         self.loaded_drivers = dict()
 
@@ -262,8 +263,8 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
             type_menu = QtGui.QMenu(driver.__name__)
             dotnet_types_menu.append(type_menu)
             dotnet_menu.addMenu(type_menu)
-            for module in driver._supported_software_modules:
-                if module in map(lambda x: x.name, CONFIG_STORE):
+            for module in driver.supported_software_modules():
+                #if module in map(lambda x: x.name, CONFIG_STORE):
                     soft_modules.append(module)
                     module_menu = QtGui.QMenu(module)
                     modules_menu.append(module_menu)
@@ -347,9 +348,11 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
             instr = pic[logical_name]
             if(driver_factory(instr["model"]) is not None):
                 if instr["simulate"] or \
-                        instr["address"] in con.existing_addresses(recheck = False):
+                        instr["address"] in \
+                            con.existing_addresses(recheck = False):
                     try:
-                        instrument_driver = instrument(logical_name)
+                        driver, mod = driver_factory(instr["model"])
+                        instrument_driver = instrument_factory(driver)
                     except BaseException as e:
                         print e.message
                     else:
@@ -361,12 +364,25 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
                             custom_action = QtGui.QAction(menu_i.text, self)
                             log_n = logical_name
                             action = menu_i.action
-                            def run_custom(dummy, action = action):
-                                action()
+                            def run_custom():
+                                instrum = \
+                                    self.get_buffered_instrument( \
+                                                    logical_name)
+                                menu_i.action(instrum)
                             custom_action.triggered.connect(run_custom)
                             menu.addAction(custom_action)
 
         self.exec_menu_at_right_place(menu, point)
+
+    def get_buffered_instrument(self, logical_name):
+        """creates one instance of the instrument, and keeps a copy.
+        returns the same instance in case it is called a second time 
+        with the same logical_name
+        """
+        
+        if not logical_name in self._instruments:
+            self._instruments[logical_name] = instrument(logical_name)
+        return self._instruments[logical_name]
 
     def auto_detect(self):
         """

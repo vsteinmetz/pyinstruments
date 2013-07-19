@@ -12,12 +12,14 @@ class Driver(object):
         self.address = address
         self.simulate = simulate
         
+    @classmethod
     def is_ivi_instrument(self):
         """returns True if the driver complies with ivi specification, 
         False otherwise. A visa or serial driver could be ivi-compliant !"""    
         
         return False
-            
+          
+    @classmethod  
     def instrument_type(self):
         """gives the instrument type ("scope", "spec_an", "na" ...)"""
         

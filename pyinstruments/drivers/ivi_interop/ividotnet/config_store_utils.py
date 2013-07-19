@@ -8,7 +8,7 @@ from pyinstruments.drivers.ivi_interop.ividotnet.dotnet_communication import \
                                             get_config_store, \
                                             get_ivi_driver_session, \
                                             get_ivi_logical_name
-
+from System.Runtime.InteropServices import COMException
 
 def col_to_enum(collection):
     """transforms a driver's collection into a python list"""
@@ -129,6 +129,23 @@ class ConfigStore(list):
                 return soft_mod.supported_instrument_models
         return []
         
+    def get_software_modules(self, instrument_type):
+        """
+        return all the software module names that support an instrument
+        type
+        """
 
-CONFIG_STORE = ConfigStore()      
-
+        mods = []
+        for soft_mod in self:
+            for index in range(soft_mod._sm.PublishedAPIs.get_Count()):
+                try:
+                    papi = soft_mod._sm.PublishedAPIs.\
+                                        get_Item(index + 1,0,0,"")
+                    if(papi.Name == instrument_type):
+                        if(papi.Type == "IVI-COM"):
+                            mods.append(soft_mod.name)
+                except COMException, AttributeError:
+                    pass
+        return mods
+    
+CONFIG_STORE = ConfigStore()
