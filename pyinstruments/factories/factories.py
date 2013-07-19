@@ -68,24 +68,23 @@ def driver(logical_name):
     return _driver(model, logical_name, address, simulate)
     
 def _instrument_factory(driver):
-    """Takes a driver and wrapps the appropriate instrument 
-    around, using the convention:
-            if driver.is_ivi_instrument():
-                returns the ivi_gui_instrument corresponding to
-                driver.instrument_type()
-            else:
-                no wrapper...
+    """if driver.is_ivi_instrument():
+            returns the ivi_gui_instrument corresponding to
+            driver.instrument_type()
+        else:
+            returns None
     """
     
     if not driver.is_ivi_instrument():
-        return driver
+        return None
     else:
         return USE_FOR_IVI[driver.instrument_type()]
 
 
 def instrument_factory(logical_name):
     """
-    returns the non-instanciated class for the instrument.
+    returns the non-instanciated class for the instrument. In case, no ivi
+    class corresponds to the instruments, returns None.
     """
     
     pic = PyInstrumentsConfig()
@@ -94,7 +93,7 @@ def instrument_factory(logical_name):
     model = dic["model"]
     simulate = dic["simulate"]
     driver, mod = driver_factory(model)
-    instrument_driver = _instrument_factory(driver)    
+    instrument_driver = _instrument_factory(driver)
     return instrument_driver
     
 def instrument(logical_name):
@@ -123,6 +122,9 @@ def instrument(logical_name):
     global INITIALIZED_INSTRUMENTS
     if logical_name not in INITIALIZED_INSTRUMENTS:
         driv = driver(logical_name)
-        INITIALIZED_INSTRUMENTS[logical_name] = \
-                                instrument_factory(logical_name)(driv)
+        inst = instrument_factory(logical_name)
+        if inst:
+            INITIALIZED_INSTRUMENTS[logical_name] = inst(driv)
+        else:
+            INITIALIZED_INSTRUMENTS[logical_name] = driv
     return INITIALIZED_INSTRUMENTS[logical_name]
