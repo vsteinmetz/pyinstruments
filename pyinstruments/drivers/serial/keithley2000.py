@@ -18,24 +18,13 @@ class Keithley2000(SerialDriver):
                 "stopbits" : serial.STOPBITS_ONE, \
                 "timeout" : 0.5, \
                 "xonxoff" : True}
-        print args
-        SerialDriver.__init__(self, *args, **kwds)
+        super(Keithley2000, self).__init__(*args, **kwds)
         #print self.serial
         self.send("*IDN?")
         #print "DEVICE: " + self.ser.readline()
         self.send("*RST")
         self.send("*CLS")
         
-    def close(self):
-        self.serial.close()
-
-    def send(self, command):
-        self.serial.write(command + self.lf)
-
-    def ask(self, command = ""):
-        if command != "":
-            self.send(command)
-        return (self.readline())
 
     def set4ResistanceMeasurement(self, mrange = 100000):
         self.measrange = mrange

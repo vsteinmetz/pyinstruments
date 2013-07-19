@@ -285,8 +285,10 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
         menu.addMenu(serial_menu)          
         
         serial_drivers = list_all_child_classes(SerialDriver)
+        serial_drivers_menu = []
         for driver in serial_drivers.values():
             driver_menu = QtGui.QMenu(driver.__name__)
+            serial_drivers_menu.append(driver_menu)
             serial_menu.addMenu(driver_menu)
             for model in driver.supported_models():
                 add_model_in_menu(driver_menu, model)
@@ -295,8 +297,10 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
         menu.addMenu(visa_menu)          
         
         visa_drivers = list_all_child_classes(VisaDriver)
+        visa_drivers_menu = []
         for driver in visa_drivers.values():
             driver_menu = QtGui.QMenu(driver.__name__)
+            visa_drivers_menu.append(driver_menu)
             visa_menu.addMenu(driver_menu)
             for model in driver.supported_models():
                 add_model_in_menu(driver_menu, model)

@@ -44,14 +44,25 @@ class SerialDriver(Driver):
                  xonxoff = self.xonxoff)
         
     def get_driver(self, **kwds):
-        print kwds
         return serial.Serial(**kwds)
 
     def send(self, command):
         self.serial.write(command + self.lf)
         
     def readline(self):
-        self.serial.readline()
+        return self.serial.readline()
+    
+    def close(self):
+        self.serial.close()
+
+    def send(self, command):
+        self.serial.write(command + self.lf)
+
+    def ask(self, command = ""):
+        if command != "":
+            self.send(command)
+        return (self.readline())
+
     
     @classmethod
     def supported_models(cls):
