@@ -65,7 +65,11 @@ def add_all_new_instruments():
         if address not in existing_addresses:
             if model == "no device":
                 model = None
-            pic.add_instrument(address = address, model = model)
+            if len(address) < 10:
+                tag = address
+            else:
+                tag = "DEV"
+            pic.add_instrument(tag, address = address, model = model)
             
 def query_models():
     """Physically queries all instruments models"""

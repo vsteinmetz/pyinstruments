@@ -366,24 +366,13 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
                             log_n = logical_name
                             action = menu_i.action
                             def run_custom():
-                                instrum = \
-                                    self.get_buffered_instrument( \
-                                                    logical_name)
+                                instrum = instrument(logical_name)
                                 menu_i.action(instrum)
                             custom_action.triggered.connect(run_custom)
                             menu.addAction(custom_action)
 
         self.exec_menu_at_right_place(menu, point)
 
-    def get_buffered_instrument(self, logical_name):
-        """creates one instance of the instrument, and keeps a copy.
-        returns the same instance in case it is called a second time 
-        with the same logical_name
-        """
-        
-        if not logical_name in self._instruments:
-            self._instruments[logical_name] = instrument(logical_name)
-        return self._instruments[logical_name]
 
     def auto_detect(self):
         """

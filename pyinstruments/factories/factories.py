@@ -12,6 +12,7 @@ from pyinstruments.factories.factories_utils import list_all_child_classes
 from pyinstruments.config import PyInstrumentsConfig
 
 USE_FOR_IVI = dict()
+INITIALIZED_INSTRUMENTS = dict()
 
 def use_for_ivi(instrument_type_str):
     """Use this decorator to set the class that has to be used for each type
@@ -119,5 +120,9 @@ def instrument(logical_name):
                 returns the raw driver
     """
     
-    driv = driver(logical_name)
-    return instrument_factory(logical_name)(driv)
+    global INITIALIZED_INSTRUMENTS
+    if logical_name not in INITIALIZED_INSTRUMENTS:
+        driv = driver(logical_name)
+        INITIALIZED_INSTRUMENTS[logical_name] = \
+                                instrument_factory(logical_name)(driv)
+    return INITIALIZED_INSTRUMENTS[logical_name]
