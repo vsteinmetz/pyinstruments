@@ -8,6 +8,12 @@ class Agilent34401A(SerialDriver):
     measrange = 100000
 
     def __init__(self,*args,**kwds):
+        kwds = {"baudrate" : 9600, \
+                "bytesize" : serial.SEVENBITS, \
+                "parity" : serial.PARITY_EVEN, \
+                "stopbits" : serial.STOPBITS_TWO, \
+                "timeout" : 0.5, \
+                "dsrdtr" : True}
         super(Agilent34401A,self).__init__(*args, **kwds)
         #self.ser = serial.Serial(port = device, baudrate = 9600, bytesize = serial.SEVENBITS, parity = serial.PARITY_EVEN, stopbits = serial.STOPBITS_TWO, timeout= 0.5, dsrdtr = 1)
         #print self.ser

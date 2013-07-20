@@ -13,7 +13,8 @@ setup(
     version = "0.0.9",
     author = "Samuel Deleglise",
     author_email = "samuel.deleglise@gmail.com",
-    description = ("""Control of data acquisition with remote instruments using (IVI-)dotnet, (IVI-)COM, Visa, and serial protocols.
+    description = ("""Control of data acquisition with remote instruments using 
+    (IVI-)dotnet, (IVI-)COM, Visa, and serial protocols.
     python dotnet and/or comtypes should be installed"""),
     license = "BSD",
     keywords = "instruments data-acquisition IVI interface",
