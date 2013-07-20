@@ -21,7 +21,7 @@ class Keithley2000(SerialDriver):
         super(Keithley2000, self).__init__(*args, **kwds)
         #print self.serial
         self.send("*IDN?")
-        print "DEVICE: " + self.ser.readline()
+        print "DEVICE: " + self.readline()
         self.send("*RST")
         self.send("*CLS")
         
