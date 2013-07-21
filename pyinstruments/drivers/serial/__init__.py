@@ -8,3 +8,5 @@ from pyinstruments.drivers.serial.agilent34401a import \
                                                 Agilent34401A
 from pyinstruments.drivers.serial.keithley2000 import \
                                                 Keithley2000
+from pyinstruments.drivers.serial.arduino import \
+                                                Arduino

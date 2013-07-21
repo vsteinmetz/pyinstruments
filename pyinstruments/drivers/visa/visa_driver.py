@@ -32,7 +32,7 @@ class VisaDriver(Driver):
         reads a value
         """
         
-        return self.visa_instr.read(val)
+        return self.visa_instr.read()
     
     def write(self, val):
         """
