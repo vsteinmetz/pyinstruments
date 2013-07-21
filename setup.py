@@ -41,10 +41,5 @@ setup(
         "License :: OSI Approved :: BSD License",
     ],
     install_requires=[
-],
-    dependency_links = [
-        "https://github.com/SamuelDeleglise/guiwrappersutils/tarball/master#egg=guiwrappersutils",
-        "https://github.com/SamuelDeleglise/conf_xml/tarball/master#egg=conf_xml",
-        "https://github.com/SamuelDeleglise/hdnavigator/tarball/master#egg=hdnavigator"
-        ],
+]
 )
