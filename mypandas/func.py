@@ -38,7 +38,7 @@ def add_to_series_and_dataframe(guess = None, result = default_result):
     - The class should inherit from the class default_result
     - The class object is appended to Series. 
     - The instances of the class, containing particular fit results are appended to the resulting DataFrame with the name: func_SOMENAME_res
-    This is useful if extra calculations are commonly made using the fit results (see func_pdh for an exemple)"""
+    This is useful if extra calculations are commonly made using the fit results (see func_pdh for an example)"""
     
     
     def decorator(f):  
@@ -56,7 +56,7 @@ def add_to_series_and_dataframe(guess = None, result = default_result):
 
 
 #===========================================================
-#           lorentz
+#           lorentz / gauss
 #===========================================================
 def guess_peak(self):
     """ gives initial guess for amplitude, x_0, width of the peak in Y(X)
@@ -107,7 +107,29 @@ def func_gauss(self,center = 10.,gamma = 1.,ampl = 1.,offset = 0.):
     sigma=gamma/(2*math.sqrt(math.log(2)*2))
     return Series(ampl/(sigma*math.sqrt(2*pi))*exp(-(X-center)*(X-center)/(2*sigma**2))+offset)
 
+
+#===========================================================
+#           Linear
+#===========================================================
+def guess_linear(ser):
+    offset = ser.mean()
+    M = ser.index[ser.argmax()]
+    m = ser.index[ser.argmin()]
+    if ser.argmax()>ser.argmin():
+        slope = (M-m)/(ser.argmax()-ser.argmin())
+    else:
+        slope = 0
+    center = -offset/slope
     
+    return {"slope":slope,"center":center}
+
+ 
+@add_to_series_and_dataframe(guess = guess_linear)
+def func_linear(self,slope = 1.,center = 0.):
+    """computes a lorentzian"""
+    X = array(self.index,dtype = float)
+    return Series( slope*(X-center), index = X)
+
 
 
 #===========================================================

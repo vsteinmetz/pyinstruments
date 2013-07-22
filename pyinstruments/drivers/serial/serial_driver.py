@@ -61,11 +61,22 @@ class SerialDriver(Driver):
     def close(self):
         self.serial.close()
 
+    def open(self):
+        self.serial = self.get_driver(port = self.address, \
+                 baudrate = self.baudrate, \
+                 bytesize = self.bytesize, \
+                 parity = self.parity, \
+                 stopbits = self.stopbits, \
+                 timeout = self.timeout, \
+                 dsrdtr = self.dsrdtr, \
+                 xonxoff = self.xonxoff, \
+                 rtscts = self.rtscts)
+        return True
+
     def ask(self, command = ""):
         if command != "":
             self.send(command)
-        return (self.readline())
-
+        return (self.readline().strip())
     
     @classmethod
     def supported_models(cls):
