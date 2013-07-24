@@ -40,3 +40,4 @@ class IviDotNetScope(IviDotNetDriver):
                                                                      0,\
                                                                       0)
             return array(tuple(dat)), start, step
+        
