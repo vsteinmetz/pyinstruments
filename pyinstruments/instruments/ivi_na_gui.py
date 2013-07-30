@@ -8,9 +8,9 @@ from pyinstruments.wrappers import Wrapper
 from pyinstruments.instruments.ivi_instrument import  IntermediateCollection
 from pyinstruments.factories import use_for_ivi
 from pyinstruments.instruments.iviguiinstruments import IviGuiInstrument
-import mypandas
-from hdnavigator import nav
+from curve import Curve
 
+import pandas
 from numpy import array,linspace
 
 
@@ -103,7 +103,6 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                                               PPhase = 16)
                         widget._setup_gui_element("AutoScale")
                         widget._exit_layout()
-                        self._setup_hdnavigator_widget(widget)
     
                         widget._setup_horizontal_layout()
                         widget._setup_gui_element("plot_xy_formatted")
@@ -159,21 +158,50 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                 data = self.FetchXYComplex()
                 pylab.plot(data[0], abs(data[1])**2)
                 pylab.show()
-                                                            
+                            
+            def get_meta(self):
+                meta = dict()
+                meta["averaging"] = self.wrapper_parent.AveragingFactor*\
+                                                self.wrapper_parent.Averaging
+                meta["center_freq"] = self.wrapper_parent.Center
+                meta["start_freq"] = self.wrapper_parent.Start
+                meta["stop_freq"] = self.wrapper_parent.Stop
+                meta["span"] = self.wrapper_parent.Span
+                meta["bandwidth"] = self.wrapper_parent.IFBandwidth
+                meta["output_port"] = self.out_port
+                meta["in_port"] = self.in_port
+
+                meta["format"] = self.Format
+                
+                meta["measurement"] = self.wrapper_name
+                meta["channel"] = self.wrapper_parent.wrapper_name
+                             
+                return meta
+                               
+            def get_curve_formatted(self):
+                x_y = self.FetchXYFormatted()
+                curve = Curve(pandas.Series(x_y[1], index = x_y[0]), \
+                                                            **self.get_meta())
+                curve.format = "formatted"
+                return curve
             
             def save_curve_formatted(self):
                 """Saves the curve using the hdnavigator module to find the location"""
-                import mypandas
-                x_y = self.FetchXYFormatted()
-                mypandas.Series(x_y[1], index = x_y[0]).save(nav.next_file)
-                nav.value_changed.emit()
+                curve = self.get_curve_formatted()
+                curve.save(self.get_savefile())
                 
+                
+            def get_curve_complex(self):
+                x_y = self.FetchXYComplex()
+                curve = Curve(pandas.Series(x_y[1], index = x_y[0]), \
+                                                            **self.get_meta())
+                curve.format = "complex"
+                return curve
+            
             def save_curve_complex(self):
                 """Saves the curve using the hdnavigator module to find the location"""
-                import mypandas
-                x_y = self.FetchXYComplex()
-                mypandas.Series(x_y[1], index = x_y[0]).save(nav.next_file)
-                nav.value_changed.emit()
+                curve = self.get_curve_complex()
+                curve.save(self.get_savefile())
             
             def xy_formatted_to_clipboard(self):
                 """copies X Y columnwise in the clipboard"""

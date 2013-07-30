@@ -23,6 +23,8 @@ class Wrapper(object):
     
         attr = self.__getattr__(name)
         super(Wrapper, self).__setattr__(name, new_attr)
+        new_attr.parent = self
+        
     
     def __getattr__(self, name):
         try:

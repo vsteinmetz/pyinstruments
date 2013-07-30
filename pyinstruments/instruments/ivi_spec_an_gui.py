@@ -8,7 +8,10 @@ from pyinstruments.wrappers import Wrapper
 from pyinstruments.instruments.ivi_instrument import  IntermediateCollection
 from pyinstruments.factories import use_for_ivi
 from pyinstruments.instruments.iviguiinstruments import IviGuiInstrument
+
 from numpy import array,linspace
+from curve import Curve
+import pandas
 
 @use_for_ivi("IviSpecAn")
 class IviSpecAnGui(Wrapper, IviGuiInstrument):
@@ -76,6 +79,30 @@ class IviSpecAnGui(Wrapper, IviGuiInstrument):
                                     Off = 10)
             widget._exit_layout() 
             self._setup_fetch_utilities(widget)
+        
+        
+        
+        
+        
+        def get_curve(self):
+            x_y = self.FetchXY()
+            meta = dict()
+            
+            meta["acquisition_type"] = self.Type
+            meta["averaging"] = self.wrapper_parent.Average.NumberOfSweeps
+            meta["center_freq"] = self.wrapper_parent.CenterFrequency
+            meta["start_freq"] = self.wrapper_parent.Start
+            meta["stop_freq"] = self.wrapper_parent.Stop
+            meta["span"] = self.wrapper_parent.Span
+            meta["bandwidth"] = self.wrapper_parent.ResolutionBandwidth
+            
+            meta["detector_type"] = self.DetectorType
+            
+            
+            meta["trace"] = self.wrapper_name
+            
+            curve = Curve(pandas.Series(x_y[0], index = x_y[1]), **meta)
+            return curve
             
         def FetchXY(self):
             """a custom function (not in the IVI driver) 

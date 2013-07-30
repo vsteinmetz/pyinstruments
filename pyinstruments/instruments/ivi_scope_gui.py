@@ -1,6 +1,7 @@
 """
 class to add gui-capabilities to IVI-compliant spectrum analyzers
 """
+from curve import Curve
 
 from pyinstruments.instruments.gui_fetchable import GuiFetchable
 from pyinstruments.wrappers import Wrapper
@@ -11,6 +12,7 @@ from pyinstruments.instruments.iviguiinstruments import IviGuiInstrument
 
 from guiwrappersutils import GuiWrapper
 from numpy import array,linspace
+import pandas
 
 @use_for_ivi("IviScope")
 class IviScopeGui(Wrapper, IviGuiInstrument):
@@ -64,7 +66,7 @@ class IviScopeGui(Wrapper, IviGuiInstrument):
         def FetchXY(self):
             """returns an array with the X and Y columns filled.
             """
-            
+                
             (y_values, start, step) = self.FetchWaveform()
             n = len(y_values)
             return array([linspace(start, \
@@ -73,6 +75,45 @@ class IviScopeGui(Wrapper, IviGuiInstrument):
                                    endpoint = False), \
                           y_values])
         
+        def get_curve(self):
+            x_y = self.FetchXY()
+            meta = dict()
+            
+             # "bandwidth", \
+             # "averaging", \
+             # "center_freq", \
+             # "start_freq", \
+             # "stop_freq", \
+             # "span", \
+              #"input_port", \
+            #  "output_port", \
+             # "start_time", \
+            #  "record_length", \
+            #  "coupling", \
+            #  "range", \
+           #   "offset", \
+           #   "input_freq_max", \
+           #   "input_impedance", \
+           #   "channel", \
+           #   "trace", \
+           #   "measurement"]
+            
+            meta["acquisition_type"] = self.wrapper_parent.Acquisition.Type
+            meta["averaging"] = self.wrapper_parent.Acquisition.NumberOfAverages
+            meta["start_time"] = self.wrapper_parent.Acquisition.StartTime
+            meta["record_length"] = self.wrapper_parent.Acquisition.RecordLength
+            meta["sample_rate"] = self.wrapper_parent.Acquisition.SampleRate
+            
+            meta["range"] = self.Range
+            meta["offset"] = self.Offset
+            meta["input_freq_max"] = self.InputFrequencyMax
+            meta["input_impedance"] = self.InputImpedance
+            
+            meta["channel"] = self.wrapper_name
+            
+            curve = Curve(pandas.Series(x_y[0], index = x_y[1]), **meta)
+            return curve
+            
         def _setupUi(self, widget):
             """sets up the graphical user interface"""
 
