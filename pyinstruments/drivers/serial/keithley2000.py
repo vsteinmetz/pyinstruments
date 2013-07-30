@@ -44,6 +44,16 @@ class Keithley2000(SerialDriver):
         time.sleep(0.1)
         res = self.readline()
         return float(res.strip())
+ 
+    def frontswitch(self):
+        state = self.ask("SYSTem:FRSWitch?")
+        if state == '1':
+            return 'front'
+        elif state == '0':
+            return 'back'
+        else:
+            return 'unknown'
+        
 
 if __name__ == "__main__":
     ea = Keithley2000(sys.argv[1])

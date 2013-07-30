@@ -30,6 +30,11 @@ class Arduino(SerialDriver):
             for each_pin in pinArray:
                 self.__sendData(each_pin)
         return True
+
+    def outputAll(self, pinArray):
+        for pin in range(14):
+            self.output(pin)
+        return True
     
     def setLow(self, pin):
         self.__sendData('0')
