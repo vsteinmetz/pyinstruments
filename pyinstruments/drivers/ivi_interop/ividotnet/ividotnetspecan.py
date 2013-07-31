@@ -7,7 +7,10 @@ from pyinstruments.drivers.ivi_interop.ividotnet import IviDotNetDriver
 from pyinstruments.drivers.ivi_interop.ividotnet.dotnet_collections import \
                                         DotNetIntermediateCollection
 from pyinstruments.wrappers import Wrapper
+from pyinstruments.drivers.multiple_choice import MultipleChoice
 from numpy import array
+    
+    
 
 class IviDotNetSpecAn(IviDotNetDriver):
     """
@@ -41,4 +44,5 @@ class IviDotNetSpecAn(IviDotNetDriver):
             """
             
             return array(tuple(self._wrapped.FetchX()))
-    
+        
+

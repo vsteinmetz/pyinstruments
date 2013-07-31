@@ -3,12 +3,12 @@ Class GuiFetchable defines a bunch of useful methods for instruments that can be
 used to query waveforms.
 """
 
+from curve import Curve
+
 import numpy
 import pandas
 from PyQt4 import QtCore,QtGui
-from curve import Curve
-
-
+import os
 
 class GuiFetchable(object):
     """Defines a bunch of useful methods for instruments that can be
@@ -22,18 +22,23 @@ class GuiFetchable(object):
                                     wrapper class")
 
     def get_savefile(self):
-        dialog = QtGui.QFileDialog()
+        settings = QtCore.QSettings("pyinstruments", "pyinstruments")
+        default_save_dir = str(settings.value("default_save_dir").toString())
+        dialog = QtGui.QFileDialog(directory = default_save_dir)
         filename = str(dialog.getSaveFileName(filter = "*.h5"))
-        if not filename:
+        if filename == "":
             return
         if not filename.endswith(".h5"):
             filename = filename + ".h5"
+        settings.setValue("default_save_dir", os.path.dirname(filename))
         return filename
 
     def save_curve(self):
         """Saves the curve by opening a FileDialog to find the location"""
 
         filename = self.get_savefile()
+        if not filename:
+            return
         curve = self.get_curve()
         curve.save(filename)
 

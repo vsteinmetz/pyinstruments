@@ -79,10 +79,7 @@ class IviSpecAnGui(Wrapper, IviGuiInstrument):
                                     Off = 10)
             widget._exit_layout() 
             self._setup_fetch_utilities(widget)
-        
-        
-        
-        
+                
         
         def get_curve(self):
             x_y = self.FetchXY()
@@ -111,3 +108,5 @@ class IviSpecAnGui(Wrapper, IviGuiInstrument):
             x = self.FetchX()
             y = self.FetchY()
             return array([x, y])
+
+
