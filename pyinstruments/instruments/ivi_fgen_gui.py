@@ -15,7 +15,7 @@ from numpy import array,linspace
 @use_for_ivi("IviFgen")
 class IviFgenGui(Wrapper, IviGuiInstrument):
     """
-    class to add gui-capabilities to IVI-compliant spectrum analyzers
+    class to add gui-capabilities to IVI-compliant function generators
     """
     
     def __init__(self, *args, **kwds):
@@ -24,8 +24,17 @@ class IviFgenGui(Wrapper, IviGuiInstrument):
          
     def _setupUi(self, widget):
         """sets up the graphical user interface"""
-        #widget._setup_horizontal_layout()
-        #widget._setup_gui_element("Acquisition.Start")
-        #widget._setup_gui_element("Acquisition.Stop")
-        #widget._exit_layout()
+        widget._setup_horizontal_layout()
+        widget._setup_gui_element("Acquisition.Start")
+        widget._setup_gui_element("Acquisition.Stop")
+        widget._exit_layout()
         pass
+
+
+    @property
+    def Offset(self):
+        return self.get_Offset()
+    
+    @Offset.setter
+    def Offset(self, val):
+        return self.set_Offset(val)

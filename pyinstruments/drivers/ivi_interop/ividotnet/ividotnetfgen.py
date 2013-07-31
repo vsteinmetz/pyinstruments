@@ -18,3 +18,8 @@ class IviDotNetFgen(IviDotNetDriver):
     #_supported_software_modules =  ["33220A"]
     ivi_type = "IviFgen"
     
+#    @classmethod
+#    def is_ivi_instrument(cls):
+#        return False
+
+    
