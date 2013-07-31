@@ -98,7 +98,7 @@ class IviSpecAnGui(Wrapper, IviGuiInstrument):
             
             meta["trace"] = self.wrapper_name
             
-            curve = Curve(pandas.Series(x_y[0], index = x_y[1]), **meta)
+            curve = Curve(pandas.Series(x_y[1], index = x_y[0]), **meta)
             return curve
             
         def FetchXY(self):
