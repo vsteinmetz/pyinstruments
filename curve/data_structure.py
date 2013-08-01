@@ -26,9 +26,9 @@ class Curve(object):
     2) The metadata in self.meta as MetaData format (dict-like object) 
     """
     
-    def __init__(self, data, **kwds):
+    def __init__(self, data, meta = dict()):
         self.data = data
-        self.meta = MetaData(**kwds)
+        self.meta = MetaData(**meta)
         
     def plot(self, *args, **kwds):
         self.data.plot(*args, **kwds)

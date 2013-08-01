@@ -10,7 +10,7 @@ def read(fname):
 
 setup(
     name = "pyinstruments",
-    version = "0.0.9",
+    version = "0.0.11",
     author = "Samuel Deleglise",
     author_email = "samuel.deleglise@gmail.com",
     description = ("""Control of data acquisition with remote instruments using 
@@ -31,10 +31,9 @@ setup(
               'pyinstruments.instruments',
               'pyinstruments.wrappers',
               'pyinstruments.factories',
-              'hdnavigator',
               'guiwrappersutils',
               'conf_xml',
-              'mypandas'],
+              'curve'],
     long_description=read('README'),
     classifiers=[
         "Development Status :: 3 - Alpha",

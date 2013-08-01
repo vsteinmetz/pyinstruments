@@ -79,25 +79,6 @@ class IviScopeGui(Wrapper, IviGuiInstrument):
             x_y = self.FetchXY()
             meta = dict()
             
-             # "bandwidth", \
-             # "averaging", \
-             # "center_freq", \
-             # "start_freq", \
-             # "stop_freq", \
-             # "span", \
-              #"input_port", \
-            #  "output_port", \
-             # "start_time", \
-            #  "record_length", \
-            #  "coupling", \
-            #  "range", \
-           #   "offset", \
-           #   "input_freq_max", \
-           #   "input_impedance", \
-           #   "channel", \
-           #   "trace", \
-           #   "measurement"]
-            
             meta["acquisition_type"] = self.wrapper_parent.Acquisition.Type
             meta["averaging"] = self.wrapper_parent.Acquisition.NumberOfAverages
             meta["start_time"] = self.wrapper_parent.Acquisition.StartTime
@@ -110,8 +91,11 @@ class IviScopeGui(Wrapper, IviGuiInstrument):
             meta["input_impedance"] = self.InputImpedance
             
             meta["channel"] = self.wrapper_name
+            meta["instrument_type"] = "Scope"
+            meta["instrument_logical_name"] = \
+                                self.wrapper_parent.logical_name
             
-            curve = Curve(pandas.Series(x_y[1], index = x_y[0]), **meta)
+            curve = Curve(pandas.Series(x_y[1], index = x_y[0]), meta = meta)
             return curve
             
         def _setupUi(self, widget):

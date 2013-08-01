@@ -1,4 +1,4 @@
-set HOME=C:\Users\Owner\
+set HOME=C:\Users\Samuel\
 cd C:\Users\Samuel\Documents\GitHub\pyinstruments
 
 C:\Python27\python.exe setup.py bdist_egg upload --identity="Samuel Deleglise" --sign --quiet

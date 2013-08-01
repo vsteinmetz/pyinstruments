@@ -1,0 +1,30 @@
+[
+  {
+    "model": "curvefinder.instrumenttype",
+    "pk": 1,
+    "fields": {
+      "name": "no-instrument"
+    }
+  },
+  {
+    "model": "curvefinder.tag",
+    "pk": 1,
+    "fields": {
+      "name": "all"
+    }
+  },
+  {
+    "model": "curvefinder.instrumentlogicalname",
+    "pk": 1,
+    "fields": {
+      "name": "no-name"
+    }
+  },
+  {
+    "model": "curvefinder.window",
+    "pk": 1,
+    "fields": {
+      "name": "default"
+    }
+  }
+]

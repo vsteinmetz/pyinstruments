@@ -94,11 +94,12 @@ class IviSpecAnGui(Wrapper, IviGuiInstrument):
             meta["bandwidth"] = self.wrapper_parent.ResolutionBandwidth
             
             meta["detector_type"] = self.DetectorType
-            
-            
             meta["trace"] = self.wrapper_name
+            meta["instrument_type"] = "SpecAn"
+            meta["instrument_logical_name"] = \
+                                self.wrapper_parent.logical_name
             
-            curve = Curve(pandas.Series(x_y[1], index = x_y[0]), **meta)
+            curve = Curve(pandas.Series(x_y[1], index = x_y[0]), meta = meta)
             return curve
             
         def FetchXY(self):

@@ -104,6 +104,8 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                         widget._setup_gui_element("AutoScale")
                         widget._exit_layout()
     
+                        self._setup_fetch_utilities(widget)
+                        
                         widget._setup_horizontal_layout()
                         widget._setup_gui_element("plot_xy_formatted")
                         widget._setup_gui_element("xy_formatted_to_clipboard")
@@ -175,14 +177,18 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                 
                 meta["measurement"] = self.wrapper_name
                 meta["channel"] = self.wrapper_parent.wrapper_name
-                             
+                meta["instrument_type"] = "NA"
+                meta["instrument_logical_name"] = \
+                            self.wrapper_parent.wrapper_parent.logical_name    
+                    
+                        
                 return meta
                                
             def get_curve_formatted(self):
                 x_y = self.FetchXYFormatted()
                 curve = Curve(pandas.Series(x_y[1], index = x_y[0]), \
-                                                            **self.get_meta())
-                curve.format = "formatted"
+                                                    meta = self.get_meta())
+                curve.meta["format"] = "formatted"
                 return curve
             
             def save_curve_formatted(self):
@@ -194,8 +200,8 @@ class IviNaGui(Wrapper, IviGuiInstrument):
             def get_curve_complex(self):
                 x_y = self.FetchXYComplex()
                 curve = Curve(pandas.Series(x_y[1], index = x_y[0]), \
-                                                            **self.get_meta())
-                curve.format = "complex"
+                                                    meta = self.get_meta())
+                curve.meta["format"] = "complex"
                 return curve
             
             def save_curve_complex(self):
