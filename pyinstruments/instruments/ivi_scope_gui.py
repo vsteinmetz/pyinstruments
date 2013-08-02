@@ -84,8 +84,8 @@ class IviScopeGui(Wrapper, IviGuiInstrument):
             meta["start_time"] = self.wrapper_parent.Acquisition.StartTime
             meta["record_length"] = self.wrapper_parent.Acquisition.RecordLength
             meta["sample_rate"] = self.wrapper_parent.Acquisition.SampleRate
-            
-            meta["range"] = self.Range
+            meta["coupling"] = self.wrapper_parent.Coupling
+            meta["full_range"] = self.Range
             meta["offset"] = self.Offset
             meta["input_freq_max"] = self.InputFrequencyMax
             meta["input_impedance"] = self.InputImpedance

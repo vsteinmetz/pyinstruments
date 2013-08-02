@@ -26,6 +26,11 @@ class FilterWidget(QtGui.QWidget):
         self.other_widget = self.get_other_widget()
         self.layout.addWidget(self.other_widget)
         self.setLayout(self.layout)
+        self.change_enabled(self._enabled_checkbox.checkState())
+    
+    @property
+    def enabled(self):
+        return self._enabled_checkbox.checkState() == 2
     
     def change_enabled(self, new_state):
         self.other_widget.setEnabled(new_state == 2)
@@ -33,8 +38,11 @@ class FilterWidget(QtGui.QWidget):
     def get_other_widget(self):
         return QtGui.QWidget()
 
-    def fullfill(self, curve):
-        raise NotImplementedError("child class should implement this")
+    def fullfills(self, curve):
+        if self.enabled:
+            return self.other_widget.fullfills(curve)
+        else:
+            return True
     
 
 class DateSelectWidget(QtGui.QWidget):
@@ -92,28 +100,107 @@ class DateConstraintWidget(FilterWidget):
     """
     Lower and upper bound on the date
     """
-    
+    def __init__(self, constraint = ">="):
+        """
+        Constraints can be either ">=", "<=" or "="
+        """
+        if constraint not in ["=", "<=", ">="]:
+            raise ValueError( \
+    """constraint can be either ">=", "<=" or "=", not """ + constraint)
+        
+        self.constraint = constraint
+        super(DateConstraintWidget, self).__init__()
+        
+        
+            
     def get_other_widget(self):
         class DateConstraintWidget(QtGui.QWidget):
+            constraint = self.constraint
             def __init__(self):
                 super(DateConstraintWidget, self).__init__()
                 self._lay = QtGui.QHBoxLayout()
-                self._lower_bound_widget = DateSelectWidget()
-                self._label = QtGui.QLabel(" <= date <= ")
-                self._upper_bound_widget = DateSelectWidget()
-                
-                self._lay.addWidget(self._lower_bound_widget)
-                self._lay.addWidget(self._label)
-                self._lay.addWidget(self._upper_bound_widget)
+                self._bound_widget = DateSelectWidget()
+                if DateConstraintWidget.constraint == ">=":
+                    self._lay.addWidget(self._bound_widget)
+                    self._label = QtGui.QLabel(" <= date")
+                    self._lay.addWidget(self._label)
+                if DateConstraintWidget.constraint == "<=":
+                    self._label = QtGui.QLabel("date <= ")
+                    self._lay.addWidget(self._label)
+                    self._lay.addWidget(self._bound_widget)
+                if DateConstraintWidget.constraint == "=":
+                    self._label = QtGui.QLabel("date = ")
+                    self._lay.addWidget(self._label)
+                    self._lay.addWidget(self._bound_widget)
                 self.setLayout(self._lay)
+            
+            @property
+            def date(self):
+                return self._bound_widget.date.toPyDate()
+            
+            def fullfills(self, curve):
+                if DateConstraintWidget.constraint == "=":
+                    return curve.date_created.date() == self.date
+                if DateConstraintWidget.constraint == ">=":
+                    return curve.date_created.date() >= self.date
+                if DateConstraintWidget.constraint == "<=":
+                    return curve.date_created.date() <= self.date
         return DateConstraintWidget()
         
 
 class StringFilterWidget(FilterWidget):
-    pass
+    def __init__(self, field_name):
+        """checks if curve.field_name is the requested string"""
+        self.field_name = field_name
+        super(StringFilterWidget, self).__init__()
+        
+    def get_other_widget(self):
+        class StringFilterWidget(QtGui.QWidget):
+            field_name = self.field_name
+            
+            def __init__(self):
+                super(StringFilterWidget, self).__init__()
+                self._lay = QtGui.QHBoxLayout()
+                self._label = QtGui.QLabel(self.field_name + " = ")
+                self._lay.addWidget(self._label)
+                self._line = QtGui.QLineEdit()
+                self._lay.addWidget(self._line)
+                self.setLayout(self._lay)
+            
+            @property
+            def value(self):
+                return str(self._line.text())
+                       
+            def fullfills(self, curve):
+                return curve.__getattribute__(self.field_name) == self.value
+        return StringFilterWidget()
 
 class ComboFilterWidget(FilterWidget):
-    pass
+    def __init__(self, foreignkey_name):
+        """checks if curve.field_name is the requested string"""
+        self.foreignkey_name = foreignkey_name
+        super(ComboFilterWidget, self).__init__()
+
+    def get_other_widget(self):
+        class ComboFilterWidget(QtGui.QWidget):
+            field_name = self.field_name
+            
+            def __init__(self):
+                super(StringFilterWidget, self).__init__()
+                self._lay = QtGui.QHBoxLayout()
+                self._label = QtGui.QLabel(self.field_name + " = ")
+                self._lay.addWidget(self._label)
+                self._line = QtGui.QLineEdit()
+                self._lay.addWidget(self._line)
+                self.setLayout(self._lay)
+            
+            @property
+            def value(self):
+                return str(self._line.text())
+                       
+            def fullfills(self, curve):
+                return curve.__getattribute__(self.field_name) == self.value
+        return StringFilterWidget()
 
 class TagFilterWidget(FilterWidget):
     pass

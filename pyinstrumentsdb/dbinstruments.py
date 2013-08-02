@@ -9,10 +9,6 @@ from curvefinder.loadsave import save
 
 from PyQt4 import QtCore, QtGui
 
-
-
-
-
 def _save_curve_with_db(self):
     """Saves the curve using the dbwidget's values"""
 
@@ -21,7 +17,8 @@ def _save_curve_with_db(self):
          self._dbwidget.name, \
          self._dbwidget.window, \
          self._dbwidget.tags, \
-         self._dbwidget.comment)
+         self._dbwidget.comment, \
+         self._curve_type)
 
 def _setup_fetch_utilities_with_db_widget(self, widget):
     """sets up the gui to fetch the waveforms in widget"""
@@ -56,7 +53,8 @@ def _save_curve_formatted_with_db(self):
          self._dbwidget.name, \
          self._dbwidget.window, \
          self._dbwidget.tags, \
-         self._dbwidget.comment)
+         self._dbwidget.comment, \
+         curve_type = "NaCurve")
     
 def _save_curve_complex_with_db(self):
     curve = self.get_curve_complex()
@@ -64,7 +62,8 @@ def _save_curve_complex_with_db(self):
          self._dbwidget.name, \
          self._dbwidget.window, \
          self._dbwidget.tags, \
-         self._dbwidget.comment)
+         self._dbwidget.comment, \
+         curve_type = "NaCurve")
 
 IviNaGui.GuiChannel.GuiMeasurement._setup_fetch_utilities = \
             _setup_fetch_utilities_with_db_widget_for_na
@@ -88,9 +87,10 @@ class IviScopeGuiDB(IviScopeGui):
             IviScopeGui.ChannelGui.__init__(self,*args, **kwds)
             self._dbwidget = CurveCreateWidget(default_name = "scope_curve", \
                                            default_window = "scope")
-        
+            self._curve_type = "ScopeCurve"
         _setup_fetch_utilities = _setup_fetch_utilities_with_db_widget
         save_curve = _save_curve_with_db
+        
             
             
 @use_for_ivi("IviSpecAn")
@@ -110,5 +110,5 @@ class IviSpecAnGuiDB(IviSpecAnGui):
             IviSpecAnGui.TraceGui.__init__(self, *args, **kwds)
             self._dbwidget = CurveCreateWidget(default_name = "spec_an_curve", \
                                            default_window = "spec_an")
-            
+            self._curve_type = "SpecAnCurve"
 

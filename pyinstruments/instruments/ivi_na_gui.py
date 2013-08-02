@@ -9,7 +9,7 @@ from pyinstruments.instruments.ivi_instrument import  IntermediateCollection
 from pyinstruments.factories import use_for_ivi
 from pyinstruments.instruments.iviguiinstruments import IviGuiInstrument
 from curve import Curve
-
+NA_CURVE_FORMAT_COMPLEX = 10
 import pandas
 from numpy import array,linspace
 
@@ -171,7 +171,7 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                 meta["span"] = self.wrapper_parent.Span
                 meta["bandwidth"] = self.wrapper_parent.IFBandwidth
                 meta["output_port"] = self.out_port
-                meta["in_port"] = self.in_port
+                meta["input_port"] = self.in_port
 
                 meta["format"] = self.Format
                 
@@ -188,7 +188,6 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                 x_y = self.FetchXYFormatted()
                 curve = Curve(pandas.Series(x_y[1], index = x_y[0]), \
                                                     meta = self.get_meta())
-                curve.meta["format"] = "formatted"
                 return curve
             
             def save_curve_formatted(self):
@@ -201,7 +200,7 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                 x_y = self.FetchXYComplex()
                 curve = Curve(pandas.Series(x_y[1], index = x_y[0]), \
                                                     meta = self.get_meta())
-                curve.meta["format"] = "complex"
+                curve.meta["format"] = NA_CURVE_FORMAT_COMPLEX
                 return curve
             
             def save_curve_complex(self):

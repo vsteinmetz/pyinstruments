@@ -1,12 +1,5 @@
 [
   {
-    "model": "curvefinder.instrumenttype",
-    "pk": 1,
-    "fields": {
-      "name": "no-instrument"
-    }
-  },
-  {
     "model": "curvefinder.tag",
     "pk": 1,
     "fields": {

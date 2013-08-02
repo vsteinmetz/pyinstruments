@@ -1,5 +1,6 @@
 from curvefinder.models import Curve, Tag, Window, \
-                                InstrumentType, InstrumentLogicalName
+                             InstrumentLogicalName, \
+                             ScopeCurve, NaCurve, SpecAnCurve
 import h5py
 from curve import Curve as PiCurve
 from pandas import HDFStore
@@ -20,7 +21,7 @@ FIELDS = ["acquisition_type", \
               "start_time", \
               "record_length", \
               "coupling", \
-              "range", \
+              "full_range", \
               "format", \
               "offset", \
               "sample_rate", \
@@ -32,8 +33,8 @@ FIELDS = ["acquisition_type", \
               "detector_type", \
               "channel"]
 
-FOREIGNKEYFIELDS = {"instrument_logical_name" : InstrumentLogicalName, \
-                    "instrument_type" : InstrumentType}
+FOREIGNKEYFIELDS = {"instrument_logical_name" : InstrumentLogicalName, 
+                    "parent" : Curve}
 
 class TagNotFound(ValueError):
     pass
@@ -95,12 +96,16 @@ def add_or_create(curve, fieldname, related_class, new_name):
                           related_class.objects.get(name = new_name))
  
 def save(picurve, name = "some_curve", window = "default", tags = ["all"], \
-         comment = ""): 
+         comment = "", curve_type = "Curve"): 
     """
     saves the curve into a file formatted as /year/month/day/name.h5.
     """
 
-    curve = Curve(name = name)
+    types = {"Curve": Curve, \
+             "NaCurve": NaCurve, \
+             "SpecAnCurve": SpecAnCurve, \
+             "ScopeCurve":ScopeCurve}
+    curve = types[curve_type](name = name)
     
     if not name.endswith(".h5"):
         name = name + ".h5"
