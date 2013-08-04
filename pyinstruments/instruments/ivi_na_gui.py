@@ -25,22 +25,22 @@ class IviNaGui(Wrapper, IviGuiInstrument):
         GuiWrapper.__init__(self)
         self._wrap_attribute("Channels", \
                         IntermediateCollection(self.Channels, \
-                        IviNaGui.GuiChannel))
+                        IviNaGui.ChannelGui))
     
     def _setupUi(self, widget):
         """sets up the graphical user interface"""
          
         widget._setup_tabs_for_collection("Channels")
     
-    class GuiChannel(Wrapper, GuiWrapper):
+    class ChannelGui(Wrapper, GuiWrapper):
         """wrapper for sub-object Channel"""
         
         def __init__(self, *args, **kwds):
-            super(IviNaGui.GuiChannel, self).__init__(*args, **kwds)
+            Wrapper.__init__(self, *args, **kwds)
             GuiWrapper.__init__(self)
             self._wrap_attribute("Measurements", \
                         IntermediateCollection(self.Measurements, \
-                        IviNaGui.GuiChannel.GuiMeasurement))
+                        IviNaGui.ChannelGui.MeasurementGui))
         
         def _setupUi(self, widget):
             widget._setup_horizontal_layout()
@@ -58,13 +58,12 @@ class IviNaGui(Wrapper, IviGuiInstrument):
             widget._setup_gui_element("Averaging")
             widget._setup_tabs_for_collection("Measurements")
     
-        class GuiMeasurement(Wrapper, GuiWrapper, GuiFetchable):
+        class MeasurementGui(Wrapper, GuiWrapper, GuiFetchable):
             """wrapper for sub-sub-object Measurement
             """
             
             def __init__(self, *args, **kwds):
-                super(IviNaGui.GuiChannel.GuiMeasurement, \
-                                        self).__init__(*args, **kwds)
+                Wrapper.__init__(self, *args, **kwds)
                 GuiWrapper.__init__(self)
                 GuiFetchable.__init__(self)
                 self.created = False
@@ -72,7 +71,6 @@ class IviNaGui(Wrapper, IviGuiInstrument):
             def Create(self, out_port = None, in_port = None):
                 """allows to create the measurement with default ports"""
                 
-                print "Creating"
                 self._wrapped.Create(2, 1)
                 if not self.created:
                     self.created = True
@@ -105,19 +103,17 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                         widget._exit_layout()
     
                         self._setup_fetch_utilities(widget)
-                        
-                        widget._setup_horizontal_layout()
-                        widget._setup_gui_element("plot_xy_formatted")
-                        widget._setup_gui_element("xy_formatted_to_clipboard")
-                        widget._setup_gui_element("save_curve_formatted")
-                        widget._exit_layout()
-                        
-                        widget._setup_horizontal_layout()
-                        widget._setup_gui_element("plot_xy_square_mod")
-                        widget._setup_gui_element("xy_complex_to_clipboard")
-                        widget._setup_gui_element("save_curve_complex")
-                        widget._exit_layout()
-                        
+            
+            def _add_fetch_buttons(self, widget):
+                widget._setup_gui_element("plot_xy_formatted")
+                widget._setup_gui_element("xy_formatted_to_clipboard")
+                widget._setup_gui_element("save_curve_formatted")
+                widget._exit_layout()
+                
+                widget._setup_horizontal_layout()
+                widget._setup_gui_element("plot_xy_square_mod")
+                widget._setup_gui_element("xy_complex_to_clipboard")
+                widget._setup_gui_element("save_curve_complex")
                     
             @property
             def in_port(self):
@@ -163,6 +159,7 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                             
             def get_meta(self):
                 meta = dict()
+                meta["curve_type"] = "NaCurve"
                 meta["averaging"] = self.wrapper_parent.AveragingFactor*\
                                                 self.wrapper_parent.Averaging
                 meta["center_freq"] = self.wrapper_parent.Center
@@ -193,7 +190,7 @@ class IviNaGui(Wrapper, IviGuiInstrument):
             def save_curve_formatted(self):
                 """Saves the curve using the hdnavigator module to find the location"""
                 curve = self.get_curve_formatted()
-                curve.save(self.get_savefile())
+                self._save_curve(curve)
                 
                 
             def get_curve_complex(self):
@@ -204,9 +201,9 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                 return curve
             
             def save_curve_complex(self):
-                """Saves the curve using the hdnavigator module to find the location"""
+                """Saves the curve using a popupdialog to select the file"""
                 curve = self.get_curve_complex()
-                curve.save(self.get_savefile())
+                self._save_curve(curve)
             
             def xy_formatted_to_clipboard(self):
                 """copies X Y columnwise in the clipboard"""

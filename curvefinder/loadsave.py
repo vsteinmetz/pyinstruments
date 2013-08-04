@@ -10,12 +10,7 @@ from django.core.files.storage import default_storage
 import os
 
 FIELDS = ["acquisition_type", \
-              "bandwidth", \
-              "averaging", \
-              "center_freq", \
-              "start_freq", \
-              "stop_freq", \
-              "span", \
+              
               "input_port", \
               "output_port", \
               "start_time", \
@@ -94,51 +89,57 @@ def add_or_create(curve, fieldname, related_class, new_name):
             related_class.create(name = new_name)
         curve.__setattr__(fieldname, \
                           related_class.objects.get(name = new_name))
- 
-def save(picurve, name = "some_curve", window = "default", tags = ["all"], \
-         comment = "", curve_type = "Curve"): 
+
+
+def curve_db_from_curve(curve):
     """
-    saves the curve into a file formatted as /year/month/day/name.h5.
+    returns a CurveDB child using the meta data found in the curve
     """
 
     types = {"Curve": Curve, \
              "NaCurve": NaCurve, \
              "SpecAnCurve": SpecAnCurve, \
-             "ScopeCurve":ScopeCurve}
-    curve = types[curve_type](name = name)
-    
-    if not name.endswith(".h5"):
-        name = name + ".h5"
-    
-    curve.date_created = now()
-    curve.comment = comment
-    (window_object, exists) = Window.objects.get_or_create(name = window)
-    curve.window = window_object
-    file_path = os.path.join(MEDIA_ROOT, \
-                             curve.date_created.strftime('%Y/%m/%d'), \
-                             name)
-    
-    file_path = default_storage.get_available_name(file_path)
-    curve.data_file = os.path.relpath(file_path, MEDIA_ROOT)
-        
-    picurve.save(file_path)
-    
-    for field, val in picurve.meta.iteritems():
-        if field in FIELDS:
-            curve.__setattr__(field, val)
-        
-        if field in FOREIGNKEYFIELDS:
-            (foreign_object, exists) = \
-                FOREIGNKEYFIELDS[field].objects.get_or_create(name = val)
-            curve.__setattr__(field, foreign_object)
-    curve.save()
-    
-    if not "all" in tags:
-        tags.append("all")
-    for tag in tags:
-        (tag_object, exists) = Tag.objects.get_or_create(name = tag)
-        curve.tags.add(tag_object)
-    curve.save()
+             "ScopeCurve": ScopeCurve}
+    (log_name, new) = InstrumentLogicalName.objects.get_or_create( \
+                    name=curve.meta.instrument_logical_name)
+    if curve.meta.curve_type == "ScopeCurve":
+        kwds = {"acquisition_type" : curve.meta.acquisition_type, \
+         "averaging" : curve.meta.averaging, \
+         "start_time" : curve.meta.start_time, \
+         "record_length": curve.meta.record_length, \
+         "coupling" : curve.meta.coupling, \
+         "full_range" : curve.meta.full_range, \
+         "offset" : curve.meta.offset, \
+         "sample_rate": curve.meta.sample_rate, \
+         "input_freq_max": curve.meta.input_freq_max, \
+         "input_impedance": curve.meta.input_impedance, \
+         "channel" : curve.meta.channel}
+    if curve.meta.curve_type == "SpecAnCurve":
+        kwds = {"bandwidth": curve.meta.bandwidth, \
+              "averaging":curve.meta.averaging, \
+              "center_freq":curve.meta.center_freq, \
+              "start_freq":curve.meta.start_freq, \
+              "stop_freq":curve.meta.stop_freq, \
+              "span":curve.meta.span, \
+              "trace":curve.meta.trace, \
+              "detector_type":curve.meta.detector_type}
+    if curve.meta.curve_type == "NaCurve":
+        kwds = {"bandwidth": curve.meta.bandwidth, \
+              "averaging":curve.meta.averaging, \
+              "center_freq":curve.meta.center_freq, \
+              "start_freq":curve.meta.start_freq, \
+              "stop_freq":curve.meta.stop_freq, \
+              "span":curve.meta.span, \
+              "input_port":curve.meta.input_port, \
+              "output_port":curve.meta.output_port, \
+              "format":curve.meta.format, \
+              "channel":curve.meta.channel, \
+              "measurement":curve.meta.measurement}
+    return types[curve.meta.curve_type](data = curve.data, \
+                                        meta = curve.meta, \
+                                        instrument_logical_name=log_name, \
+                                        **kwds)
+ 
 
 def save_h5(h5filename, comment = "", tags = []):
     """

@@ -45,11 +45,15 @@ class CurveCreateWidget(QtGui.QWidget):
     """
     
     def __init__(self, default_name = "some_curve", \
-                 default_window = "default"):
+                 default_window = "default", \
+                 comment = "", \
+                 tags = []):
         super(CurveCreateWidget, self).__init__()
         self.setup_ui()
         self.name = default_name
         self.window = default_window
+        self.comment = comment
+        self.tags = tags
     
     @property
     def tags(self):

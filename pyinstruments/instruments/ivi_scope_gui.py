@@ -59,7 +59,7 @@ class IviScopeGui(Wrapper, IviGuiInstrument):
         """
         
         def __init__(self, *args, **kwds):
-            super(IviScopeGui.ChannelGui,self).__init__(*args,**kwds)
+            Wrapper.__init__(self, *args,**kwds)
             GuiWrapper.__init__(self)
             GuiFetchable.__init__(self)
         
@@ -89,9 +89,8 @@ class IviScopeGui(Wrapper, IviGuiInstrument):
             meta["offset"] = self.Offset
             meta["input_freq_max"] = self.InputFrequencyMax
             meta["input_impedance"] = self.InputImpedance
-            
             meta["channel"] = self.wrapper_name
-            meta["instrument_type"] = "Scope"
+            meta["curve_type"] = "ScopeCurve"
             meta["instrument_logical_name"] = \
                                 self.wrapper_parent.logical_name
             

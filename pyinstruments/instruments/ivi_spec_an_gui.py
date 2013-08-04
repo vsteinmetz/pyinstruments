@@ -49,7 +49,7 @@ class IviSpecAnGui(Wrapper, IviGuiInstrument):
         """wrapper for sub-object Trace"""
     
         def __init__(self, *args, **kwds):
-            super(IviSpecAnGui.TraceGui,self).__init__(*args,**kwds)
+            Wrapper.__init__(self, *args,**kwds)
             GuiWrapper.__init__(self)
             GuiFetchable.__init__(self)
         
@@ -85,6 +85,7 @@ class IviSpecAnGui(Wrapper, IviGuiInstrument):
             x_y = self.FetchXY()
             meta = dict()
             
+            meta["curve_type"] = 'SpecAnCurve'
             meta["acquisition_type"] = self.Type
             meta["averaging"] = self.wrapper_parent.Average.NumberOfSweeps
             meta["center_freq"] = self.wrapper_parent.CenterFrequency

@@ -2,10 +2,23 @@ from PyQt4 import QtCore,QtGui
 from PyQt4.QtGui import QVBoxLayout
 import os
 
+def graphical_exception(func):
+    """a wrapper to display the exception in a pop up window rather than 
+    lost in the console"""
+    def new_func(*args,**kwds):
+        try:
+            return func(*args,**kwds)
+        except Exception as e:
+            m = QtGui.QMessageBox()
+            m.setText(str(e))
+            m.exec_()
+    return new_func
+
 class GuiWrapperWidget(QtGui.QWidget):
     def __init__(self,driver):
         self.driver = driver
         self._gui_elements = dict()
+        self._callable_elements = []
         self._tab_widgets = []
         self._tab_widget_items = []
         
@@ -22,6 +35,7 @@ class GuiWrapperWidget(QtGui.QWidget):
         for k,v in self._gui_elements.iteritems():
             v.value = self.driver._get_recursing_attribute(k)[-1] 
     
+    @graphical_exception
     def get_values_from_gui(self,item_name_changed = None):
         item_name_changed = str(item_name_changed)
         if item_name_changed is not None:
@@ -83,57 +97,45 @@ class GuiWrapperWidget(QtGui.QWidget):
             obj = EnumItem(property_name,**enum)
             self.add_below(obj)
             self._gui_elements[property_name] = obj
-            obj.value_changed.connect( \
-                            graphical_exception( \
-                            self.get_values_from_gui))
+            obj.value_changed.connect(self.get_values_from_gui)
             return
         
         if isinstance(val,basestring):
             obj = StringItem(property_name)
             self.add_below(obj)
             self._gui_elements[property_name] = obj
-            obj.value_changed.connect( \
-                            graphical_exception( \
-                            self.get_values_from_gui))
-        
+            obj.value_changed.connect(self.get_values_from_gui)
+             
         if isinstance(val,float):
             obj = DoubleItem(property_name)
             self.add_below(obj)
             self._gui_elements[property_name] = obj
-            obj.value_changed.connect( \
-                            graphical_exception( \
-                            self.get_values_from_gui))
+            obj.value_changed.connect(self.get_values_from_gui)
             return
         
         if isinstance(val,bool):
             obj = BoolItem(property_name)
             self.add_below(obj)
             self._gui_elements[property_name] = obj
-            obj.value_changed.connect( \
-                            graphical_exception( \
-                            self.get_values_from_gui))
+            obj.value_changed.connect(self.get_values_from_gui)
             return
             
         if isinstance(val,int):
             obj = IntItem(property_name)
             self.add_below(obj)
             self._gui_elements[property_name] = obj
-            obj.value_changed.connect( \
-                            graphical_exception( \
-                            self.get_values_from_gui))
+            obj.value_changed.connect(self.get_values_from_gui)
             return    
             
         if callable(val):
             obj = ButtonItem(property_name)
             self.add_below(obj)
             self._gui_elements[property_name] = obj
-            obj.pressed.connect(graphical_exception(val))
-            obj.value_changed.connect( \
-                            graphical_exception( \
-                            self.get_values_from_gui))
-    
-    
-    
+            new_func = graphical_exception(val)
+            self._callable_elements.append(new_func)
+            obj.pressed.connect(graphical_exception(new_func))
+#            obj.value_changed.connect(self.get_values_from_gui)
+
     
     
     ##=======================================
@@ -374,18 +376,6 @@ class Emitter(QtCore.QObject):
     
     value_changed = QtCore.pyqtSignal()
 
-
-def graphical_exception(func):
-    """a wrapper to display the exception in a pop up window rather than lost in the console"""
-    def new_func(*args,**kwds):
-        try:
-            return func(*args,**kwds)
-        except Exception as e:
-            m = QtGui.QMessageBox()
-            m.setText(e.message)
-            m.exec_()
-    return new_func
-
 class GuiWrapper(object):
     """basic class to handle GUI capabilities of the wrapper"""
     
@@ -404,7 +394,6 @@ class GuiWrapper(object):
     
     def __getattr__(self,attr):
         return self.__getattribute__(attr)
-    
        
     def _create_widget(self):
         widget = GuiWrapperWidget(self)
@@ -420,7 +409,9 @@ class GuiWrapper(object):
         
     def gui(self):
         widget = self._create_widget()
-        self.gui_window = GuiWrapperWindow(self,widget)
+        if hasattr(self, "gui_window"):
+            self.gui_window.deleteLater()
+        self.gui_window = GuiWrapperWindow(self, widget)
         self.gui_window.setWindowTitle(self._gui_title)
         return self.gui_window
    # def sizeHint(self):

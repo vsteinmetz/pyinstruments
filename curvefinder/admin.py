@@ -1,7 +1,7 @@
 from django.contrib import admin
-from curvefinder.models import Curve, SpecAnCurve, NaCurve, ScopeCurve
+from curvefinder.models import CurveDB, SpecAnCurve, NaCurve, ScopeCurve
 
-admin.site.register(Curve)
+admin.site.register(CurveDB)
 admin.site.register(SpecAnCurve)
 admin.site.register(NaCurve)
 admin.site.register(ScopeCurve)

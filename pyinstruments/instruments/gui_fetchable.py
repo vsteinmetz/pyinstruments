@@ -21,6 +21,11 @@ class GuiFetchable(object):
         raise NotImplementedError("This function should be implemented in the \
                                     wrapper class")
 
+    def _add_fetch_buttons(self, widget):
+        widget._setup_gui_element("plot_xy")
+        widget._setup_gui_element("xy_to_clipboard")
+        widget._setup_gui_element("save_curve")
+
     def get_savefile(self):
         settings = QtCore.QSettings("pyinstruments", "pyinstruments")
         default_save_dir = str(settings.value("default_save_dir").toString())
@@ -33,35 +38,23 @@ class GuiFetchable(object):
         settings.setValue("default_save_dir", os.path.dirname(filename))
         return filename
 
-    def save_curve(self):
-        """Saves the curve by opening a FileDialog to find the location"""
-
+    def _save_curve(self, curve):
         filename = self.get_savefile()
         if not filename:
             return
-        curve = self.get_curve()
         curve.save(filename)
 
-#    def _setup_hdnavigator_widget(self, widget):
-#        """sets up a nice widget that helps navigate in the folders"""
-#
-#
-#        widget_nav = nav._create_widget()
-#        self.widget_nav = widget_nav
-#        widget.add_below(widget_nav)
-#        p = widget_nav.palette()
-#        p.setColor(widget_nav.backgroundRole(), QtCore.Qt.gray)
-#        widget_nav.setPalette(p)
-#        widget_nav.setAutoFillBackground(True)
-    
+    def save_curve(self):
+        """Saves the curve by opening a FileDialog to find the location"""
+
+        curve = self.get_curve()
+        self._save_curve(curve)
     
     def _setup_fetch_utilities(self, widget):
         """sets up the gui to fetch the waveforms in widget"""
 #        self._setup_hdnavigator_widget(widget)
         widget._setup_horizontal_layout()
-        widget._setup_gui_element("plot_xy")
-        widget._setup_gui_element("xy_to_clipboard")
-        widget._setup_gui_element("save_curve")
+        self._add_fetch_buttons(widget)
         widget._exit_layout()
         
     def plot_xy(self):

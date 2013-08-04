@@ -1,6 +1,7 @@
 import pandas
 import h5py
 import os
+import numpy
 
 class MetaData(dict):
     """a container class for all the meta data associated to the curve
@@ -20,14 +21,15 @@ class MetaData(dict):
     def __dir__(self):
         return self.keys()
 
+
 class Curve(object):
     """a container class that contains:
     1) The data in pandas Series format (self.data)
     2) The metadata in self.meta as MetaData format (dict-like object) 
     """
-    
-    def __init__(self, data, meta = dict()):
-        self.data = data
+        
+    def __init__(self, data = None, meta = dict()):
+        self._data = data
         self.meta = MetaData(**meta)
         
     def plot(self, *args, **kwds):
@@ -35,19 +37,28 @@ class Curve(object):
     
     plot.__doc__ = pandas.Series.plot.__doc__
     
-    def save(self, filename, meta = True):
+    def save_in_file(self, filename, meta = True):
         with pandas.get_store(filename) as store:
-            store["data"] = self.data
+            store["data"] = self._data
         
         with h5py.File(filename) as the_file:
-            meta = the_file.create_group("meta")
+            try:
+                meta = the_file["meta"]
+            except KeyError:
+                meta = the_file.create_group("meta")
             for key, value in self.meta.iteritems():
-                meta.create_dataset(key, data = value)       
-        
+                try: 
+                    meta[key].write_direct(numpy.array(value))
+                except KeyError:
+                    meta.create_dataset(key, data = value)
+    
     def load_data(self, filename):
         with pandas.get_store(filename, "r") as store:
-            self.data = store["data"]
-        
+            self._data = store["data"]
+    
+    @property
+    def data(self):
+        return self._data
         
 def load(filename):
     """loads the curve at filename"""
