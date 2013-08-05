@@ -6,8 +6,7 @@ from pyinstruments.instruments.ivi_na_gui import IviNaGui
 from pyinstruments.instruments.ivi_instrument import \
                                                 IntermediateCollection
 from curvefinder.qtgui.gui import CurveCreateWidget
-from curvefinder.loadsave import curve_db_from_curve
-from curvefinder.models import Window, Tag
+from curvefinder.models import Window, Tag, curve_db_from_curve
 import json
 
 from PyQt4 import QtCore, QtGui

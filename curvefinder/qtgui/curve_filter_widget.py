@@ -5,15 +5,10 @@ defines a widget to filter curves in the database
 from PyQt4 import QtGui, QtCore
 from datetime import timedelta
 
-class CurveFinderWidget(QtGui.QWidget):
-    """
-    The main editor for curves
-    """
-    
-    def __init__(self):
-        pass
+from curvefinder.qtgui.gui import CurveTagWidget
+from curvefinder.models import CurveDB
 
-class FilterWidget(QtGui.QWidget):
+class FilterWidget(QtGui.QWidget, object):
     """
     Base class for graphical filtering element
     """
@@ -31,10 +26,26 @@ class FilterWidget(QtGui.QWidget):
     
         self.other_widget.value_changed.connect(self.value_changed)
         self._enabled_checkbox.stateChanged.connect(self.value_changed)
+        self._enabled_checkbox.stateChanged.connect(self.enabled_changed)
+        self.enabled_changed.connect(self._enabled_changed)
     
     @property
     def enabled(self):
         return self._enabled_checkbox.checkState() == 2
+    
+    @enabled.setter
+    def enabled(self, val):
+        self._enabled_checkbox.setChecked(val)
+        return val
+    
+    @property
+    def value(self):
+        return self.enabled, self.other_widget.value
+    
+    @value.setter
+    def value(self, val):
+        self.enabled, self.other_widget.value = val
+        return val
     
     def change_enabled(self, new_state):
         self.other_widget.setEnabled(new_state == 2)
@@ -53,11 +64,14 @@ class FilterWidget(QtGui.QWidget):
             return self.other_widget.get_kwds_for_query()
         else:
             return dict()
-    
+    def _enabled_changed(self):
+        if self.enabled:
+            self.enabled_on.emit()
     value_changed = QtCore.pyqtSignal(name = "value_changed")
+    enabled_on = QtCore.pyqtSignal(name = "enabled_on")
+    enabled_changed = QtCore.pyqtSignal(name = "enabled_changed")
     
-    
-class DateSelectWidget(QtGui.QWidget):
+class DateSelectWidget(QtGui.QWidget, object):
     """a widget to select a date"""
     
     def __init__(self, default = None, parent = None):
@@ -65,11 +79,13 @@ class DateSelectWidget(QtGui.QWidget):
         
         super(DateSelectWidget, self).__init__(parent)
         self._lay = QtGui.QHBoxLayout()
-        self._choose_button = QtGui.QPushButton("...")
-        self._choose_button.clicked.connect(self._choose_date)
-        self._lay.addWidget(self._choose_button)
         self._date_edit = QtGui.QDateEdit()
         self._lay.addWidget(self._date_edit)
+        self._choose_button = QtGui.QPushButton("...")
+        self._choose_button.setMinimumWidth(30)
+        self._choose_button.setMaximumWidth(30)
+        self._choose_button.clicked.connect(self._choose_date)
+        self._lay.addWidget(self._choose_button)
         
         self._date_edit.dateTimeChanged.connect(self.value_changed)
         self.setLayout(self._lay)
@@ -77,27 +93,29 @@ class DateSelectWidget(QtGui.QWidget):
         if default:
             self.date = default
         else:
-            self.date = QtCore.QDate.currentDate()
+            self.date = QtCore.QDate.currentDate().toPyDate()
     
     value_changed = QtCore.pyqtSignal(name = "value_changed")
     
     def _choose_date(self):
         calendar = CalendarValidateWidget(default = self.date)
-        date = calendar.get_date()
+        date = calendar.get_date().toPyDate()
         if date:
-            self._date_edit.setDate(date)
+            self.date = date
         
     @property
     def date(self):
-        return self._date_edit.date()
+        return self._date_edit.date().toPyDate()
     
     @date.setter
     def date(self, date):
-        self._date_edit.setDate(date)
+        self._date_edit.setDate(QtCore.QDate(date.year, \
+                                             date.month, \
+                                             date.day))
     
     
     
-class CalendarValidateWidget(QtGui.QMessageBox):
+class CalendarValidateWidget(QtGui.QMessageBox, object):
     def __init__(self, default = None):
         super(CalendarValidateWidget, self).__init__()
         self.addButton("Cancel", QtGui.QMessageBox.RejectRole)
@@ -129,19 +147,40 @@ class DateConstraintWidget(FilterWidget):
         self.constraint = constraint
         super(DateConstraintWidget, self).__init__(parent)
         
-        
+
+    
+    
             
     def get_other_widget(self):
-        class InnerDateConstraintWidget(QtGui.QWidget):
+        class InnerDateConstraintWidget(QtGui.QWidget, object):
             constraint = self.constraint
+            
+            @property
+            def date(self):
+                return self._bound_widget.date
+            
+            @date.setter
+            def date(self, new_date):
+                self._bound_widget.date = new_date
+                return new_date
+            
+            @property
+            def value(self):
+                return self.date
+            
+            @value.setter
+            def value(self, new_date):
+                self.date = new_date
+                return new_date
+            
             def __init__(self, parent):
                 super(InnerDateConstraintWidget, self).__init__(parent)
                 self._lay = QtGui.QHBoxLayout()
                 self._bound_widget = DateSelectWidget()
                 if self.constraint == ">=":
-                    self._lay.addWidget(self._bound_widget)
-                    self._label = QtGui.QLabel(" <= date")
+                    self._label = QtGui.QLabel("date >=")
                     self._lay.addWidget(self._label)
+                    self._lay.addWidget(self._bound_widget)
                 if self.constraint == "<=":
                     self._label = QtGui.QLabel("date <= ")
                     self._lay.addWidget(self._label)
@@ -156,10 +195,7 @@ class DateConstraintWidget(FilterWidget):
             
             value_changed = QtCore.pyqtSignal(name = 'value_changed')
             
-            @property
-            def date(self):
-                return self._bound_widget.date.toPyDate()
-            
+                        
             def get_kwds_for_query(self):
                 if self.constraint == '>=':
                     return {"date_created__gte":self.date}
@@ -186,9 +222,9 @@ class StringFilterWidget(FilterWidget):
         """checks if curve.field_name is the requested string"""
         self.field_name = field_name
         super(StringFilterWidget, self).__init__(parent)
-        
+    
     def get_other_widget(self):
-        class InnerStringFilterWidget(QtGui.QWidget):
+        class InnerStringFilterWidget(QtGui.QWidget, object):
             field_name = self.field_name
             
             def __init__(self, parent):
@@ -207,6 +243,11 @@ class StringFilterWidget(FilterWidget):
             @property
             def value(self):
                 return str(self._line.text())
+             
+            @value.setter
+            def value(self, val):
+                self._line.setText(val)
+                return val
              
             def get_kwds_for_query(self):
                 if '*' in self.value:
@@ -229,7 +270,7 @@ class ComboFilterWidget(FilterWidget):
         super(ComboFilterWidget, self).__init__(parent)
 
     def get_other_widget(self):
-        class InnerComboFilterWidget(QtGui.QWidget):
+        class InnerComboFilterWidget(QtGui.QWidget, object):
             field_name = self.foreignkey_name
             db_class = self.db_class
             
@@ -256,6 +297,11 @@ class ComboFilterWidget(FilterWidget):
             def value(self):
                 return str(self._combo.currentText())
                 
+            @value.setter
+            def value(self, val):
+                index = self._combo.findText(val)
+                self._combo.setCurrentIndex(index)
+                
             def get_kwds_for_query(self):
                 return {self.field_name + "__name":self.value}
                    
@@ -264,7 +310,23 @@ class ComboFilterWidget(FilterWidget):
         return InnerComboFilterWidget(self)
 
 class TagFilterWidget(FilterWidget):
-    pass
-
-class CommentFilterWidget(FilterWidget):
-    pass
+    def __init__(self, parent):
+        """checks if curve.field_name is the requested string"""
+        super(TagFilterWidget, self).__init__(parent)
+        
+    def get_query_set(self):
+        if self.enabled:
+            return CurveDB.objects.filter_tags_required(*self.other_widget.tags)
+        else:
+            return CurveDB.objects.all()
+    def get_other_widget(self):
+        class InnerTagFilterWidget(CurveTagWidget):
+            @property
+            def value(self):
+                return self.tags
+            
+            @value.setter
+            def value(self, val):
+                self.tags = val
+                     
+        return InnerTagFilterWidget(self)

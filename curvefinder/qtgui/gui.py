@@ -13,10 +13,10 @@ class ToolTiper(object):
             message = "Create \"" + widget.driver.Next.dir + "\" !"
 
 
-class CurveSelectWidget(QtGui.QWidget):
+class CurveSelectWidget(QtGui.QWidget, object):
     pass
 
-class CurveCommentWidget(QtGui.QWidget):
+class CurveCommentWidget(QtGui.QWidget, object):
     def __init__(self):
         super(CurveCommentWidget, self).__init__()
         self.setup_ui()
@@ -39,7 +39,7 @@ class CurveCommentWidget(QtGui.QWidget):
     def comment(self, comment):
         return self.comment_box.setText(comment)
         
-class CurveCreateWidget(QtGui.QWidget):
+class CurveCreateWidget(QtGui.QWidget, object):
     """combines a CurveTagWidget, CurveCommentWidget, a name and window 
     input fields
     """
@@ -47,8 +47,8 @@ class CurveCreateWidget(QtGui.QWidget):
     def __init__(self, default_name = "some_curve", \
                  default_window = "default", \
                  comment = "", \
-                 tags = []):
-        super(CurveCreateWidget, self).__init__()
+                 tags = [], parent = None):
+        super(CurveCreateWidget, self).__init__(parent)
         self.setup_ui()
         self.name = default_name
         self.window = default_window
@@ -119,12 +119,14 @@ class CurveCreateWidget(QtGui.QWidget):
         self.v_lay.addLayout(self.h_lay2)
         self.setLayout(self.v_lay)
 
-class CurveTagWidget(QtGui.QWidget):
-    def __init__(self):
-        super(CurveTagWidget, self).__init__()
+class CurveTagWidget(QtGui.QWidget, object):
+    def __init__(self, parent = None):
+        super(CurveTagWidget, self).__init__(parent)
         self._setup_ui()
         self.tree_widget.itemSelectionChanged.connect(self._update_tag_list)
         self._update_tag_list()
+    
+    value_changed = QtCore.pyqtSignal(name = "value_changed")
     
     @property
     def tags(self):
@@ -147,16 +149,14 @@ class CurveTagWidget(QtGui.QWidget):
         for tag in self.get_selected_tags():
             string += """'""" + tag + """' ;"""
         self.tag_list.setText(string)
+        self.value_changed.emit()
         
     def _setup_ui(self):
         """sets up the GUI"""
         
         self.tag_list = QtGui.QTextEdit()
         width = self.tag_list.sizeHint().width()
-        height = 20
-        def sizeHint():
-            return QtCore.QSize(width, height)
-        self.tag_list.sizeHint = sizeHint
+        self.tag_list.setMaximumHeight(30)
         self.tag_list.setEnabled(False)
         
         self.tree_widget = QtGui.QTreeWidget()
@@ -241,6 +241,7 @@ class CurveTagWidget(QtGui.QWidget):
     
     def select(self, tag):
         tag_elements = tag.split('/')
+        child = None
         for index in range(self.tree_widget.topLevelItemCount()):
             item = self.tree_widget.topLevelItem(index)
             if item.text(0) == tag_elements[0]:
@@ -249,7 +250,8 @@ class CurveTagWidget(QtGui.QWidget):
                     child = self._get_child(child, tag_element)
                     if not child:
                         return
-        child.setSelected(True)
+        if child:
+            child.setSelected(True)
        
     def _prevent_unselect_all(self, *args, **kwds):
         all = self.tree_widget.topLevelItem(0)

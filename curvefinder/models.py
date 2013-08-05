@@ -9,6 +9,8 @@ from django.core.files.storage import default_storage
 
 import os
 import pandas
+from collections import OrderedDict
+
 
 class InstrumentLogicalName(models.Model):
     """
@@ -42,11 +44,31 @@ class Window(models.Model):
         return self.name
 
 
+
+class CurveManager(models.Manager):
+    """
+    Custom manager to make easy researchs by tag
+    """
+    
+    def filter_tags_required(self, *args):
+        """
+        returns only the curves that contains all the required tags
+        """
+        
+        question = models.Q()
+        for tag in args:
+            question = question & models.Q(tags_flatten__contains = \
+                         ';' + str(Tag.objects.get(name = tag).pk) + ';')
+        return super(CurveManager, self).filter(question)
+
+
 class CurveDB(models.Model, Curve):
     """
     The base object containing the path to the curves, with all the meta 
     data associated.
     """   
+    
+    objects = CurveManager()
     
     def __init__(self, *args, **kwds):
         data = kwds.pop("data", None)
@@ -75,6 +97,7 @@ class CurveDB(models.Model, Curve):
     instrument_logical_name = models.ForeignKey(InstrumentLogicalName, \
                                                 default = 1)
     #flags
+    tags_flatten = models.TextField(blank = True, null = True)
     user_has_read = models.BooleanField(default = False, db_index=True)
     
     curve_types = ChoiceEnum('Curve', 'ScopeCurve', 'NaCurve', 'SpecAnCurve')
@@ -105,8 +128,17 @@ class CurveDB(models.Model, Curve):
             self.data_file = os.path.relpath(full_path, MEDIA_ROOT)
         if (self.pk is None) or (not self.data_read_only):
             super(CurveDB, self).save_in_file(self.get_full_filename())
+        
+        if self.pk == None:
+            super(CurveDB, self).save()
+                #add tag 'all'
+        self.tags.add(Tag.objects.get(name = 'all')) 
+        self.tags_flatten = ';' + \
+                            ';'.join([str(tag.id) \
+                                        for tag in self.tags.all()]) + \
+                            ';'
         super(CurveDB, self).save()
-            
+    
             
     @property
     def data(self):
@@ -123,7 +155,24 @@ class CurveDB(models.Model, Curve):
                 raise ValueError(\
                     "Trying to modify the data in a read-only curve")
         self._data = table
-        
+    
+    SUBCLASSES = \
+        {curve_types._reverse_dict['Curve']:'curve', \
+         curve_types._reverse_dict['NaCurve']:'frequencycurve', \
+         curve_types._reverse_dict['SpecAnCurve']:'frequencycurve', \
+         curve_types._reverse_dict['ScopeCurve']:'scopecurve'}
+    
+    def get_subclass(self):
+        if self.curve_type == self.curve_types._reverse_dict['Curve']:
+            return self 
+        return self.__getattribute__(self.SUBCLASSES[self.curve_type])\
+                                                            .get_subclass()
+
+    def get_subclass_fields(self):
+        return self.get_subclass().get_fields_as_text_ordered_dict()
+
+    def get_fields_as_text_ordered_dict(self):
+        return OrderedDict()
 
 class FrequencyCurve(CurveDB):
     """
@@ -136,6 +185,20 @@ class FrequencyCurve(CurveDB):
     stop_freq = models.FloatField(blank = True)
     span = models.FloatField(blank = True)
     bandwidth = models.FloatField(blank = True)
+    
+    def get_fields_as_text_ordered_dict(self):
+        dic = OrderedDict()
+        dic["center_freq"] = str(self.center_freq)
+        dic["start_freq"] = str(self.start_freq)
+        dic["stop_freq"] = str(self.stop_freq)
+        dic["span"] = str(self.span)
+        dic["bandwidth"] = str(self.bandwidth)
+        return dic
+    
+    
+    SUBCLASSES = \
+        {CurveDB.curve_types._reverse_dict['NaCurve']:'nacurve', \
+         CurveDB.curve_types._reverse_dict['SpecAnCurve']:'specancurve'}
   
 class NaCurve(FrequencyCurve):
     """
@@ -170,6 +233,19 @@ class NaCurve(FrequencyCurve):
                                         null = True, \
                                         blank = True)
     
+    def get_subclass(self):
+        return self
+    
+    def get_fields_as_text_ordered_dict(self):
+        dic = super(NaCurve, self).get_fields_as_text_ordered_dict()
+        dic["input_port"] = str(self.input_port)
+        dic["output_port"] = str(self.output_port)
+        dic["format"] = str(self.formats._choice_dict[self.format])
+        dic["averaging"] = str(self.averaging)
+        dic["channel"] = str(self.channel)
+        dic["measurement"] = str(self.measurement)
+        return dic
+        
 class SpecAnCurve(FrequencyCurve):
     """
     Model for traces acquired by a spectrum analyzer
@@ -197,6 +273,16 @@ class SpecAnCurve(FrequencyCurve):
     trace = models.CharField(max_length = 255, \
                                         null = True, \
                                         blank = True)
+    
+    def get_fields_as_text_ordered_dict(self):
+        dic = super(SpecAnCurve, self).get_fields_as_text_ordered_dict()
+        dic["averaging"] = str(self.averaging)
+        dic["detector_type"] = str(self.detector_types._choice_dict[self.detector_type])
+        dic["trace"] = str(self.trace)
+        return dic
+    
+    def get_subclass(self):
+        return self
     
 class ScopeCurve(CurveDB):
     """
@@ -237,3 +323,77 @@ class ScopeCurve(CurveDB):
 
     def get_absolute_url(self):
         return reverse('curves_detail', args=[self.id])
+
+    def get_subclass(self):
+        return self
+
+    def get_fields_as_text_ordered_dict(self):
+        dic = OrderedDict()
+        dic["averaging"] = str(self.averaging)
+        dic["acquisition_type"] = str(self.acquisition_types.\
+                                      _choice_dict[self.acquisition_type])
+        dic["start_time"] = str(self.start_time)
+        dic["record_length"] = str(self.record_length)
+        dic["coupling"] = str(self.couplings.\
+                                      _choice_dict[self.coupling])
+        dic["sample_rate"] = str(self.sample_rate)
+        dic["full_range"] = str(self.full_range)
+        dic["offset"] = str(self.offset)
+        dic["input_freq_max"] = str(self.input_freq_max)
+        dic["input_impedance"] = str(self.input_impedance)
+        dic["channel"] = str(self.channel)
+        return dic
+
+def curve_db_from_curve(curve):
+    """
+    returns a CurveDB child using the meta data found in the curve
+    """
+
+    types = {"CurveDB": CurveDB, \
+             "NaCurve": NaCurve, \
+             "SpecAnCurve": SpecAnCurve, \
+             "ScopeCurve": ScopeCurve}
+    (log_name, new) = InstrumentLogicalName.objects.get_or_create( \
+                    name=curve.meta.instrument_logical_name)
+    
+    if curve.meta.curve_type == "ScopeCurve":
+        kwds = {"acquisition_type" : curve.meta.acquisition_type, \
+         "averaging" : curve.meta.averaging, \
+         "start_time" : curve.meta.start_time, \
+         "record_length": curve.meta.record_length, \
+         "coupling" : curve.meta.coupling, \
+         "full_range" : curve.meta.full_range, \
+         "offset" : curve.meta.offset, \
+         "sample_rate": curve.meta.sample_rate, \
+         "input_freq_max": curve.meta.input_freq_max, \
+         "input_impedance": curve.meta.input_impedance, \
+         "channel" : curve.meta.channel}
+    if curve.meta.curve_type == "SpecAnCurve":
+        kwds = {"bandwidth": curve.meta.bandwidth, \
+              "averaging":curve.meta.averaging, \
+              "center_freq":curve.meta.center_freq, \
+              "start_freq":curve.meta.start_freq, \
+              "stop_freq":curve.meta.stop_freq, \
+              "span":curve.meta.span, \
+              "trace":curve.meta.trace, \
+              "detector_type":curve.meta.detector_type}
+    if curve.meta.curve_type == "NaCurve":
+        kwds = {"bandwidth": curve.meta.bandwidth, \
+              "averaging":curve.meta.averaging, \
+              "center_freq":curve.meta.center_freq, \
+              "start_freq":curve.meta.start_freq, \
+              "stop_freq":curve.meta.stop_freq, \
+              "span":curve.meta.span, \
+              "input_port":curve.meta.input_port, \
+              "output_port":curve.meta.output_port, \
+              "format":curve.meta.format, \
+              "channel":curve.meta.channel, \
+              "measurement":curve.meta.measurement}
+    return types[curve.meta.curve_type](data = curve.data, \
+                                meta = curve.meta, \
+                                instrument_logical_name=log_name, \
+                                curve_type = CurveDB.curve_types.\
+                                    _reverse_dict[curve.meta.curve_type], \
+                                **kwds)
+    
+CURVE_TYPE_CLASSES = ChoiceEnum(Curve, ScopeCurve, NaCurve, SpecAnCurve)
