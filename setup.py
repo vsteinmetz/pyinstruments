@@ -6,7 +6,8 @@ import subprocess
 
 class installWithPost(install):
     def run(self):
-        # Call parent 
+        # Call parent
+        subprocess.call(['pip', 'install', 'django'])
         install.run(self)
         # Execute commands
         subprocess.call(['python', 'manage.py', 'syncdb'])
