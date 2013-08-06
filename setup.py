@@ -7,7 +7,11 @@ import subprocess
 class installWithPost(install):
     def run(self):
         # Call parent
+        
+        subprocess.call(['python', 'setup_datastore.py', 'install'])
         subprocess.call(['pip', 'install', 'django'])
+        subprocess.call(['pip', 'install', 'django-model-utils'])
+        subprocess.call(['pip', 'install', 'django-utils'])
         install.run(self)
         # Execute commands
         subprocess.call(['python', 'manage.py', 'syncdb'])
