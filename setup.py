@@ -4,12 +4,16 @@ from distutils.core import setup
 from distutils.command.install import install
 import subprocess
 
+def set_environment_variable_on_windows(name, value):
+    subprocess.call(['setx', name, value])
+    os.environ[name] = value
+
 class installWithPost(install):
     def run(self):
         # Call parent
-        
-        subprocess.call(['python', 'setup_datastore.py', 'install'])
         subprocess.call(['pip', 'install', 'django'])
+        subprocess.call(['python', 'setup_datastore.py', 'install'])
+        set_environment_variable_on_windows('DJANGO_SETTINGS_MODULE', 'datastore.settings')
         subprocess.call(['pip', 'install', 'django-model-utils'])
         subprocess.call(['pip', 'install', 'django-utils'])
         install.run(self)

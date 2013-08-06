@@ -149,7 +149,7 @@ class CurveDB(models.Model, Curve):
     @tags_txt.setter
     def tags_txt(self, val):
         for tag_txt in val:
-            (tag, new) = Window.objects.get_or_create(name = tag_txt)
+            (tag, new) = Tag.objects.get_or_create(name = tag_txt)
             self.tags.add(tag)
         return val
     
