@@ -1,11 +1,12 @@
 from django.db import models
 from django.core.urlresolvers import reverse
-from model_utils import ChoiceEnum
+from model_utils import Choices
 import datastore
 from curve import Curve
 from datastore.settings import MEDIA_ROOT
 from datetime import datetime
 from django.core.files.storage import default_storage
+from pyinstruments import choices
 
 import os
 import pandas
@@ -100,9 +101,11 @@ class CurveDB(models.Model, Curve):
     tags_flatten = models.TextField(blank = True, null = True)
     user_has_read = models.BooleanField(default = False, db_index=True)
     
-    curve_types = ChoiceEnum('Curve', 'ScopeCurve', 'NaCurve', 'SpecAnCurve')
+    
     data_read_only = models.BooleanField(default = True)
-    curve_type  = models.IntegerField(max_length = 30, \
+    
+    curve_types = Choices('Curve', 'ScopeCurve', 'NaCurve', 'SpecAnCurve')
+    curve_type  = models.CharField(max_length = 100, \
                                    choices = tuple(curve_types), \
                                    default = curve_types.Curve)
     
@@ -185,13 +188,13 @@ class CurveDB(models.Model, Curve):
         self._data = table
     
     SUBCLASSES = \
-        {curve_types._reverse_dict['Curve']:'curve', \
-         curve_types._reverse_dict['NaCurve']:'frequencycurve', \
-         curve_types._reverse_dict['SpecAnCurve']:'frequencycurve', \
-         curve_types._reverse_dict['ScopeCurve']:'scopecurve'}
+        {curve_types.Curve:'curve', \
+         curve_types.NaCurve:'frequencycurve', \
+         curve_types.SpecAnCurve:'frequencycurve', \
+         curve_types.ScopeCurve:'scopecurve'}
     
     def get_subclass(self):
-        if self.curve_type == self.curve_types._reverse_dict['Curve']:
+        if self.curve_type == self.curve_types.Curve:
             return self 
         return self.__getattribute__(self.SUBCLASSES[self.curve_type])\
                                                             .get_subclass()
@@ -225,8 +228,8 @@ class FrequencyCurve(CurveDB):
     
     
     SUBCLASSES = \
-        {CurveDB.curve_types._reverse_dict['NaCurve']:'nacurve', \
-         CurveDB.curve_types._reverse_dict['SpecAnCurve']:'specancurve'}
+        {CurveDB.curve_types.NaCurve:'nacurve', \
+         CurveDB.curve_types.SpecAnCurve:'specancurve'}
   
 class NaCurve(FrequencyCurve):
     """
@@ -239,19 +242,9 @@ class NaCurve(FrequencyCurve):
         
     input_port = models.FloatField(blank = True)
     output_port = models.FloatField(blank = True)
-    formats = ChoiceEnum("Real", \
-                        "Polar", \
-                        "LinMag", \
-                        "GroupDelay", \
-                        "Imag", \
-                        "PPhase", \
-                        "Smith", \
-                        "UPhase", \
-                        "SLinear", \
-                        "SLogarithmic",\
-                        "Complex")
+    formats = choices.na_formats
     
-    format = models.IntegerField(choices = formats, blank = True)
+    format = models.CharField(max_length = 100, choices = formats, blank = True)
     
     averaging = models.IntegerField(blank = True)
     channel = models.CharField(max_length = 255, \
@@ -283,19 +276,13 @@ class SpecAnCurve(FrequencyCurve):
         super(SpecAnCurve, self).__init__(*args, **kwds)
         curve_type = super(SpecAnCurve, self).curve_types.SpecAnCurve
         
-    detector_types = ChoiceEnum("Sample", \
-                                "Off", \
-                                "Neg", \
-                                "Average", \
-                                "Pos", \
-                                "Qpe", \
-                                "Rav", \
-                                "AverageAgain", \
-                                "Norm", \
-                                "Eav")
+    detector_types = choices.spec_an_detector_types
+    acquisition_types = choices.spec_an_acquisition_types
     
     averaging = models.IntegerField()
-    detector_type = models.IntegerField(choices = detector_types, \
+    detector_type = models.CharField(max_length = 100, choices = detector_types, \
+                                        blank = True)
+    acquisition_type = models.CharField(max_length = 100, choices = acquisition_types, \
                                         blank = True)
     
     trace = models.CharField(max_length = 255, \
@@ -321,24 +308,18 @@ class ScopeCurve(CurveDB):
         super(ScopeCurve, self).__init__(*args, **kwds)
         curve_type = super(ScopeCurve, self).curve_types.ScopeCurve
         
-    acquisition_types = ChoiceEnum("normal", \
-                                   "peakDetect", \
-                                   "hiRes", \
-                                   "enveloppe", \
-                                   "average")
+    acquisition_types = choices.scope_acquisition_types
     
     averaging = models.IntegerField(blank = True)
-    acquisition_type = models.IntegerField(choices = \
+    acquisition_type = models.CharField(max_length = 100, choices = \
                                            acquisition_types, \
                                             blank = True)
     
     start_time = models.FloatField(blank = True)
     record_length  = models.IntegerField(blank = True)
-    couplings = ChoiceEnum("AC", \
-                           "DC", \
-                           "GND")
+    couplings = choices.scope_couplings
     
-    coupling = models.IntegerField(choices = couplings, blank = True)
+    coupling = models.CharField(max_length = 100, choices = couplings, blank = True)
     
     sample_rate = models.FloatField(blank = True)
     full_range = models.FloatField(blank = True)
@@ -420,8 +401,6 @@ def curve_db_from_curve(curve):
     return types[curve.meta.curve_type](data = curve.data, \
                                 meta = curve.meta, \
                                 instrument_logical_name=log_name, \
-                                curve_type = CurveDB.curve_types.\
-                                    _reverse_dict[curve.meta.curve_type], \
+                                curve_type = curve.meta.curve_type, \
                                 **kwds)
     
-CURVE_TYPE_CLASSES = ChoiceEnum(Curve, ScopeCurve, NaCurve, SpecAnCurve)

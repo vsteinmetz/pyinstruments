@@ -2,6 +2,7 @@
 class to add gui-capabilities to IVI-compliant spectrum analyzers
 """
 
+from pyinstruments import choices
 from guiwrappersutils import GuiWrapper
 from pyinstruments.instruments.gui_fetchable import GuiFetchable
 from pyinstruments.wrappers import Wrapper
@@ -66,6 +67,7 @@ class IviSpecAnGui(Wrapper, IviGuiInstrument):
                                     MaxHold = 2, \
                                     MinHold = 3, \
                                     Average = 4)
+            
             widget._setup_gui_element("DetectorType", \
                                     Average = 1, \
                                     Pos = 2, \
@@ -79,14 +81,16 @@ class IviSpecAnGui(Wrapper, IviGuiInstrument):
                                     Off = 10)
             widget._exit_layout() 
             self._setup_fetch_utilities(widget)
-                
+        
+        acquisition_types = choices.spec_an_acquisition_types
+        detector_types = choices.spec_an_detector_types
         
         def get_curve(self):
             x_y = self.FetchXY()
             meta = dict()
             
             meta["curve_type"] = 'SpecAnCurve'
-            meta["acquisition_type"] = self.Type
+            meta["acquisition_type"] = self.acquisition_types[self.Type][0]
             meta["averaging"] = self.wrapper_parent.Average.NumberOfSweeps
             meta["center_freq"] = self.wrapper_parent.CenterFrequency
             meta["start_freq"] = self.wrapper_parent.Start
@@ -94,7 +98,7 @@ class IviSpecAnGui(Wrapper, IviGuiInstrument):
             meta["span"] = self.wrapper_parent.Span
             meta["bandwidth"] = self.wrapper_parent.ResolutionBandwidth
             
-            meta["detector_type"] = self.DetectorType
+            meta["detector_type"] = self.detector_types[self.DetectorType][0]
             meta["trace"] = self.wrapper_name
             meta["instrument_type"] = "SpecAn"
             meta["instrument_logical_name"] = \

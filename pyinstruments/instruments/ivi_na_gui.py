@@ -2,6 +2,7 @@
 class to add gui-capabilities to IVI-compliant network analyzers
 """
 
+from pyinstruments import choices
 from guiwrappersutils import GuiWrapper
 from pyinstruments.instruments.gui_fetchable import GuiFetchable
 from pyinstruments.wrappers import Wrapper
@@ -156,7 +157,9 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                 data = self.FetchXYComplex()
                 pylab.plot(data[0], abs(data[1])**2)
                 pylab.show()
-                            
+              
+            formats = choices.na_formats
+                          
             def get_meta(self):
                 meta = dict()
                 meta["curve_type"] = "NaCurve"
@@ -170,7 +173,7 @@ class IviNaGui(Wrapper, IviGuiInstrument):
                 meta["output_port"] = self.out_port
                 meta["input_port"] = self.in_port
 
-                meta["format"] = self.Format
+                meta["format"] = self.formats[self.Format][0]
                 
                 meta["measurement"] = self.wrapper_name
                 meta["channel"] = self.wrapper_parent.wrapper_name

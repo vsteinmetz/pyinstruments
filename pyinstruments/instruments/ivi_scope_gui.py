@@ -2,7 +2,7 @@
 class to add gui-capabilities to IVI-compliant spectrum analyzers
 """
 from curve import Curve
-
+from pyinstruments import choices
 from pyinstruments.instruments.gui_fetchable import GuiFetchable
 from pyinstruments.wrappers import Wrapper
 from pyinstruments.instruments.ivi_instrument import \
@@ -75,16 +75,23 @@ class IviScopeGui(Wrapper, IviGuiInstrument):
                                    endpoint = False), \
                           y_values])
         
+
+        
+        acquisition_types = choices.scope_acquisition_types
+        couplings = choices.scope_couplings
+        
         def get_curve(self):
             x_y = self.FetchXY()
             meta = dict()
             
-            meta["acquisition_type"] = self.wrapper_parent.Acquisition.Type
+            meta["acquisition_type"] = self.acquisition_types[ \
+                    self.wrapper_parent.Acquisition.Type][0]
             meta["averaging"] = self.wrapper_parent.Acquisition.NumberOfAverages
             meta["start_time"] = self.wrapper_parent.Acquisition.StartTime
             meta["record_length"] = self.wrapper_parent.Acquisition.RecordLength
             meta["sample_rate"] = self.wrapper_parent.Acquisition.SampleRate
-            meta["coupling"] = self.wrapper_parent.Coupling
+            meta["coupling"] = self.couplings[ \
+                    self.wrapper_parent.Coupling][0]
             meta["full_range"] = self.Range
             meta["offset"] = self.Offset
             meta["input_freq_max"] = self.InputFrequencyMax
