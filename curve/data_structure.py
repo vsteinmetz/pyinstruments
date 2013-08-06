@@ -73,4 +73,4 @@ def load(filename):
             else:
                 for key, value in meta.iteritems():
                     kwds[key] = value.value
-    return Curve(data, **kwds)
+    return Curve(data, meta = kwds)
