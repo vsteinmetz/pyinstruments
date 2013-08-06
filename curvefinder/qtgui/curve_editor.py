@@ -16,10 +16,49 @@ import json
 from collections import OrderedDict
 
 
-class CurveEditor(QtGui.QMainWindow):
+class NamedCheckBox(QtGui.QWidget):
+    def __init__(self, parent, label):
+        super(NamedCheckBox, self).__init__(parent)
+        self._lay = QtGui.QFormLayout()
+        self.label = QtGui.QLabel(label)
+        self.checkbox = QtGui.QCheckBox()
+        self._lay.addRow(self.label, self.checkbox)
+        self.setLayout(self._lay)
+        self.checkbox.stateChanged.connect(self._state_changed)
+    
+    @property
+    def check_state(self):
+        return self.checkbox.checkState() == 2
+    
+    def _state_changed(self):
+        if self.check_state:
+            self.checked.emit()
+        else:
+            self.unchecked.emit()
+    
+    checked = QtCore.pyqtSignal(name='checked')
+    unchecked = QtCore.pyqtSignal(name='unchecked')
+        
+class CurveEditorToolBar(QtGui.QToolBar, object):
+    popup_unread_activated = QtCore.pyqtSignal(\
+                                            name='popup_unread_activated')
+    popup_unread_deactivated = QtCore.pyqtSignal(\
+                                        name = 'popup_unread_deactivated')
+
+    def __init__(self, parent):
+        super(CurveEditorToolBar, self).__init__(parent)
+        self._checkbox_popup_unread = NamedCheckBox(self, \
+                                                    'popup unread curves')
+        self.addWidget(self._checkbox_popup_unread)
+        self._checkbox_popup_unread.checked.connect(self.popup_unread_activated)
+        self._checkbox_popup_unread.unchecked.connect(\
+                                        self.popup_unread_deactivated)
+    
+    
+class CurveEditor(QtGui.QMainWindow, object):
     def __init__(self):
         super(CurveEditor, self).__init__()
-        self._filter_widget = self._get_filter_widget()
+        self._filter_widget = FilterWidgetFull(self)
         #self._list_curve_widget = self._get_list_curve_widget()
         self.addDockWidget(\
                 QtCore.Qt.DockWidgetArea(QtCore.Qt.LeftDockWidgetArea), \
@@ -28,7 +67,15 @@ class CurveEditor(QtGui.QMainWindow):
         #self._filter_widget._widget_full._filter_layout.addWidget(\
                 #QtCore.Qt.DockWidgetArea(QtCore.Qt.RightDockWidgetArea), \
         #        self._list_curve_widget)
-        self._curve_display_widget = self._get_curve_display_widget()
+        self.toolbar = CurveEditorToolBar(self)
+        
+        self.addToolBar(self.toolbar)
+        self.toolbar.popup_unread_activated.connect(\
+                                            self.activate_popup_unread)
+        self.toolbar.popup_unread_deactivated.connect(\
+                                            self.deactivate_popup_unread)
+        
+        self._curve_display_widget = CurveDisplayWidget(self)
         self.setCentralWidget(self._curve_display_widget)
         self._filter_widget.value_changed.connect(self.refresh)
         self._filter_widget.value_changed.connect(self.save_defaults)        
@@ -48,11 +95,32 @@ class CurveEditor(QtGui.QMainWindow):
             defaults = {}
         self.set_defaults(**defaults)
         
+        self.popup_timer = QtCore.QTimer()
+        self.popup_timer.timeout.connect(self.popup_unread_curves)
+        self.popup_timer.setSingleShot(False)
+        self.popup_timer.setInterval(500) #ms
+        self.popup_unread = False
+        
         self.show()
+
+    def popup_unread_curves(self):
+        unread = CurveDB.objects.filter(user_has_read = False)
+        if unread:
+            self._filter_widget.refresh()
+            self.display(unread[0])
+
+    def activate_popup_unread(self):
+        self.popup_unread = True
+        self.popup_timer.start()
     
+    def deactivate_popup_unread(self):
+        self.popup_unread = False
+        self.popup_timer.stop()
     
     def display(self, curve):
         self._curve_display_widget.display(curve)
+        if  curve:
+            self._filter_widget.select_by_id(curve.id)
     
     def set_defaults(self, **kwds):
         self._filter_widget.set_defaults(**kwds)
@@ -70,11 +138,26 @@ class CurveEditor(QtGui.QMainWindow):
     def refresh(self):
         self._filter_widget.refresh()    
     
-    def _get_filter_widget(self):
-        return FilterWidgetFull(self)
+    def get_filter_widget(self):
+        """
+        mostly for interactive debugging purposes
+        """
+        
+        return self._filter_widget._widget_full
     
-    def _get_curve_display_widget(self):
-        return CurveDisplayWidget(self)
+    def get_list_widget(self):
+        """
+        mostly for interactive debugging purposes
+        """
+        
+        return self._filter_widget._widget_full._list_widget
+    
+    def get_curve_display_widget(self):
+        """
+        mostly for interactive debugging purposes
+        """
+        
+        return self._curve_display_widget
     
     #def _get_list_curve_widget(self):
     #    return ListCurveWidget(self)
@@ -95,6 +178,12 @@ class FilterWidgetFull(QtGui.QDockWidget):
     value_changed = QtCore.pyqtSignal(name = "value_changed")
     current_item_changed = QtCore.pyqtSignal(object, \
                                     name = "current_item_changed")
+    
+    def select_by_id(self, id):
+        """if the curve is in the list, selects it, otherwise cancels
+        the current selection
+        """
+        self._widget_full.select_by_id(id)
     
     def refresh(self):
         self._widget_full._list_widget.refresh()    
@@ -156,6 +245,13 @@ class FilterWidgetFull(QtGui.QDockWidget):
                 
             value_changed = QtCore.pyqtSignal(name = "value_changed")
             
+            def select_by_id(self, id):
+                """if the curve is in the list, selects it, otherwise cancels
+                the current selection
+                """
+                
+                self._list_widget.select_by_id(id)
+            
             def _disable_lte_gte(self):
                 self._filters["date_lte"].enabled = False
                 self._filters["date_gte"].enabled = False
@@ -197,10 +293,6 @@ class FilterWidgetFull(QtGui.QDockWidget):
 class ListCurveWidget(QtGui.QWidget, object):
     current_item_changed = QtCore.pyqtSignal(object)
     def __init__(self, parent):
-        self.refresh_timer = QtCore.QTimer()
-        self.refresh_timer.timeout.connect(self.refresh)
-        self.refresh_timer.setSingleShot(False)
-        self.refresh_timer.setInterval(500) #ms
         super(ListCurveWidget, self).__init__(parent)
         self._tree_widget = self._get_tree_widget()
         self._lay = QtGui.QVBoxLayout()
@@ -208,63 +300,70 @@ class ListCurveWidget(QtGui.QWidget, object):
         self._refresh_button.pressed.connect(self.refresh)
         self._lay_refresh = QtGui.QHBoxLayout()
         self._lay_refresh.addWidget(self._refresh_button)
-        
-        self._auto_refresh_label = QtGui.QLabel('auto refresh')
-        self._auto_refresh = QtGui.QCheckBox()
-        self._auto_refresh.stateChanged.connect(self._auto_refresh_clicked)
-        self._lay_refresh.addWidget(self._auto_refresh_label)
-        self._lay_refresh.addWidget(self._auto_refresh)
         self._lay.addLayout(self._lay_refresh)
         
         self._lay.setContentsMargins(0, 0, 0, 0)
         self._lay.addWidget(self._tree_widget)
         self.refresh()
-        self._tree_widget.currentItemChanged.connect(
+        self._tree_widget.itemSelectionChanged.connect(
                                           self._current_item_changed)
         self.setLayout(self._lay)
         self.setMinimumWidth(180)
+        
     def _current_item_changed(self):
         self.current_item_changed.emit(self.selected)
     
-    @property
-    def auto_refresh(self):
-        return self._auto_refresh.checkState() == 2
-    
-    def _auto_refresh_clicked(self):
-        if self.auto_refresh:
-            self._refresh_button.hide()
-            self.refresh_timer.start()
-        else:
-            self._refresh_button.show()
-            self.refresh_timer.stop()
-    
+    def select_by_id(self, id):
+        """if the curve is in the list, selects it, otherwise cancels
+        the current selection
+        """
+         
+        for index in range(self._tree_widget.topLevelItemCount()):
+            item = self._tree_widget.topLevelItem(index)
+            if item.pk == id:
+                item.setSelected(True)
+                self._tree_widget.setCurrentItem(item)
+                return
+        self._tree_widget.clearSelection()
+        
     @property
     def selected(self):
         sel = self._tree_widget.selectedItems()
         if sel:
-            return CurveDB.objects.get(pk = sel[0].pk)
+            try:
+                curve = CurveDB.objects.get(pk = sel[0].pk)
+            except CurveDB.DoesNotExist:
+                return None
+            else:
+                return curve 
         else:
             return None
         
     def refresh(self):
         next_select = None
+        next_pk = None
         previous_selected = self.selected
         previous_pk = None
         if previous_selected:
             previous_pk = previous_selected.pk
-        curves = self.parent().get_query_set()
+        curves = self.parent().get_query_set().order_by('id')
         self._tree_widget.clear()
         for curve in curves:
             item = QtGui.QTreeWidgetItem([curve.name])
+            self._tree_widget.addTopLevelItem(item)
             item.pk = curve.pk
             if item.pk == previous_pk:
                 next_select = item
-            self._tree_widget.addTopLevelItem(item)
+                next_pk = item.pk
+            
         
         if not next_select:
             next_select = self._tree_widget.topLevelItem(0)
-        next_select.setSelected(True)
-        self.current_item_changed.emit(self.selected)
+        if next_select:
+            next_select.setSelected(True)
+            self._tree_widget.setCurrentItem(next_select)
+        if previous_pk != next_pk:
+            self.current_item_changed.emit(self.selected)
 
     
     def _get_tree_widget(self):
@@ -322,12 +421,28 @@ class CurveIdWidget(QtGui.QWidget):
         self.widget_all_fields = AllFieldDisplayWidget(self, dict())
         self._lay.addWidget(self.widget_all_fields, 0, 1)
         self.delete_button = QtGui.QPushButton("Delete...")
+        self.delete_button.pressed.connect(self.delete)
         self.delete_button.setMaximumWidth(100)
         self.delete_button.setMinimumHeight(150)
         self._lay.addWidget(self.delete_button, 0, 2)
+        self.curve_displayed = None
         
-        
+    def delete(self, confirm=True):
+        if not self.curve_displayed:
+            return
+        if confirm:
+            
+            message_box = QtGui.QMessageBox(self)
+            answer = message_box.question(self, 'delete', \
+                        'are you sure you want to delete curve id =' \
+                        + str(self.curve_displayed.id) + ' ?', 'No', 'Yes')
+            if not answer:
+                return
+        self.curve_displayed.delete()
+        self.parent().parent().refresh()
+    
     def dump_in_gui(self, curve):
+        self.curve_displayed = curve
         fields = curve.get_subclass_fields()
         if self.widget_all_fields:
             self.widget_all_fields.deleteLater()
@@ -378,9 +493,9 @@ class CurveDisplayWidget(QtGui.QWidget):
         #---
         #---Add toolbar and register manager tools
         #toolbar = self.parent().addToolBar("tools")
-        toolbar = QtGui.QToolBar("plot tools", self)
-        self.manager.add_toolbar(toolbar, id(toolbar))
-        self._lay.addWidget(toolbar)
+        self.toolbar = QtGui.QToolBar("plot tools", self)
+        self.manager.add_toolbar(self.toolbar, id(self.toolbar))
+        self._lay.addWidget(self.toolbar)
         self.manager.register_all_curve_tools()
         #---
        

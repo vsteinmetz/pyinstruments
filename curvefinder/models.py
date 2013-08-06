@@ -150,6 +150,11 @@ class CurveDB(models.Model, Curve):
             self.tags.add(tag)
         return val
     
+    def delete(self):
+        """deletes the entry in the database and the file"""
+        os.remove(self.get_full_filename())
+        super(CurveDB, self).delete()
+    
     @property
     def window_txt(self):
         return self.window.name

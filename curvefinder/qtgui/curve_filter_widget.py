@@ -79,9 +79,16 @@ class FilterWidget(QtGui.QWidget, object):
     enabled_changed = QtCore.pyqtSignal(name = "enabled_changed")
 
 class DummyLabel(QtGui.QLabel, object):
+    def __init__(self, parent, name, label, bool_condition = True):
+        self.name = name
+        self.bool_condition = bool_condition
+        super(DummyLabel, self).__init__(label, parent = parent)
     value_changed = QtCore.pyqtSignal(name = 'value_changed') 
-
     value = True #dummy
+    def get_kwds_for_query(self):
+        return {self.name: self.bool_condition}
+    
+    
 class BoolFilterWidget(FilterWidget):
     def __init__(self, name, bool_condition, label, parent):
         self.name = name
@@ -91,10 +98,9 @@ class BoolFilterWidget(FilterWidget):
         
         
     def get_other_widget(self):
-        return DummyLabel(self.label)
+        return DummyLabel(self, self.name, self.label, self.bool_condition)
  
-    def get_kwds_for_query(self):
-        return {self.name: self.bool_condition}
+    
  
 class DateSelectWidget(QtGui.QWidget, object):
     """a widget to select a date"""
