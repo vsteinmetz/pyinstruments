@@ -152,7 +152,10 @@ class CurveDB(models.Model, Curve):
     
     def delete(self):
         """deletes the entry in the database and the file"""
-        os.remove(self.get_full_filename())
+        try:
+            os.remove(self.get_full_filename())
+        except WindowsError:
+            print 'no file found at ' + self.get_full_filename()
         super(CurveDB, self).delete()
     
     @property

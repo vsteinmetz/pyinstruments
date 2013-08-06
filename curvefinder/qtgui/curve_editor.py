@@ -17,6 +17,10 @@ from collections import OrderedDict
 
 
 class NamedCheckBox(QtGui.QWidget):
+    def __bool__(self):
+        return self.check_state
+    __nonzero__=__bool__
+    
     def __init__(self, parent, label):
         super(NamedCheckBox, self).__init__(parent)
         self._lay = QtGui.QFormLayout()
@@ -494,11 +498,14 @@ class CurveDisplayWidget(QtGui.QWidget):
         #---Add toolbar and register manager tools
         #toolbar = self.parent().addToolBar("tools")
         self.toolbar = QtGui.QToolBar("plot tools", self)
+        self.autoscale = NamedCheckBox(self, 'autoscale')
+        self.autoscale.checked.connect(self.plot_widget.plot.do_autoscale)
+        self.toolbar.addWidget(self.autoscale)
         self.manager.add_toolbar(self.toolbar, id(self.toolbar))
         self._lay.addWidget(self.toolbar)
         self.manager.register_all_curve_tools()
         #---
-       
+    
     def display(self, curve):
         self.displayed_curve = curve
         if curve:
@@ -507,6 +514,8 @@ class CurveDisplayWidget(QtGui.QWidget):
             self.curve_item.set_data(array(curve.data.index, \
                                     dtype = float), \
                                     array(curve.data, dtype = float))
+            if self.autoscale:
+                self.curve_item.plot().do_autoscale()
             self.curve_item.plot().replot()
         
             curve.user_has_read = True

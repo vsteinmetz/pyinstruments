@@ -183,7 +183,7 @@ class CurveTagWidget(QtGui.QWidget, object):
         self.tree_widget.setIndentation(20)
         self.tree_widget.setObjectName("tree_widget")
         self.tree_widget.setSelectionMode( \
-                            QtGui.QAbstractItemView.MultiSelection)
+                            QtGui.QAbstractItemView.ExtendedSelection)
         
         self.lay = QtGui.QVBoxLayout()
         self.lay.addWidget(self.tree_widget)

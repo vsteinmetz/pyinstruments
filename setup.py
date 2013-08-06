@@ -1,5 +1,15 @@
 import os
 from setuptools import setup
+from distutils.core import setup
+from distutils.command.install import install
+import subprocess
+
+class installWithPost(install):
+    def run(self):
+        # Call parent 
+        install.run(self)
+        # Execute commands
+        subprocess.call(['python', 'manage.py', 'syncdb'])
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -10,7 +20,8 @@ def read(fname):
 
 setup(
     name = "pyinstruments",
-    version = "0.0.11",
+    cmdclass={"install": installWithPost},
+    version = "0.0.13",
     author = "Samuel Deleglise",
     author_email = "samuel.deleglise@gmail.com",
     description = ("""Control of data acquisition with remote instruments using 
@@ -31,6 +42,12 @@ setup(
               'pyinstruments.instruments',
               'pyinstruments.wrappers',
               'pyinstruments.factories',
+              'pyinstrumentsdb',
+              'datastore',
+              'curve',
+              'curvefinder',
+              'curvefinder.fixtures',
+              'curvefinder.qtgui',
               'guiwrappersutils',
               'conf_xml',
               'curve'],
@@ -41,5 +58,6 @@ setup(
         "License :: OSI Approved :: BSD License",
     ],
     install_requires=[
-]
+                      'django>1.5'
+    ]
 )
