@@ -131,15 +131,35 @@ class CurveDB(models.Model, Curve):
         
         if self.pk == None:
             super(CurveDB, self).save()
-                #add tag 'all'
-        self.tags.add(Tag.objects.get(name = 'all')) 
+                
         self.tags_flatten = ';' + \
                             ';'.join([str(tag.id) \
                                         for tag in self.tags.all()]) + \
                             ';'
         super(CurveDB, self).save()
     
-            
+           
+    @property
+    def tags_txt(self):
+        return [tag.name for tag in self.tags.all()]
+    
+    @tags_txt.setter
+    def tags_txt(self, val):
+        for tag_txt in val:
+            (tag, new) = Window.objects.get_or_create(name = tag_txt)
+            self.tags.add(tag)
+        return val
+    
+    @property
+    def window_txt(self):
+        return self.window.name
+    
+    @window_txt.setter
+    def window_txt(self, val):
+        (win, new) = Window.objects.get_or_create(name = val)
+        self.window = win
+        return val
+     
     @property
     def data(self):
         if self._data is not None:

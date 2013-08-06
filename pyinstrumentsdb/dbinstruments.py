@@ -43,9 +43,7 @@ class DBFetchable(object):
             pass
         else:
             curve.name = self._dbwidget.name
-            (win, new) = \
-                Window.objects.get_or_create(name=self._dbwidget.window)
-            curve.window = win
+            curve.window_txt = self._dbwidget.window
             curve.save()
         
             tags = self._dbwidget.tags
@@ -66,6 +64,7 @@ class DBFetchable(object):
         """sets up the gui to fetch the waveforms in widget"""
     
         self._dbwidget = CurveCreateWidget(**self._get_defaults())
+        self._dbwidget.hide_save_button()
         p = self._dbwidget.palette()
         p.setColor(self._dbwidget.backgroundRole(), QtCore.Qt.gray)
         self._dbwidget.setPalette(p)

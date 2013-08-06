@@ -8,6 +8,13 @@ from datetime import timedelta
 from curvefinder.qtgui.gui import CurveTagWidget
 from curvefinder.models import CurveDB
 
+
+class HBoxLayoutTight(QtGui.QHBoxLayout):
+    def __init__(self, parent = None):
+        super(HBoxLayoutTight, self).__init__(parent)
+        self.setContentsMargins(0, 0, 0, 0)
+
+
 class FilterWidget(QtGui.QWidget, object):
     """
     Base class for graphical filtering element
@@ -15,7 +22,7 @@ class FilterWidget(QtGui.QWidget, object):
     
     def __init__(self, parent):
         super(FilterWidget, self).__init__(parent)
-        self.layout = QtGui.QHBoxLayout()
+        self.layout = HBoxLayoutTight()
         self._enabled_checkbox = QtGui.QCheckBox()
         self._enabled_checkbox.stateChanged.connect(self.change_enabled)
         self.layout.addWidget(self._enabled_checkbox)
@@ -70,7 +77,25 @@ class FilterWidget(QtGui.QWidget, object):
     value_changed = QtCore.pyqtSignal(name = "value_changed")
     enabled_on = QtCore.pyqtSignal(name = "enabled_on")
     enabled_changed = QtCore.pyqtSignal(name = "enabled_changed")
-    
+
+class DummyLabel(QtGui.QLabel, object):
+    value_changed = QtCore.pyqtSignal(name = 'value_changed') 
+
+    value = True #dummy
+class BoolFilterWidget(FilterWidget):
+    def __init__(self, name, bool_condition, label, parent):
+        self.name = name
+        self.label = label
+        self.bool_condition = bool_condition
+        super(BoolFilterWidget, self).__init__(parent)
+        
+        
+    def get_other_widget(self):
+        return DummyLabel(self.label)
+ 
+    def get_kwds_for_query(self):
+        return {self.name: self.bool_condition}
+ 
 class DateSelectWidget(QtGui.QWidget, object):
     """a widget to select a date"""
     
@@ -78,7 +103,7 @@ class DateSelectWidget(QtGui.QWidget, object):
         """defaults to today if no date is provided"""
         
         super(DateSelectWidget, self).__init__(parent)
-        self._lay = QtGui.QHBoxLayout()
+        self._lay = HBoxLayoutTight()
         self._date_edit = QtGui.QDateEdit()
         self._lay.addWidget(self._date_edit)
         self._choose_button = QtGui.QPushButton("...")
@@ -175,7 +200,7 @@ class DateConstraintWidget(FilterWidget):
             
             def __init__(self, parent):
                 super(InnerDateConstraintWidget, self).__init__(parent)
-                self._lay = QtGui.QHBoxLayout()
+                self._lay = HBoxLayoutTight()
                 self._bound_widget = DateSelectWidget()
                 if self.constraint == ">=":
                     self._label = QtGui.QLabel("date >=")
@@ -229,7 +254,7 @@ class StringFilterWidget(FilterWidget):
             
             def __init__(self, parent):
                 super(InnerStringFilterWidget, self).__init__(parent)
-                self._lay = QtGui.QHBoxLayout()
+                self._lay = HBoxLayoutTight()
                 self._label = QtGui.QLabel(self.field_name + " = ")
                 self._lay.addWidget(self._label)
                 self._line = QtGui.QLineEdit()
@@ -276,7 +301,7 @@ class ComboFilterWidget(FilterWidget):
             
             def __init__(self, parent):
                 super(InnerComboFilterWidget, self).__init__(parent)
-                self._lay = QtGui.QHBoxLayout()
+                self._lay = HBoxLayoutTight()
                 self._label = QtGui.QLabel(self.field_name + " = ")
                 self._lay.addWidget(self._label)
                 self._combo = QtGui.QComboBox()

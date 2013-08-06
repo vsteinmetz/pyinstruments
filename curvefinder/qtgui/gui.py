@@ -54,6 +54,9 @@ class CurveCreateWidget(QtGui.QWidget, object):
         self.window = default_window
         self.comment = comment
         self.tags = tags
+        self.save_button.pressed.connect(self.save_pressed)
+    
+    save_pressed = QtCore.pyqtSignal(name = 'save_pressed')
     
     @property
     def tags(self):
@@ -111,6 +114,8 @@ class CurveCreateWidget(QtGui.QWidget, object):
         self.curve_comment_widget = CurveCommentWidget()
         self.h_lay2.addWidget(self.curve_tag_widget)
         self.h_lay2.addWidget(self.curve_comment_widget)
+        self.save_button = QtGui.QPushButton("save")
+        self.h_lay2.addWidget(self.save_button)
         
         
         self.v_lay = QtGui.QVBoxLayout()
@@ -118,7 +123,23 @@ class CurveCreateWidget(QtGui.QWidget, object):
         self.v_lay.addLayout(self.h_lay1)
         self.v_lay.addLayout(self.h_lay2)
         self.setLayout(self.v_lay)
-
+        
+    def dump_in_gui(self, curve):
+        self.comment = curve.comment
+        self.name = curve.name
+        self.window = curve.window_txt
+        self.tags = curve.tags_txt
+        
+    def save_curve(self, curve):
+        curve.comment = self.comment
+        curve.name = self.name
+        curve.window_txt = self.window
+        curve.tags_txt = self.tags
+        curve.save()
+    
+    def hide_save_button(self):
+        self.save_button.hide()
+        
 class CurveTagWidget(QtGui.QWidget, object):
     def __init__(self, parent = None):
         super(CurveTagWidget, self).__init__(parent)
@@ -139,9 +160,6 @@ class CurveTagWidget(QtGui.QWidget, object):
     def get_selected_tags(self):    
         tags = [self._get_tag_from_item(item) \
                 for item in self.tree_widget.selectedItems()]
-        tags.reverse()
-        tags.append(tags.pop(0))
-        tags.reverse()
         return tags
         
     def _update_tag_list(self, *args, **kwds):
@@ -182,10 +200,8 @@ class CurveTagWidget(QtGui.QWidget, object):
         self.tree_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tree_widget.customContextMenuRequested.connect(self._contextMenu)
         
-        self.tree_widget.itemSelectionChanged.connect( \
-                                            self._prevent_unselect_all)
-        
         self.setLayout(self.lay)
+        self.lay.setSpacing(0)
         self.refresh()
     
     def _remove_all_items(self):
@@ -217,9 +233,9 @@ class CurveTagWidget(QtGui.QWidget, object):
         tags = Tag.objects.all()
         for tag in tags:
             self.add_item(tag.name)
-        self.select("all")
     
     def _set_tags(self, tags):
+        self.tree_widget.clearSelection()
         for tag in tags:
             self.select(tag)
     
@@ -252,10 +268,6 @@ class CurveTagWidget(QtGui.QWidget, object):
                         return
         if child:
             child.setSelected(True)
-       
-    def _prevent_unselect_all(self, *args, **kwds):
-        all = self.tree_widget.topLevelItem(0)
-        all.setSelected(True)
   
     def _exec_menu_at_right_place(self, menu, point):
         p = QtCore.QPoint(point)
