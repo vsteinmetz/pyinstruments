@@ -124,7 +124,8 @@ class CurveDB(models.Model, Curve):
         
         import pandas
         data = pandas.Series(sin(array(self.data.index)), index = self.data.index)
-        fit_curve = FitCurveDB(data=data, parent=self, fit_params = {'foo':4, 'bar':6})
+        fit_curve = FitCurveDB(data=data, parent=self)
+        fit_curve.fit_params = {'foo':4, 'bar':6}
         if autosave:
             fit_curve.save()
         return fit_curve
@@ -434,5 +435,5 @@ class FitCurveDB(CurveDB):
     
     @fit_params.setter
     def fit_params(self, params):
-        json.dumps(params, self.fit_params_json)
+        self.fit_params_json = json.dumps(params, self.fit_params_json)
         return params
