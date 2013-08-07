@@ -1,16 +1,18 @@
+import datastore
+from curve import Curve
+from pyinstruments import choices
+from datastore.settings import MEDIA_ROOT
+
 from django.db import models
 from django.core.urlresolvers import reverse
 from model_utils import Choices
-import datastore
-from curve import Curve
-from datastore.settings import MEDIA_ROOT
 from datetime import datetime
 from django.core.files.storage import default_storage
-from pyinstruments import choices
-
 import os
 import pandas
+from numpy import array, sin
 from collections import OrderedDict
+import json
 
 
 class InstrumentLogicalName(models.Model):
@@ -113,7 +115,20 @@ class CurveDB(models.Model, Curve):
     def get_full_filename(self):
         return os.path.join(datastore.settings.MEDIA_ROOT, \
                                  self.data_file.name)
-            
+    
+    
+    def fit(self, func, guess = None, autosave = False):
+        """
+        Makes a fit of the curve and returns the child fit curve
+        """
+        
+        import pandas
+        data = pandas.Series(sin(array(self.data.index)), index = self.data.index)
+        fit_curve = FitCurveDB(data=data, parent=self, fit_params = {'foo':4, 'bar':6})
+        if autosave:
+            fit_curve.save()
+        return fit_curve
+    
     def save(self):
         """
         Saves the curve in the database. If the curve is data_read_only 
@@ -407,4 +422,17 @@ def curve_db_from_curve(curve):
                                 instrument_logical_name=log_name, \
                                 curve_type = curve.meta.curve_type, \
                                 **kwds)
+
+
+class FitCurveDB(CurveDB):
+    fit_params_json = models.TextField()
+    fit_function = models.CharField(max_length = 255)
+
+    @property
+    def fit_params(self):
+        return json.loads(self.fit_params_json)
     
+    @fit_params.setter
+    def fit_params(self, params):
+        json.dumps(params, self.fit_params_json)
+        return params
