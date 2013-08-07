@@ -30,7 +30,7 @@ def read(fname):
 setup(
     name = "pyinstruments",
     cmdclass={"install": installWithPost},
-    version = "0.0.15",
+    version = "0.0.16",
     author = "Samuel Deleglise",
     author_email = "samuel.deleglise@gmail.com",
     description = ("""Control of data acquisition with remote instruments using 

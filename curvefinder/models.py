@@ -86,11 +86,7 @@ class CurveDB(models.Model, Curve):
     tags = models.ManyToManyField(Tag, default = [1])
     window = models.ForeignKey(Window, default = 1)
     
-    # parent curve e.g., for fit curve...
-    parent = models.ForeignKey("self", \
-                               related_name = 'childs', \
-                               blank = True, \
-                               null = True)
+
         
     #read only
     data_file = models.FileField(upload_to = '%Y/%m/%d')
@@ -100,7 +96,12 @@ class CurveDB(models.Model, Curve):
     #flags
     tags_flatten = models.TextField(blank = True, null = True)
     user_has_read = models.BooleanField(default = False, db_index=True)
-    
+       
+    # parent curve e.g., for fit curve...
+    parent = models.ForeignKey("self", \
+                               related_name = 'childs', \
+                               blank = True, \
+                               null = True)
     
     data_read_only = models.BooleanField(default = True)
     
@@ -130,7 +131,7 @@ class CurveDB(models.Model, Curve):
             full_path = default_storage.get_available_name(full_path)
             self.data_file = os.path.relpath(full_path, MEDIA_ROOT)
         if (self.pk is None) or (not self.data_read_only):
-            Curve.save(self.get_full_filename())
+            Curve.save(self, self.get_full_filename())
         
         if self.pk == None:
             super(CurveDB, self).save()
@@ -155,6 +156,7 @@ class CurveDB(models.Model, Curve):
     
     def delete(self):
         """deletes the entry in the database and the file"""
+        
         try:
             os.remove(self.get_full_filename())
         except WindowsError:
@@ -204,6 +206,8 @@ class CurveDB(models.Model, Curve):
 
     def get_fields_as_text_ordered_dict(self):
         return OrderedDict()
+
+
 
 class FrequencyCurve(CurveDB):
     """
