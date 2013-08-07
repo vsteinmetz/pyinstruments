@@ -1,5 +1,33 @@
 # Django settings for datastore project.
 
+
+from PyQt4.QtCore import QSettings
+import os
+
+settings = QSettings("pyinstruments", "pyinstruments")
+
+# Absolute filesystem path to the directory that will hold user-uploaded files.
+# Example: "/var/www/example.com/media/"
+MEDIA_ROOT = None
+DATABASE_FILE = str(settings.value("database_file").toString())
+if DATABASE_FILE=="":
+    DATABASE_FILE = None
+else:
+    MEDIA_ROOT = os.path.splitext(DATABASE_FILE)[0]
+    
+def change_default_databse_name(filename):
+    """
+    first, changes directly the 'living' dictionnary, but also stores  the value 
+    for latter execution
+    """
+    
+    DATABASE_FILE = filename
+    DATABASES["default"]["NAME"] = filename
+    MEDIA_ROOT = os.path.splitext(DATABASE_FILE)[0]
+    settings.setValue("database_file", filename)
+
+    
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -9,14 +37,14 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-import os
-file = os.path.join(os.environ["HOMEDRIVE"], os.environ["HOMEPATH"], \
-                                                            "datastore.db")
+#import os
+#file = os.path.join(os.environ["HOMEDRIVE"], os.environ["HOMEPATH"], \
+#                                                            "datastore.db")
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': file,                      # Or path to database file if using sqlite3.
+        'NAME': DATABASE_FILE,                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -52,10 +80,9 @@ USE_L10N = True
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = False
 
-# Absolute filesystem path to the directory that will hold user-uploaded files.
-# Example: "/var/www/example.com/media/"
-MEDIA_ROOT = os.path.join(os.environ["HOMEDRIVE"], os.environ["HOMEPATH"],\
-                                    "Datastore")
+
+#os.path.join(os.environ["HOMEDRIVE"], os.environ["HOMEPATH"],\
+#                                    "Datastore")
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.

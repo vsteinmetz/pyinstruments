@@ -6,6 +6,9 @@ from curvefinder.qtgui.curve_filter_widget import DateConstraintWidget, \
                                       BoolFilterWidget
 from curvefinder.models import Window, CurveDB
 from curvefinder.qtgui.gui import CurveCreateWidget
+from curve_editor_menus import CurveEditorMenuBar, CurveEditorToolBar, NamedCheckBox 
+import datastore.settings
+import os
 
 from numpy import array
 from guiqwt import plot
@@ -16,52 +19,21 @@ import json
 from collections import OrderedDict
 
 
-class NamedCheckBox(QtGui.QWidget):
-    def __bool__(self):
-        return self.check_state
-    __nonzero__=__bool__
-    
-    def __init__(self, parent, label):
-        super(NamedCheckBox, self).__init__(parent)
-        self._lay = QtGui.QFormLayout()
-        self.label = QtGui.QLabel(label)
-        self.checkbox = QtGui.QCheckBox()
-        self._lay.addRow(self.label, self.checkbox)
-        self.setLayout(self._lay)
-        self.checkbox.stateChanged.connect(self._state_changed)
-    
-    @property
-    def check_state(self):
-        return self.checkbox.checkState() == 2
-    
-    def _state_changed(self):
-        if self.check_state:
-            self.checked.emit()
-        else:
-            self.unchecked.emit()
-    
-    checked = QtCore.pyqtSignal(name='checked')
-    unchecked = QtCore.pyqtSignal(name='unchecked')
-        
-class CurveEditorToolBar(QtGui.QToolBar, object):
-    popup_unread_activated = QtCore.pyqtSignal(\
-                                            name='popup_unread_activated')
-    popup_unread_deactivated = QtCore.pyqtSignal(\
-                                        name = 'popup_unread_deactivated')
 
-    def __init__(self, parent):
-        super(CurveEditorToolBar, self).__init__(parent)
-        self._checkbox_popup_unread = NamedCheckBox(self, \
-                                                    'popup unread curves')
-        self.addWidget(self._checkbox_popup_unread)
-        self._checkbox_popup_unread.checked.connect(self.popup_unread_activated)
-        self._checkbox_popup_unread.unchecked.connect(\
-                                        self.popup_unread_deactivated)
-    
-    
 class CurveEditor(QtGui.QMainWindow, object):
+    def database_exists(self):
+        return datastore.settings.DATABASE_FILE!=None and \
+                os.path.exists(datastore.settings.DATABASE_FILE)
+    
+    
     def __init__(self):
         super(CurveEditor, self).__init__()
+        
+        self.menubar = CurveEditorMenuBar(self)
+        if not self.database_exists():
+            self.menubar.menu_file._new_database(cancel_allowed=False)
+            
+        self.setMenuBar(self.menubar)
         self._filter_widget = FilterWidgetFull(self)
         #self._list_curve_widget = self._get_list_curve_widget()
         self.addDockWidget(\
