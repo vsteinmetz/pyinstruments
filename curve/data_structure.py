@@ -37,7 +37,8 @@ class Curve(object):
     
     plot.__doc__ = pandas.Series.plot.__doc__
     
-    def save_in_file(self, filename, meta = True):
+    
+    def save(self, filename, meta = True):
         with pandas.get_store(filename) as store:
             store["data"] = self._data
         

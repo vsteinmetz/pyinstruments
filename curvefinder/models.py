@@ -130,7 +130,7 @@ class CurveDB(models.Model, Curve):
             full_path = default_storage.get_available_name(full_path)
             self.data_file = os.path.relpath(full_path, MEDIA_ROOT)
         if (self.pk is None) or (not self.data_read_only):
-            super(CurveDB, self).save_in_file(self.get_full_filename())
+            Curve.save(self.get_full_filename())
         
         if self.pk == None:
             super(CurveDB, self).save()

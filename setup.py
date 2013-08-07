@@ -58,8 +58,7 @@ setup(
               'curvefinder.fixtures',
               'curvefinder.qtgui',
               'guiwrappersutils',
-              'conf_xml',
-              'curve'],
+              'conf_xml'],
     long_description=read('README'),
     classifiers=[
         "Development Status :: 3 - Alpha",
