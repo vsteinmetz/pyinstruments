@@ -21,17 +21,11 @@ from collections import OrderedDict
 
 
 class CurveEditor(QtGui.QMainWindow, object):
-    def database_exists(self):
-        return datastore.settings.DATABASE_FILE!=None and \
-                os.path.exists(datastore.settings.DATABASE_FILE)
-    
-    
+        
     def __init__(self):
         super(CurveEditor, self).__init__()
         
         self.menubar = CurveEditorMenuBar(self)
-        if not self.database_exists():
-            self.menubar.menu_file._new_database(cancel_allowed=False)
             
         self.setMenuBar(self.menubar)
         self._filter_widget = FilterWidgetFull(self)

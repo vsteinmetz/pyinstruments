@@ -1,9 +1,7 @@
 # Django settings for datastore project.
 
-
-from PyQt4.QtCore import QSettings
 import os
-
+from PyQt4.QtCore import QSettings
 settings = QSettings("pyinstruments", "pyinstruments")
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
@@ -14,19 +12,20 @@ if DATABASE_FILE=="":
     DATABASE_FILE = None
 else:
     MEDIA_ROOT = os.path.splitext(DATABASE_FILE)[0]
-    
-def change_default_databse_name(filename):
-    """
-    first, changes directly the 'living' dictionnary, but also stores  the value 
-    for latter execution
-    """
-    
-    DATABASE_FILE = filename
-    DATABASES["default"]["NAME"] = filename
-    MEDIA_ROOT = os.path.splitext(DATABASE_FILE)[0]
-    settings.setValue("database_file", filename)
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': DATABASE_FILE,                      # Or path to database file if using sqlite3.
+        # The following settings are not used with sqlite3:
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
+        'PORT': '',                      # Set to empty string for default.
+    }
+}
     
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -41,17 +40,7 @@ MANAGERS = ADMINS
 #file = os.path.join(os.environ["HOMEDRIVE"], os.environ["HOMEPATH"], \
 #                                                            "datastore.db")
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': DATABASE_FILE,                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                      # Set to empty string for default.
-    }
-}
+
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -187,3 +176,9 @@ LOGGING = {
         },
     }
 }
+
+
+
+
+    
+
