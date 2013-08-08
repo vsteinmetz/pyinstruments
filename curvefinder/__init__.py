@@ -10,6 +10,9 @@ from guidata import qapplication as __qapplication
 _APP = __qapplication()
 from curvefinder.qtgui.curve_editor import CurveEditor as gui
 
+__all__ = ['gui']
+
 if __name__ == "__main__":
     GUI = gui()
     _APP.exec_()
+    

@@ -1,8 +1,9 @@
 
-
-
 import datastore.settings
 
+import time
+import os
+import guidata
 from PyQt4 import QtCore, QtGui
         
 class MenuFile(QtGui.QMenu):
@@ -11,8 +12,32 @@ class MenuFile(QtGui.QMenu):
         self.forget_database_location = QtGui.QAction(widget)
         self.forget_database_location.setText('forget database location...')
         self.forget_database_location.triggered.connect(self._forget_db_location)
-        
         self.addAction(self.forget_database_location)
+        
+        self.open_django_admin = QtGui.QAction(widget)
+        self.open_django_admin.setText('open django admin')
+        self.open_django_admin.triggered.connect(self._open_django_admin)
+        self.addAction(self.open_django_admin)
+        
+        self.quit = QtGui.QAction(widget)
+        self.quit.setText('quit')
+        self.quit.triggered.connect(self._quit)
+        self.addAction(self.quit)
+        
+    def _quit(self):
+        guidata.qapplication().quit()
+    
+    def _open_django_admin(self):
+        import subprocess
+        subprocess.Popen([   'python', 
+                            os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                '..',
+                                '..',
+                                'manage.py'),
+                            'runserver'], shell = True)
+        time.sleep(10)
+        desktop_services = QtGui.QDesktopServices()
+        desktop_services.openUrl(QtCore.QUrl('http://localhost:8000/admin'))
         
     def  _forget_db_location(self):
         settings = QtCore.QSettings('pyinstruments', 'pyinstruments')

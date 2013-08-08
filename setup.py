@@ -2,23 +2,33 @@ import os
 from setuptools import setup
 from distutils.core import setup
 from distutils.command.install import install
+from distutils.command.bdist_wininst import bdist_wininst
 import subprocess
+
 
 def set_environment_variable_on_windows(name, value):
     subprocess.call(['setx', name, value])
     os.environ[name] = value
 
+
+
+def install_dependancies():
+    # Call parent
+    subprocess.call(['pip', 'install', 'django'])
+    subprocess.call(['python', 'setup_datastore.py', 'install'])
+    set_environment_variable_on_windows('DJANGO_SETTINGS_MODULE', 'datastore.settings')
+    subprocess.call(['pip', 'install', 'django-model-utils'])
+    subprocess.call(['pip', 'install', 'django-utils'])
+
+
+
 class installWithPost(install):
     def run(self):
-        # Call parent
-        subprocess.call(['pip', 'install', 'django'])
-        subprocess.call(['python', 'setup_datastore.py', 'install'])
-        set_environment_variable_on_windows('DJANGO_SETTINGS_MODULE', 'datastore.settings')
-        subprocess.call(['pip', 'install', 'django-model-utils'])
-        subprocess.call(['pip', 'install', 'django-utils'])
+        install_dependancies()
         install.run(self)
         # Execute commands
-        subprocess.call(['python', 'manage.py', 'syncdb'])
+        #subprocess.call(['python', 'manage.py', 'syncdb'])     
+        
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -30,7 +40,8 @@ def read(fname):
 setup(
     name = "pyinstruments",
     cmdclass={"install": installWithPost},
-    version = "0.0.16",
+    scripts={'postinstallscript.py'},
+    version = "0.1.09",
     author = "Samuel Deleglise",
     author_email = "samuel.deleglise@gmail.com",
     description = ("""Control of data acquisition with remote instruments using 
@@ -66,6 +77,8 @@ setup(
         "License :: OSI Approved :: BSD License",
     ],
     install_requires=[
-                      'django>1.5'
+                      'django>1.5',
+                      'guiqwt',
+                      'guidata'
     ]
 )

@@ -2,7 +2,7 @@
 class to add gui-capabilities to IVI-compliant spectrum analyzers
 """
 
-from pyinstruments import choices
+from pyinstruments.instruments import choices
 from guiwrappersutils import GuiWrapper
 from pyinstruments.instruments.gui_fetchable import GuiFetchable
 from pyinstruments.wrappers import Wrapper

@@ -1,6 +1,6 @@
 import datastore
 from curve import Curve
-from pyinstruments import choices
+from pyinstruments.instruments import choices
 from datastore.settings import MEDIA_ROOT
 
 from django.db import models
