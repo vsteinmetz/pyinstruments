@@ -24,3 +24,4 @@ from pyinstruments.instruments.ivi_scope_gui import IviScopeGui
 from pyinstruments.instruments.ivi_spec_an_gui import IviSpecAnGui
 from pyinstruments.instruments.ivi_na_gui import IviNaGui
 from pyinstruments.instruments.ivi_fgen_gui import IviFgenGui
+from pyinstruments.instruments import choices

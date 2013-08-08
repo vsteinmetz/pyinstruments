@@ -41,7 +41,7 @@ setup(
     name = "pyinstruments",
     cmdclass={"install": installWithPost},
     scripts={'postinstallscript.py'},
-    version = "0.1.10",
+    version = "0.1.12",
     author = "Samuel Deleglise",
     author_email = "samuel.deleglise@gmail.com",
     description = ("""Control of data acquisition with remote instruments using 
@@ -70,6 +70,7 @@ setup(
               'curvefinder.qtgui',
               'guiwrappersutils',
               'conf_xml'],
+    py_modules = ['manage'],
     long_description=read('README'),
     classifiers=[
         "Development Status :: 3 - Alpha",
