@@ -1,17 +1,18 @@
 #! python
 # -*- coding: utf-8 -*-
 
-#import os
-#import subprocess
-
 
 import os
 import sys
 import shutil
-#import curvefinder
 import pkgutil
-curvefinder = pkgutil.get_loader("curvefinder")
-pyinstrumentsdb = pkgutil.get_loader("pyinstrumentsdb")
+
+##===============================================================
+##     CREATE DESKTOP SHORTCUT FIRST
+##===============================================================
+
+curvefinder = pkgutil.get_loader("pyinstruments.curvefinder")
+pyinstrumentsdb = pkgutil.get_loader("pyinstruments.pyhardwaredb")
 
 DESKTOP_FOLDER = get_special_folder_path("CSIDL_DESKTOPDIRECTORY")
 CURVEFINDER_NAME = 'curvefinder.lnk'
@@ -45,20 +46,19 @@ file_created(os.path.join(DESKTOP_FOLDER, CURVEFINDER_NAME))
 file_created(os.path.join(DESKTOP_FOLDER, PYINSTRUMENTSDB_NAME))
 
 
-import subprocess
+##===============================================================
+##     INSTALL DJANGO AND EXTENSIONS TO BE SURE
+##===============================================================
 
+import subprocess
+from PyQt4.QtCore import QSettings
+QSettings('pyinstruments', 'pyinstruments').setValue('database_file', '')
 def set_environment_variable_on_windows(name, value):
     subprocess.call(['setx', name, value])
     os.environ[name] = value
 
-
-
-def install_dependancies():
-    # Call parent
-    subprocess.call(['pip', 'install', 'django'])
-    subprocess.call(['python', 'setup_datastore.py', 'install'])
-    set_environment_variable_on_windows('DJANGO_SETTINGS_MODULE', 'datastore.settings')
-    subprocess.call(['pip', 'install', 'django-model-utils'])
-    subprocess.call(['pip', 'install', 'django-utils'])
-
-install_dependancies()
+subprocess.call(['pip', 'install', 'django'])
+set_environment_variable_on_windows('DJANGO_SETTINGS_MODULE', 
+                                    'pyinstruments.datastore.settings')
+subprocess.call(['pip', 'install', 'django-model-utils'])
+subprocess.call(['pip', 'install', 'django-utils'])
