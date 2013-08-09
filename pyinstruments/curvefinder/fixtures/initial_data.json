@@ -1,0 +1,16 @@
+[
+  {
+    "model": "curvefinder.instrumentlogicalname",
+    "pk": 1,
+    "fields": {
+      "name": "no-name"
+    }
+  },
+  {
+    "model": "curvefinder.window",
+    "pk": 1,
+    "fields": {
+      "name": "default"
+    }
+  }
+]
