@@ -36,7 +36,7 @@ setup(
     name = "pyinstruments",
     cmdclass={"install": installWithPost},
     scripts={'postinstallscript.py'},
-    version = "0.1.16",
+    version = "0.1.17",
     author = "Samuel Deleglise",
     author_email = "samuel.deleglise@gmail.com",
     description = ("""Control of data acquisition with remote instruments using 
@@ -67,7 +67,7 @@ setup(
               'pyinstruments/utils/conf_xml',
               'pyinstruments/utils/curve',
               'pyinstruments/utils/guiwrappersutils'],
-    long_description=read('README'),
+    long_description=read('README.rst'),
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Topic :: Scientific/Engineering :: Human Machine Interfaces",
