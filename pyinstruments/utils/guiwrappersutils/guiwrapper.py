@@ -15,14 +15,14 @@ def graphical_exception(func):
     return new_func
 
 class GuiWrapperWidget(QtGui.QWidget):
-    def __init__(self,driver):
+    def __init__(self, driver, parent=None):
         self.driver = driver
         self._gui_elements = dict()
         self._callable_elements = []
         self._tab_widgets = []
         self._tab_widget_items = []
         
-        super(GuiWrapperWidget,self).__init__()
+        super(GuiWrapperWidget,self).__init__(parent)
         self.lay = QtGui.QVBoxLayout()
         
         self.current_layout = self.lay
@@ -79,10 +79,10 @@ class GuiWrapperWidget(QtGui.QWidget):
     def _exit_layout(self):
         self.parent_layout()
     
-    def _setup_gui_element(self,property_name,**enum):
+    def _setup_gui_element(self, property_name, enum=None):
         """sets up for you a graphical element by checking the type of 
-        self.property_name. Will make a ComboBox if you provide a dict 
-        for enum. i.e: enum = {"AC":0,"DC":1,"GND":2}
+        self.property_name. Will make a ComboBox if you provide a list
+        enum. i.e: enum = [(0,"AC"),(1,"DC"),(2,"GND")}
         in case there is a point in the property_name, will look into 
         the attribute (e.g. property_name = "Average.NumberOfSweeps").
         """
@@ -93,8 +93,8 @@ class GuiWrapperWidget(QtGui.QWidget):
             print "Attribute " + property_name + " was not found in the driver. The corresponding element will be dropped from the GUI"
             return
         
-        if len(enum)>0:
-            obj = EnumItem(property_name,**enum)
+        if enum:
+            obj = EnumItem(property_name, enum)
             self.add_below(obj)
             self._gui_elements[property_name] = obj
             obj.value_changed.connect(self.get_values_from_gui)
@@ -170,49 +170,6 @@ class GuiWrapperWidget(QtGui.QWidget):
         if hasattr(self.driver, "_height_hint"):
             size.setHeight(self.driver._height_hint)
         return size
-
-class GuiWrapperWindow(QtGui.QMainWindow,object):
-    def __init__(self, driver, centralWidget):
-        super(GuiWrapperWindow,self).__init__(None)
-        self.driver = driver
-        self._setupBasicUi(self, centralWidget)
-        self.show()
-        
-    def _setupBasicUi(self, MainWindow, centralWidget):
-        MainWindow.setObjectName("MainWindow")
-        #MainWindow.resize(905, 400)
-        
-        self.setCentralWidget(centralWidget)
-        
-        #self.menubar = QtGui.QMenuBar(MainWindow)
-        #self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
-        #self.menubar.setObjectName("menubar")
-        #self.menuFile = QtGui.QMenu(self.menubar)
-        #self.menuFile.setObjectName("menuFile")
-        #MainWindow.setMenuBar(self.menubar)
-        
-        self.statusbar = QtGui.QStatusBar(MainWindow)
-        self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
-
-        #self.actionAutoDetect = QtGui.QAction(MainWindow)
-        #self.actionAutoDetect.setObjectName("actionAutoDetect")
-        #self.menuFile.addAction(self.actionAutoDetect)
-        
-        #self.menubar.addAction(self.menuFile.menuAction())
-        
-        self._retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)  
-         
-         
-        
-    def _retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", self.driver._gui_title, None, QtGui.QApplication.UnicodeUTF8))
-        #self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "file", None, QtGui.QApplication.UnicodeUTF8))
-        #self.actionAutoDetect.setText(QtGui.QApplication.translate("MainWindow", "auto detect new hardware!", None, QtGui.QApplication.UnicodeUTF8))
-    
-    
-
 
 class GuiItem(QtGui.QWidget):
     def __init__(self,label,hide_label = False):
@@ -311,18 +268,17 @@ class BoolItem(GuiItem):
         return val
     
 class EnumItem(GuiItem):
-    def __init__(self,label,**kwds):
-        super(EnumItem,self).__init__(label)
+    def __init__(self, label, enum):
+        super(EnumItem, self).__init__(label)
         self._item = QtGui.QComboBox()
-        for k,v in kwds.iteritems():
-            self._item.addItem(k,v)
+        for number, string in enumerate(enum):
+            self._item.addItem(string, number)
         self._lay.addWidget(self._item)
         self._item.currentIndexChanged.connect(self.emit)
-        self.choices = kwds
+        self.choices = enum
         self.choices_num = dict()
-        for i,num in enumerate(self.choices.values()):
-            self.choices_num[num] = i
-        kwds.values()
+        for index, val in enumerate(self.choices):
+            self.choices_num[index] = index
 
     @property
     def value(self):
@@ -384,7 +340,7 @@ class GuiWrapper(object):
         super(GuiWrapper,self).__init__()
         self._emitter = Emitter()
         self._gui_title = gui_title
-        self._widgets = []
+        self._widget = None
     
     def set_width_hint(self, width):
         self._width_hint = width
@@ -395,13 +351,15 @@ class GuiWrapper(object):
     def __getattr__(self,attr):
         return self.__getattribute__(attr)
        
-    def _create_widget(self):
-        widget = GuiWrapperWidget(self)
+    def widget(self, parent=None):
+        if self._widget:
+            return self._widget
+        widget = GuiWrapperWidget(self, parent)
         self._setupUi(widget)    
         widget.resize(widget.sizeHint())
         self.value_changed.connect(widget.set_values_in_gui)
         self.value_changed.emit()
-        self._widgets.append(widget)
+        self._widget = widget
         return widget
     
     def _set_gui_title(self,title):
@@ -409,11 +367,8 @@ class GuiWrapper(object):
         
     def gui(self):
         widget = self._create_widget()
-        if hasattr(self, "gui_window"):
-            self.gui_window.deleteLater()
-        self.gui_window = GuiWrapperWindow(self, widget)
-        self.gui_window.setWindowTitle(self._gui_title)
-        return self.gui_window
+        widget.show()
+        return widget
    # def sizeHint(self):
    #     return super(GuiWrapperWidget,self.gui_widget).sizeHint()
     

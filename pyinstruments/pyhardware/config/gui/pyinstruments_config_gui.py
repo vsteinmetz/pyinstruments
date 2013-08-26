@@ -180,7 +180,9 @@ class PyInstrumentsConfigGui(QtGui.QDockWidget):
         
     def gui_pressed(self, widget_item):
         instr = instrument(widget_item.val('logical_name'))
-        self.parent().central.lay.addWidget(instr.gui())
+        widget = instr.widget(parent=self)
+        self.parent().central.lay.addWidget(widget)
+        widget.show()
         self._instruments.append(instr)
         
     def setupUi(self, MainWindow):
