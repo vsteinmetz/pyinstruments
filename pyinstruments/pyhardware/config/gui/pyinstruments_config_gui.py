@@ -17,92 +17,82 @@ from pyinstruments.pyhardware.drivers.ivi_interop.ividotnet.config_store_utils \
 from PyQt4 import QtCore, QtGui
 import os
 
-class PyInstrumentsConfigGui(QtGui.QMainWindow):
-    """
-    Main gui class
-    """
-    
+class CentralWidgetInstruments(QtGui.QWidget):
+    def __init__(self, parent = None):
+        super(CentralWidgetInstruments, self).__init__(parent)
+        self.lay = QtGui.QHBoxLayout()
+        self.setLayout(self.lay)
+
+
+class PyInstrumentsWindow(QtGui.QMainWindow):
     def __init__(self, parent = None):
         """
         creates the window and associates it with the config object
         """
         
-        super(PyInstrumentsConfigGui, self).__init__(parent)
-        self.setupUi(self)
-        self._instruments = dict()
-        self.show()
-        self.loaded_drivers = dict()
-
-        QtCore.QObject.connect(self.actionRefresh, \
-                               QtCore.SIGNAL('triggered()'), \
-                               self.refresh)
-        QtCore.QObject.connect(self.actionAutoDetect, \
-                               QtCore.SIGNAL('triggered()'), \
-                               self.auto_detect)
-        QtCore.QObject.connect(self.actionRemoveAll, \
-                               QtCore.SIGNAL('triggered()'), \
-                               self.remove_all)
-        QtCore.QObject.connect(self.actionQueryModels, \
-                               QtCore.SIGNAL('triggered()'), \
-                               self.query_models)
-        self.treeWidget.itemChanged.connect(self.item_changed) 
-        self.treeWidget.setColumnWidth(0, 100)
-        self.treeWidget.setColumnWidth(1, 100)
-        self.treeWidget.setColumnWidth(2, 100)
-        self.treeWidget.setColumnWidth(3, 100)
-        self.refresh()
-       
-        self.treeWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.treeWidget.customContextMenuRequested.connect(self.contextMenu)
-       
-
-         
-    def setupUi(self, MainWindow):
-        """sets up the GUI"""
-        
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(405, 400)
-        self.treeWidget = PyTreeWidget(["logical_name", \
-                                        "address", \
-                                        "model", \
-                                        "simulate"])
-        self.treeWidget.setGeometry(QtCore.QRect(0, 0, 401, 400))
-        self.treeWidget.setIndentation(20)
-        self.treeWidget.setObjectName("treeWidget")
-        self.treeWidget.header().setDefaultSectionSize(500)
-        self.setCentralWidget(self.treeWidget)        
-        
-        self.menubar = QtGui.QMenuBar(MainWindow)
+        super(PyInstrumentsWindow, self).__init__(parent)
+        self.menubar = QtGui.QMenuBar(self)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 401, 21))
         self.menubar.setObjectName("menubar")
+        
+        self.menu_action = QtGui.QAction(self)
         self.menuFile = QtGui.QMenu(self.menubar)
-        self.menuFile.setObjectName("menuFile")
-        MainWindow.setMenuBar(self.menubar)
-        self.statusbar = QtGui.QStatusBar(MainWindow)
+        self.menu_action.setMenu(self.menuFile)
+#        self.menuFile.setObjectName("menuFile")
+        self.setMenuBar(self.menubar)
+        self.menubar.addAction(self.menu_action)
+        self.statusbar = QtGui.QStatusBar(self)
         self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
-        self.actionRefresh = QtGui.QAction(MainWindow)
+        self.setStatusBar(self.statusbar)
+        self.actionRefresh = QtGui.QAction(self)
         self.actionRefresh.setObjectName("actionRefresh")
-        self.actionRemoveAll = QtGui.QAction(MainWindow)
+        self.actionRemoveAll = QtGui.QAction(self)
         self.actionRemoveAll.setObjectName("actionRemoveAll")
         
-        self.actionQueryModels = QtGui.QAction(MainWindow)
+        self.actionQueryModels = QtGui.QAction(self)
         self.actionQueryModels.setObjectName("actionQueryModels")
         self.menuFile.addAction(self.actionQueryModels)
         
-        self.actionAutoDetect = QtGui.QAction(MainWindow)
+        self.actionAutoDetect = QtGui.QAction(self)
         self.actionAutoDetect.setObjectName("actionAutoDetect")
         self.menuFile.addAction(self.actionAutoDetect)
         
-        self.actionHelp = QtGui.QAction(MainWindow)
+        self.actionHelp = QtGui.QAction(self)
         self.actionHelp.setObjectName("actionHelp")
         self.menuFile.addAction(self.actionRefresh)
         self.menuFile.addAction(self.actionRemoveAll)
         self.menubar.addAction(self.menuFile.menuAction())
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)  
+        self.retranslateUi(self)
+        QtCore.QMetaObject.connectSlotsByName(self)
+        
+        self.dev_list = PyInstrumentsConfigGui(self)
+          
         self.setWindowIcon(\
-                        QtGui.QIcon(os.path.split(__file__)[0] +"/usb.png")) 
+                        QtGui.QIcon(os.path.split(__file__)[0] +"/usb.png"))
+        
+        QtCore.QObject.connect(self.actionRefresh, \
+                               QtCore.SIGNAL('triggered()'), \
+                               self.dev_list.refresh)
+        QtCore.QObject.connect(self.actionAutoDetect, \
+                               QtCore.SIGNAL('triggered()'), \
+                               self.dev_list.auto_detect)
+        QtCore.QObject.connect(self.actionRemoveAll, \
+                               QtCore.SIGNAL('triggered()'), \
+                               self.dev_list.remove_all)
+        QtCore.QObject.connect(self.actionQueryModels, \
+                               QtCore.SIGNAL('triggered()'), \
+                               self.dev_list.query_models)
+
+        self.central = CentralWidgetInstruments(self)
+        self.setCentralWidget(self.central)
+        
+        
+        
+        self.addDockWidget(\
+                QtCore.Qt.DockWidgetArea(QtCore.Qt.LeftDockWidgetArea),
+                self.dev_list)
+        
+        self.statusbar.showMessage('running...')
         
     def retranslateUi(self, MainWindow):
         """qt's stuffs..."""
@@ -150,26 +140,75 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
                                             None, \
                                             QtGui.QApplication.UnicodeUTF8) \
                                        )
+
+class PyInstrumentsConfigGui(QtGui.QDockWidget):
+    """
+    Main gui class
+    """
+    
+    def __init__(self, parent=None):
+        """
+        creates the window and associates it with the config object
+        """
+        
+        super(PyInstrumentsConfigGui, self).__init__(parent)
+        self.setupUi(self)
+        self._instruments = dict()
+        self.show()
+        self.loaded_drivers = dict()
+
+        self.tree_widget.itemChanged.connect(self.item_changed) 
+        self.tree_widget.setColumnWidth(0, 100)
+        self.tree_widget.setColumnWidth(1, 100)
+        self.tree_widget.setColumnWidth(2, 100)
+        self.tree_widget.setColumnWidth(3, 100)
+        self.refresh()
+       
+        self.tree_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.tree_widget.customContextMenuRequested.connect(self.contextMenu)
+       
+
+         
+    def setupUi(self, MainWindow):
+        """sets up the GUI"""
+        
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(405, 400)
+        self.tree_widget = PyTreeWidget([("logical_name", "string"), \
+                                        ("address", "string"), \
+                                        ("model", "string"), \
+                                        ("code", "text")])
+        self.tree_widget.setGeometry(QtCore.QRect(0, 0, 401, 400))
+        self.tree_widget.setIndentation(20)
+        self.tree_widget.setObjectName("tree_widget")
+        self.tree_widget.header().setDefaultSectionSize(500)
+        
+        self.setWidget(self.tree_widget)
+        
+    
         
     
     def _refresh(self, full = False):
         """
-        refreshes the gui, if full, sets also the color of the addess field
+        refreshes the gui, if full, sets also the color of the address field
         """
         
         pic = PyInstrumentsConfig()
-        self.treeWidget.blockSignals(True)
-        self.treeWidget.remove_all_items()
+        self.tree_widget.blockSignals(True)
+        self.tree_widget.remove_all_items()
         for tag, instr in pic.iteritems():
-            widgetItem = self.treeWidget.add_item("", \
-                                                  "", \
-                                                  "", \
-                                                  False)
-            widgetItem.set_values(tag, \
-                                  instr["address"], \
-                                  instr["model"], \
-                                  instr["simulate"])
-            
+            widgetItem = self.tree_widget.add_item("",
+                                                  "",
+                                                  "",
+                                                  "")
+            try:
+                widgetItem.set_values(tag, \
+                                  instr["address"],
+                                  instr["model"],
+                                  instr["code"])
+            except KeyError as e:
+                print "error"
+                print e
             if(driver_factory(instr["model"]) is None):
                 widgetItem.set_color(2, "red")
             else:
@@ -181,7 +220,7 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
             else:
                 widgetItem.set_color(1, "red")
                     
-        self.treeWidget.blockSignals(False) 
+        self.tree_widget.blockSignals(False) 
     
     def refresh(self):
         """
@@ -210,7 +249,7 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
         
         def change_address(new_address):
             pic = PyInstrumentsConfig()
-            itm = self.treeWidget.itemAt(point)
+            itm = self.tree_widget.itemAt(point)
             pic[itm.val("logical_name")]["address"] =  new_address
             pic.save()
             self.refresh()
@@ -242,7 +281,7 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
         
         def change_model(new_model):
             pic = PyInstrumentsConfig()
-            itm = self.treeWidget.itemAt(point)
+            itm = self.tree_widget.itemAt(point)
             pic[itm.val("logical_name")]["model"] =  new_model
             pic.save()
             self.refresh()
@@ -319,14 +358,14 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
         
     def contextMenu(self, point):
         """
-        Context Menu (right click on the treeWidget)
+        Context Menu (right click on the tree_widget)
         """
         
         
-        if self.treeWidget.itemAt(point) != None:
-            if self.treeWidget.columnAt(point.x()) == 1:        
+        if self.tree_widget.itemAt(point) != None:
+            if self.tree_widget.columnAt(point.x()) == 1:        
                 return self.contextMenuAdresses(point)
-            if self.treeWidget.columnAt(point.x()) == 2:
+            if self.tree_widget.columnAt(point.x()) == 2:
                 return self.contextMenuModels(point)
         pic = PyInstrumentsConfig()
         
@@ -350,7 +389,7 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
         actionAddDevice = QtGui.QAction("add device", self)
         actionAddDevice.triggered.connect(add)
         menu.addAction(actionAddDevice)
-        items = self.treeWidget.selectedItems()
+        items = self.tree_widget.selectedItems()
         if len(items)>0:
             obj = items[0]
             logical_name = str(obj.text(0))
@@ -445,15 +484,18 @@ class PyInstrumentsConfigGui(QtGui.QMainWindow):
         
         pic = PyInstrumentsConfig()
         pic.clear()
-        for itm in self.treeWidget:
-            pic[itm.val("logical_name")] = {"address" : itm.val("address"), \
-                                            "model" : itm.val("model"), \
-                                            "simulate" : itm.val("simulate")}
+        for itm in self.tree_widget:
+            pic[itm.val("logical_name")] = {"address" : itm.val("address"),
+                                            "model" : itm.val("model"),
+                                            "code": itm.val("code")}
         pic.save()
     
     def item_changed(self):
         """an item changed in the gui"""
         
+        print "item changed"
         self.get_from_gui()
+        pic = PyInstrumentsConfig()
+        print pic
         self.fast_refresh()
         self.get_from_gui()

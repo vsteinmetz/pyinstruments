@@ -30,7 +30,8 @@ class Curve(object):
         
     def __init__(self, data = None, meta = dict()):
         self._data = data
-        self.meta = MetaData(**meta)
+        self._meta = MetaData(**meta)
+        
         
     def plot(self, *args, **kwds):
         self.data.plot(*args, **kwds)

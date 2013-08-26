@@ -11,11 +11,12 @@ class PyTreeWidget(QtGui.QTreeWidget):
     configuration
     """
     
-    def __init__(self, col_names, main_key = 0, is_editable = True):
+    def __init__(self, col_names_and_types, main_key=0, is_editable=True):
         super(PyTreeWidget, self).__init__()
         self.main_key = main_key
         self.is_editable = is_editable
-        for index, name in enumerate(col_names):
+        self.types = []
+        for index, (name, type_) in enumerate(col_names_and_types):
             self.headerItem().setText(index, \
                                       QtGui.QApplication.translate( \
                                                         "MainWindow", \
@@ -23,18 +24,11 @@ class PyTreeWidget(QtGui.QTreeWidget):
                                                         None, \
                                                         QtGui.QApplication.\
                                                         UnicodeUTF8))
-        self.itemChanged.connect(self.item_changed)
+            if type_ not in ['string', 'text']:
+                raise ValueError('authorized types are string and text')
+            self.types.append(type_)
+#        self.itemChanged.connect(self.item_changed)
 
-    def item_changed(self, item, col):
-        """
-        an item in the gui was changed
-        """
-        
-        if item.types[col] == bool:
-            res = item.checkState(col) != 0
-            self.blockSignals(True)
-            item.setText(col, str(res))
-            
 
     def col_nr(self, col_name):
         """returns the index of the column named col_name"""
@@ -47,46 +41,14 @@ class PyTreeWidget(QtGui.QTreeWidget):
     def add_item(self, *args):
         """adds a top level item, with labels in the successive columns as 
         found in args.
-        if a list is provided, will create a combobox,
-        if boolean provided, makes a checkbox
         """
         
-        labels = [""]*len(args)
-        choices = [None]*len(args)
-        boolean = [None]*len(args)
-        types = [None]*len(args)
-        for index, val in enumerate(args):
-            if isinstance(val, basestring):
-                labels[index] = val
-                types[index] = str
-            if isinstance(val, list):
-                choices[index] = val
-                types[index] = list
-            if isinstance(val, bool):
-                boolean[index] = val
-                types[index] = bool
-        
-        itm = PyTreeWidgetItem(labels)
-        itm.parentTree = self
-        itm.types = types
+        labels = list(args)
+        itm = PyTreeWidgetItem(self, labels)
         itm.setFlags(itm.flags() | QtCore.Qt.ItemIsUserCheckable)
         if self.is_editable:
-            itm.setFlags(itm.flags() | QtCore.Qt.ItemIsEditable)
+            itm.setFlags(itm.flags() | QtCore.Qt.ItemIsEditable)        
         
-        self.addTopLevelItem(itm)
-        for index, (choice, boo) in enumerate(zip(choices, boolean)):
-            if choice is not None:
-                cmb = ComboBoxItem(itm, index)
-                for c in choice:
-                    cmb.addItem(c)
-                self.setItemWidget(itm, index, cmb)
-            if boo is not None:
-                if boo == "False":
-                    boo = False
-                if boo == "True":
-                    boo = True
-                itm.setCheckState(index, boo*2)
-                self.item_changed(itm, index)
         return itm
     
     
@@ -104,7 +66,7 @@ class PyTreeWidget(QtGui.QTreeWidget):
             raise KeyError("no elements in the tree")
         for index in range(self.topLevelItemCount()):
             ite = self.topLevelItem(index)
-            if ite.val(self.main_key) == val:
+            if ite.text(self.main_key) == val:
                 return ite 
         raise KeyError("no element with value " + \
                        str(val) + \
@@ -127,101 +89,87 @@ class PyTreeWidget(QtGui.QTreeWidget):
 
     def __setitem__(self):
         raise NotImplementedError("That should have been though, sorry...")
+    
+    edit_pressed = QtCore.pyqtSignal(QtGui.QTreeWidgetItem, int, name='edit_pressed')
 
+class TextDialog(QtGui.QDialog):
+    def __init__(self, parent = None):
+        super(TextDialog, self).__init__(parent)
+        self.lay = QtGui.QVBoxLayout()
+        self.text_edit = QtGui.QPlainTextEdit(self)
+        self.lay.addWidget(self.text_edit)
+        self.button_ok = QtGui.QPushButton('OK')
+        self.button_cancel = QtGui.QPushButton('Cancel')
+        self.hlay = QtGui.QHBoxLayout()
+        self.hlay.addWidget(self.button_cancel)
+        self.hlay.addWidget(self.button_ok)
+        self.lay.addLayout(self.hlay)
+        self.setLayout(self.lay)
+        self.button_cancel.pressed.connect(self.reject)
+        self.button_ok.pressed.connect(self.accept)
+        
+    def text(self):
+        return self.text_edit.toPlainText()    
+    
+    def set_text(self, text):
+        self.text_edit.setPlainText(text)    
 
 class PyTreeWidgetItem(QtGui.QTreeWidgetItem):
     """
     Wrapper for an item in the tree
     """
     
-    def val(self, col):
+    def __init__(self, parent_tree, list_val):
+        self.long_texts = list_val
+        self.parent_tree = parent_tree
+        self.buttons = []*len(list_val)
+        super(PyTreeWidgetItem, self).__init__(list_val)
+        self.parent_tree.addTopLevelItem(self)
+        for index, type_ in enumerate(self.parent_tree.types):
+            if type_ == 'text':
+                button = QtGui.QPushButton("edit...")
+                self.buttons.append(button)
+                self.parent_tree.setItemWidget(self, index, button)
+                self.current_index = index
+                def emit_with_index(itm=self, idx=index):
+                    print "alors"
+                    self.parent_tree.edit_pressed.emit(itm, idx)
+                button.pressed.connect(emit_with_index)
+        self.parent_tree.edit_pressed.connect(self.new_text)
+        
+                
+    def new_text(self, item, index):
+        if item==self:
+            self.text_dialog = TextDialog()
+            self.text_dialog.accepted.connect(self._i_changed)
+            self.text_dialog.set_text(self.long_texts[index])
+            self.text_dialog.exec_()
+            
+    
+    def _i_changed(self):
+        self.long_texts[self.current_index] = str(self.text_dialog.text())
+        self.parent_tree.itemChanged.emit(self, 0)
+    
+    def set_values(self, *args):
+        for index, val in enumerate(args):
+            if self.parent_tree.types[index] == "string":
+                if val:
+                    self.setText(index, val)
+            else:
+                self.long_texts[index] = val
+    
+    def val(self, col):                
         """column can either be a number or the name of the column"""
         
         if isinstance(col, basestring):
-            index = self.parentTree.col_nr(col)
+            index = self.parent_tree.col_nr(col)
         else:
             index = col
-        if self.types[index] == bool:
-            if str(self.text(index)) == 'True':
-                return True
-            if str(self.text(index)) == 'False':
-                return False
-        else:
+        if self.parent_tree.types[index] == 'string':
             return str(self.text(index))
-    
-    def set_values(self, *args):
-        """displays the values as they appear in args. raises an exception 
-        if something is inconsistent with the possible values previously 
-        entered in add_item
-        """
+        else:
+            return self.long_texts[index]
         
-        for index, val in enumerate(args):
-            self._set_val(index, val)
-
-    def set_value(self, **kwds):
-        """
-        Sets the value for the whole line
-        """
-        
-        if len(kwds)!=1:
-            raise ValueError("set_value expects only a single kwd:value pair")
-        col = kwds.keys()[0]
-        val = kwds.values()[0]
-        for index in range(self.parentTree.columnCount()):
-            if kwds.keys()[0] == self.parentTree.headerItem().text(index):
-                self._set_val(index, val)
-                
-    def _set_val(self, index, val):
-        """
-        sets only one value
-        """
-        
-        if self.types[index] == str:
-            self.setText(index, str(val))
-        if self.types[index] == bool:
-            if val == "True":
-                val = True
-            if val == "False":
-                val = False
-            if not isinstance(val, bool):
-                raise ValueError("boolean expected for a checkbox")
-            self.setCheckState(index, val*2)
-            self.parentTree.item_changed(self, index)
-        if self.types[index] == list:
-            #self.parentTree.itemWidget(self,1)
-            cmb = self.parentTree.itemWidget(self, index)
-            for index in range(cmb.count()):
-                if cmb.itemText(index) == val:
-                    cmb.setCurrentIndex(index)
-               
     def set_color(self, col_nr , color_str):
-        self.setBackgroundColor(col_nr, QtGui.QColor(color_str))    
-         
-class ComboBoxItem(QtGui.QComboBox):
-    """
-    Item for multiple choice
-    """
-    
-    def __init__(self, item, column):
-        super(ComboBoxItem, self).__init__()
-        self.item = item
-        self.column = column
-        QtCore.QObject.connect(self, \
-                               QtCore.SIGNAL("currentIndexChanged(int)"), \
-                               self.change_item)
-
-    #@QtCore.pyqtSlot(int)
-    def change_item(self, index):
-        """
-        selected item changed
-        """
-        
-        self.item.setText(self.column, self.itemText(index))
-
-    def data(self):
-        """
-        returns the data string associated with the combobox value
-        """
-        
-        return str(tl.data(0, QtCore.Qt.UserRole).toString())
+        self.setBackgroundColor(col_nr, QtGui.QColor(color_str))
      
