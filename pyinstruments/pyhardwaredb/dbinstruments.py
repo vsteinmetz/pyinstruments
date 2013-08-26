@@ -1,4 +1,3 @@
-from pyinstruments.pyhardware import use_for_ivi
 from pyinstruments.pyhardware.instruments.gui_fetchable import GuiFetchable
 from pyinstruments.pyhardware.instruments.ivi_scope_gui import IviScopeGui
 from pyinstruments.pyhardware.instruments.ivi_spec_an_gui import IviSpecAnGui

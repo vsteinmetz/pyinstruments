@@ -9,7 +9,6 @@ class VisaDriver(Driver):
     """
     Base class for device interfaced with Visa
     """
-    _supported_models = []
     
     def __init__(self, *args):
         """
@@ -49,4 +48,9 @@ class VisaDriver(Driver):
         *IDN? query reply.
         """
         
-        return cls._supported_models
+        models = []
+        if hasattr(cls, '_supported_models'):
+            return cls._supported_models
+        for child in cls.__subclasses__():
+            models+=child.supported_models()
+        return models

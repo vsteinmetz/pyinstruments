@@ -3,6 +3,8 @@ defines the base class for a driver. This abstract class can be inherited by
 ivicom, ividotnet, visa or serial
 """
 
+from pyinstruments.utils.class_utils import list_all_child_classes
+
 class Driver(object):
     """Base class to interface an instrument
     """
@@ -41,4 +43,8 @@ class Driver(object):
         *IDN? query reply.
         """
         
-        raise NotImplementedError()
+        models = []
+        
+        for subclass in cls.__subclasses__():
+            models+=subclass.supported_models()
+        return models

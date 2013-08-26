@@ -14,9 +14,19 @@ from pyinstruments.utils import curve
 
 from guidata import qapplication as __qapplication
 _APP = __qapplication()
+
+from pyinstruments.pyhardware.config import PyInstrumentsConfig as _PIC
     
-from pyinstruments.pyhardware.factories import instrument, use_for_ivi
-import pyinstruments.pyhardware.instruments
+def instrument(logical_name):
+    pic = _PIC()
+    dic = pic[logical_name]
+    address = dic["address"]
+    model = dic["model"]
+    simulate = dic["simulate"]
+    code = dic["code"]
+    exec(code)
+    return instrument
+
 
 def gui():
     import pyinstruments.pyhardware.config.gui

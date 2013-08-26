@@ -5,14 +5,17 @@ This module is here to allow GUI interaction with the config file
 from pyinstruments.pyhardware.config.gui.pytreewidget import PyTreeWidget
 from pyinstruments.pyhardware.config.pyinstruments_config import PyInstrumentsConfig
 import pyinstruments.pyhardware.config.connected_instruments as con
-from pyinstruments.pyhardware.factories import driver_factory, instrument_factory
-from pyinstruments.pyhardware.factories.factories_utils import \
-                                        list_all_child_classes
-from pyinstruments.pyhardware.drivers.ivi_interop.ividotnet import IviDotNetDriver
+#from pyinstruments.pyhardware.factories import driver_factory, instrument_factory
+#from pyinstruments.pyhardware.factories.factories_utils import \
+ #                                       list_all_child_classes
+from pyinstruments.pyhardware.drivers import Driver
+from pyinstruments.pyhardware.drivers.ivi import IviDriver
 from pyinstruments.pyhardware.drivers import VisaDriver, SerialDriver
 from pyinstruments.pyhardware import instrument
-from pyinstruments.pyhardware.drivers.ivi_interop.ividotnet.config_store_utils \
-                                    import CONFIG_STORE
+from pyinstruments.utils.class_utils import list_all_child_classes
+from pyivi import software_modules
+#from pyinstruments.pyhardware.drivers.ivi_interop.ividotnet.config_store_utils \
+#                                    import CONFIG_STORE
                                             
 from PyQt4 import QtCore, QtGui
 import os
@@ -32,7 +35,7 @@ class PyInstrumentsWindow(QtGui.QMainWindow):
         
         super(PyInstrumentsWindow, self).__init__(parent)
         self.menubar = QtGui.QMenuBar(self)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 401, 21))
+        #self.menubar.setGeometry(QtCore.QRect(0, 0, 401, 21))
         self.menubar.setObjectName("menubar")
         
         self.menu_action = QtGui.QAction(self)
@@ -94,6 +97,10 @@ class PyInstrumentsWindow(QtGui.QMainWindow):
         
         self.statusbar.showMessage('running...')
         
+    
+    def sizeHint(self):
+        return QtCore.QSize(900, 900)    
+    
     def retranslateUi(self, MainWindow):
         """qt's stuffs..."""
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", \
@@ -153,35 +160,42 @@ class PyInstrumentsConfigGui(QtGui.QDockWidget):
         
         super(PyInstrumentsConfigGui, self).__init__(parent)
         self.setupUi(self)
-        self._instruments = dict()
+        self._instruments = []#dict()
         self.show()
-        self.loaded_drivers = dict()
+        #self.loaded_drivers = dict()
 
         self.tree_widget.itemChanged.connect(self.item_changed) 
-        self.tree_widget.setColumnWidth(0, 100)
-        self.tree_widget.setColumnWidth(1, 100)
-        self.tree_widget.setColumnWidth(2, 100)
-        self.tree_widget.setColumnWidth(3, 100)
+        self.tree_widget.setColumnWidth(0, 119)
+        self.tree_widget.setColumnWidth(1, 119)
+        self.tree_widget.setColumnWidth(2, 119)
+        self.tree_widget.setColumnWidth(3, 40)
+        self.tree_widget.setColumnWidth(4, 50)
+        self.tree_widget.setColumnWidth(5, 50)
         self.refresh()
        
         self.tree_widget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.tree_widget.customContextMenuRequested.connect(self.contextMenu)
-       
-
-         
+        self.tree_widget.button_pressed.connect(self.gui_pressed)
+        
+        
+    def gui_pressed(self, widget_item):
+        instr = instrument(widget_item.val('logical_name'))
+        self.parent().central.lay.addWidget(instr.gui())
+        self._instruments.append(instr)
+        
     def setupUi(self, MainWindow):
         """sets up the GUI"""
         
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(405, 400)
-        self.tree_widget = PyTreeWidget([("logical_name", "string"), \
-                                        ("address", "string"), \
-                                        ("model", "string"), \
-                                        ("code", "text")])
-        self.tree_widget.setGeometry(QtCore.QRect(0, 0, 401, 400))
-        self.tree_widget.setIndentation(20)
+        self.tree_widget = PyTreeWidget([("logical_name", "string"),
+                                        ("address", "string"),
+                                        ("model", "string"),
+                                        ("simulate", "bool"),
+                                        ("code", "text"),
+                                        ("gui", "button")])
+        #self.tree_widget.setGeometry(QtCore.QRect(0, 0, 401, 400))
+        #self.tree_widget.setIndentation(20)
         self.tree_widget.setObjectName("tree_widget")
-        self.tree_widget.header().setDefaultSectionSize(500)
+        #self.tree_widget.header().setDefaultSectionSize(500)
         
         self.setWidget(self.tree_widget)
         
@@ -200,19 +214,22 @@ class PyInstrumentsConfigGui(QtGui.QDockWidget):
             widgetItem = self.tree_widget.add_item("",
                                                   "",
                                                   "",
+                                                  "",
+                                                  "",
                                                   "")
             try:
                 widgetItem.set_values(tag, \
                                   instr["address"],
                                   instr["model"],
+                                  instr["simulate"],
                                   instr["code"])
             except KeyError as e:
                 print "error"
                 print e
-            if(driver_factory(instr["model"]) is None):
-                widgetItem.set_color(2, "red")
-            else:
+            if(instr["model"] in Driver.supported_models()):
                 widgetItem.set_color(2, "green")
+            else:
+                widgetItem.set_color(2, "red")
             
             
             if(instr["address"] in con.existing_addresses(full)):
@@ -298,25 +315,24 @@ class PyInstrumentsConfigGui(QtGui.QDockWidget):
             menu.addAction(model_action)
         
         menu = QtGui.QMenu(self)
-        ivi_interop = QtGui.QMenu("ivi_interop", self)
-        dotnet_menu = QtGui.QMenu("dotnet", self)
-        menu.addMenu(dotnet_menu)
-        dotnet_drivers = list_all_child_classes(IviDotNetDriver)
-        dotnet_types_menu = []
+        ivi_menu = QtGui.QMenu("ivi", self)
+        menu.addMenu(ivi_menu)
+        ivi_drivers = list_all_child_classes(IviDriver)
+        ivi_types_menu = []
         soft_modules = []
         modules_menu = []
         model_actions = []
-        for driver in dotnet_drivers.values():
+        for driver in ivi_drivers.values():
             type_menu = QtGui.QMenu(driver.__name__)
-            dotnet_types_menu.append(type_menu)
-            dotnet_menu.addMenu(type_menu)
+            ivi_types_menu.append(type_menu)
+            ivi_menu.addMenu(type_menu)
             for module in driver.supported_software_modules():
                 #if module in map(lambda x: x.name, CONFIG_STORE):
                     soft_modules.append(module)
                     module_menu = QtGui.QMenu(module)
                     modules_menu.append(module_menu)
                     type_menu.addMenu(module_menu)
-                    for model in CONFIG_STORE.get_supported_models(module):
+                    for model in software_modules[module].supported_instrument_models():
                         add_model_in_menu(module_menu, model)
                         
         
@@ -354,8 +370,6 @@ class PyInstrumentsConfigGui(QtGui.QDockWidget):
 #            module_menu.addAction(model_action)
         self.exec_menu_at_right_place(menu, point)
         
-
-        
     def contextMenu(self, point):
         """
         Context Menu (right click on the tree_widget)
@@ -382,7 +396,7 @@ class PyInstrumentsConfigGui(QtGui.QDockWidget):
             adds an item
             """
             
-            pic.add_instrument()
+            tag = pic.add_instrument()
             self.refresh()
             
         menu = QtGui.QMenu(self)
@@ -422,31 +436,7 @@ class PyInstrumentsConfigGui(QtGui.QDockWidget):
             #### if some specific menu_items have to be added,
             ## they will be added here
             
-            instr = pic[logical_name]
-            if(driver_factory(instr["model"]) is not None):
-                if instr["simulate"] or \
-                        instr["address"] in \
-                            con.existing_addresses(recheck = False):
-                    try:
-                        instrument_driver = instrument_factory( \
-                                                        logical_name)
-                    except BaseException as e:
-                        print e.message
-                    else:
-                        try:
-                            items = instrument_driver.menu_items()
-                        except AttributeError:
-                            items = []
-                        for menu_i in items:
-                            custom_action = QtGui.QAction(menu_i.text, \
-                                                          self)
-                            log_n = logical_name
-                            action = menu_i.action
-                            def run_custom():
-                                instrum = instrument(logical_name)
-                                menu_i.action(instrum)
-                            custom_action.triggered.connect(run_custom)
-                            menu.addAction(custom_action)
+            
 
         self.exec_menu_at_right_place(menu, point)
 
@@ -487,15 +477,14 @@ class PyInstrumentsConfigGui(QtGui.QDockWidget):
         for itm in self.tree_widget:
             pic[itm.val("logical_name")] = {"address" : itm.val("address"),
                                             "model" : itm.val("model"),
+                                            "simulate" : itm.val("simulate"),
                                             "code": itm.val("code")}
         pic.save()
     
     def item_changed(self):
         """an item changed in the gui"""
-        
-        print "item changed"
+
         self.get_from_gui()
         pic = PyInstrumentsConfig()
-        print pic
         self.fast_refresh()
         self.get_from_gui()

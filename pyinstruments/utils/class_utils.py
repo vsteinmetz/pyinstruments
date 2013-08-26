@@ -1,7 +1,3 @@
-"""
-Some utilities to list drivers are listed here
-"""
-
 from collections import OrderedDict
 
 def class_to_str(cls):

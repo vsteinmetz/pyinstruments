@@ -69,7 +69,8 @@ def add_all_new_instruments():
                 tag = address
             else:
                 tag = "DEV"
-            pic.add_instrument(tag, address = address, model = model)
+            tag = pic.add_instrument(tag, address = address, model = model)
+            
             
 def query_models():
     """Physically queries all instruments models"""

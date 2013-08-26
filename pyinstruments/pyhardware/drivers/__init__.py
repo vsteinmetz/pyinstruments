@@ -4,6 +4,6 @@ protocol, hardware address and so on...
 """
 
 from driver import Driver
-from ivi_interop import IviComDriver, IviDotNetDriver
+from ivi import IviDriver
 from serial import SerialDriver
 from visa import VisaDriver

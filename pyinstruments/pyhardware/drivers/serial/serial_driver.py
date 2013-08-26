@@ -10,7 +10,6 @@ class SerialDriver(Driver):
     Base class for serial drivers
     """
     
-    _supported_models = []
     lf = "\r\n"
     def __init__(self, \
                  logical_name, \
@@ -86,4 +85,9 @@ class SerialDriver(Driver):
         *IDN? query reply.
         """
         
-        return cls._supported_models
+        models = []
+        if hasattr(cls, '_supported_models'):
+            return cls._supported_models
+        for child in cls.__subclasses__():
+            models+=child.supported_models()
+        return models
