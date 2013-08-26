@@ -1,7 +1,7 @@
 """module to interface the TDS2024b scope (using VISA interface)"""
 
 from pyinstruments.pyhardware.drivers.visa import VisaDriver
-from mypandas import *
+from pandas import Series
 
 import visa
 
