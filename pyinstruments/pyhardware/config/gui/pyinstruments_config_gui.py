@@ -23,9 +23,22 @@ import os
 class CentralWidgetInstruments(QtGui.QWidget):
     def __init__(self, parent = None):
         super(CentralWidgetInstruments, self).__init__(parent)
+        
         self.lay = QtGui.QHBoxLayout()
+        self.tabs = QtGui.QTabWidget()
+        self.tabs.setTabsClosable(True)
+        self.tabs.tabCloseRequested.connect(self.tabs.removeTab)
+        
+        self.lay.addWidget(self.tabs)
+        
+        
         self.setLayout(self.lay)
 
+        
+
+    def add_instrument(self, widget, name):
+        index = self.tabs.addTab(widget, name)
+        self.tabs.setCurrentIndex(index)
 
 class PyInstrumentsWindow(QtGui.QMainWindow):
     def __init__(self, parent = None):
@@ -96,10 +109,8 @@ class PyInstrumentsWindow(QtGui.QMainWindow):
                 self.dev_list)
         
         self.statusbar.showMessage('running...')
-        
+        self.resize(QtCore.QSize(1500, 700))
     
-    def sizeHint(self):
-        return QtCore.QSize(900, 900)    
     
     def retranslateUi(self, MainWindow):
         """qt's stuffs..."""
@@ -179,9 +190,10 @@ class PyInstrumentsConfigGui(QtGui.QDockWidget):
         
         
     def gui_pressed(self, widget_item):
-        instr = instrument(widget_item.val('logical_name'))
+        name = widget_item.val('logical_name')
+        instr = instrument(name)
         widget = instr.widget(parent=self)
-        self.parent().central.lay.addWidget(widget)
+        self.parent().central.add_instrument(widget, name)
         widget.show()
         self._instruments.append(instr)
         
