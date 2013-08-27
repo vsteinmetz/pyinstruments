@@ -1,7 +1,8 @@
-from pyinstruments.utils.curve import Curve
 import pyinstruments.datastore
-from pyinstruments.pyhardware import choices
 from pyinstruments.datastore.settings import MEDIA_ROOT
+
+from pyhardware.utils.curve import Curve
+from pyhardware import choices
 
 from django.db import models
 from django.core.urlresolvers import reverse
@@ -81,9 +82,9 @@ class CurveDB(models.Model, Curve):
         self.date_created = datetime.now()
 
 
-    @property
-    def meta(self):
-        return self._meta
+    #@property
+    #def meta(self):
+    #    return self._meta
 
     def __unicode__(self):
         return self.name
@@ -93,7 +94,6 @@ class CurveDB(models.Model, Curve):
     tags = models.ManyToManyField(Tag, default = [1])
     window = models.ForeignKey(Window, default = 1)
     
-
         
     #read only
     data_file = models.FileField(upload_to = '%Y/%m/%d')

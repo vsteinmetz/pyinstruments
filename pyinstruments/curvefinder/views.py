@@ -7,7 +7,7 @@ import os
 from pandas import HDFStore
 from django.conf import settings
 from django.views.generic import ListView, DetailView, TemplateView
-from pyinstruements.curvefinder.models import Curve
+from pyinstruments.curvefinder.models import Curve
 
 
 class CurveListView(ListView):
