@@ -2,7 +2,7 @@ import pyinstruments.datastore
 from pyinstruments.datastore.settings import MEDIA_ROOT
 
 from pyhardware.utils.curve import Curve
-from pyhardware import choices
+from pyivi import choices
 
 from django.db import models
 from django.core.urlresolvers import reverse
