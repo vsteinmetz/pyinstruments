@@ -302,12 +302,12 @@ class SpecAnCurve(FrequencyCurve):
         curve_type = super(SpecAnCurve, self).curve_types.SpecAnCurve
         
     detector_types = choices.spec_an_detector_types
-    acquisition_types = choices.spec_an_acquisition_types
+    trace_types = choices.spec_an_trace_types
     
     averaging = models.IntegerField()
     detector_type = models.CharField(max_length = 100, choices = detector_types, \
                                         blank = True)
-    acquisition_type = models.CharField(max_length = 100, choices = acquisition_types, \
+    trace_type = models.CharField(max_length = 100, choices = trace_types, \
                                         blank = True)
     
     trace = models.CharField(max_length = 255, \
