@@ -1,7 +1,8 @@
-from pyinstruments.utils.curve import Curve
 import pyinstruments.datastore
-from pyinstruments.pyhardware import choices
 from pyinstruments.datastore.settings import MEDIA_ROOT
+
+from pyhardware.utils.curve import Curve
+from pyivi import choices
 
 from django.db import models
 from django.core.urlresolvers import reverse
@@ -80,6 +81,11 @@ class CurveDB(models.Model, Curve):
         Curve.__init__(self, data=data, meta=meta)
         self.date_created = datetime.now()
 
+
+    #@property
+    #def meta(self):
+    #    return self._meta
+
     def __unicode__(self):
         return self.name
 
@@ -88,7 +94,6 @@ class CurveDB(models.Model, Curve):
     tags = models.ManyToManyField(Tag, default = [1])
     window = models.ForeignKey(Window, default = 1)
     
-
         
     #read only
     data_file = models.FileField(upload_to = '%Y/%m/%d')
@@ -297,12 +302,12 @@ class SpecAnCurve(FrequencyCurve):
         curve_type = super(SpecAnCurve, self).curve_types.SpecAnCurve
         
     detector_types = choices.spec_an_detector_types
-    acquisition_types = choices.spec_an_acquisition_types
+    trace_types = choices.spec_an_trace_types
     
     averaging = models.IntegerField()
     detector_type = models.CharField(max_length = 100, choices = detector_types, \
                                         blank = True)
-    acquisition_type = models.CharField(max_length = 100, choices = acquisition_types, \
+    trace_type = models.CharField(max_length = 100, choices = trace_types, \
                                         blank = True)
     
     trace = models.CharField(max_length = 255, \
@@ -313,6 +318,7 @@ class SpecAnCurve(FrequencyCurve):
         dic = super(SpecAnCurve, self).get_fields_as_text_ordered_dict()
         dic["averaging"] = str(self.averaging)
         dic["detector_type"] = str(self.detector_types._choice_dict[self.detector_type])
+        dic["trace_type"] = str(self.trace_types._choice_dict[self.trace_type])
         dic["trace"] = str(self.trace)
         return dic
     
@@ -378,50 +384,51 @@ def curve_db_from_curve(curve):
     returns a CurveDB child using the meta data found in the curve
     """
 
-    types = {"CurveDB": CurveDB, \
-             "NaCurve": NaCurve, \
-             "SpecAnCurve": SpecAnCurve, \
+    types = {"CurveDB": CurveDB,
+             "NaCurve": NaCurve,
+             "SpecAnCurve": SpecAnCurve,
              "ScopeCurve": ScopeCurve}
     (log_name, new) = InstrumentLogicalName.objects.get_or_create( \
                     name=curve.meta.instrument_logical_name)
     
     if curve.meta.curve_type == "ScopeCurve":
-        kwds = {"acquisition_type" : curve.meta.acquisition_type, \
-         "averaging" : curve.meta.averaging, \
-         "start_time" : curve.meta.start_time, \
-         "record_length": curve.meta.record_length, \
-         "coupling" : curve.meta.coupling, \
-         "full_range" : curve.meta.full_range, \
-         "offset" : curve.meta.offset, \
-         "sample_rate": curve.meta.sample_rate, \
-         "input_freq_max": curve.meta.input_freq_max, \
-         "input_impedance": curve.meta.input_impedance, \
-         "channel" : curve.meta.channel}
+        kwds = { "acquisition_type" : curve.meta.acquisition_type,
+                 "averaging" : curve.meta.averaging,
+                 "start_time" : curve.meta.start_time,
+                 "record_length": curve.meta.record_length,
+                 "coupling" : curve.meta.coupling,
+                 "full_range" : curve.meta.full_range,
+                 "offset" : curve.meta.offset,
+                 "sample_rate": curve.meta.sample_rate,
+                 "input_freq_max": curve.meta.input_freq_max,
+                 "input_impedance": curve.meta.input_impedance,
+                 "channel" : curve.meta.channel}
     if curve.meta.curve_type == "SpecAnCurve":
-        kwds = {"bandwidth": curve.meta.bandwidth, \
-              "averaging":curve.meta.averaging, \
-              "center_freq":curve.meta.center_freq, \
-              "start_freq":curve.meta.start_freq, \
-              "stop_freq":curve.meta.stop_freq, \
-              "span":curve.meta.span, \
-              "trace":curve.meta.trace, \
-              "detector_type":curve.meta.detector_type}
+        kwds = {  "bandwidth": curve.meta.bandwidth,
+                  "averaging":curve.meta.averaging,
+                  "center_freq":curve.meta.center_freq,
+                  "start_freq":curve.meta.start_freq,
+                  "stop_freq":curve.meta.stop_freq,
+                  "span":curve.meta.span,
+                  "trace":curve.meta.trace,
+                  "detector_type":curve.meta.detector_type,
+                  "trace_type":curve.meta.trace_type}
     if curve.meta.curve_type == "NaCurve":
-        kwds = {"bandwidth": curve.meta.bandwidth, \
-              "averaging":curve.meta.averaging, \
-              "center_freq":curve.meta.center_freq, \
-              "start_freq":curve.meta.start_freq, \
-              "stop_freq":curve.meta.stop_freq, \
-              "span":curve.meta.span, \
-              "input_port":curve.meta.input_port, \
-              "output_port":curve.meta.output_port, \
-              "format":curve.meta.format, \
-              "channel":curve.meta.channel, \
-              "measurement":curve.meta.measurement}
-    return types[curve.meta.curve_type](data = curve.data, \
-                                meta = curve.meta, \
-                                instrument_logical_name=log_name, \
-                                curve_type = curve.meta.curve_type, \
+        kwds = {  "bandwidth": curve.meta.bandwidth,
+                  "averaging":curve.meta.averaging,
+                  "center_freq":curve.meta.center_freq,
+                  "start_freq":curve.meta.start_freq,
+                  "stop_freq":curve.meta.stop_freq,
+                  "span":curve.meta.span,
+                  "input_port":curve.meta.input_port,
+                  "output_port":curve.meta.output_port,
+                  "format":curve.meta.format,
+                  "channel":curve.meta.channel,
+                  "measurement":curve.meta.measurement}
+    return types[curve.meta.curve_type](data = curve.data,
+                                meta = curve.meta,
+                                instrument_logical_name=log_name,
+                                curve_type = curve.meta.curve_type,
                                 **kwds)
 
 

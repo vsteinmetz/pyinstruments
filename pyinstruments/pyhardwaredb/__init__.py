@@ -7,9 +7,11 @@ from guidata import qapplication as __qapplication
 _APP = __qapplication()
 
 import dbinstruments
-from pyinstruments.pyhardware import instrument, gui
+from pyhardware import instrument, gui
 
-    
+
+
+
 if __name__ == "__main__":
     GUI = gui()
     _APP.exec_()

@@ -16,7 +16,7 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^curves/', include(curvefinder.urls)),
+    url(r'^curves/', include(pyinstruments.curvefinder.urls)),
     url(r'^merge/$', \
         CurveMergeView.as_view(), name="curves_merge")
 )
