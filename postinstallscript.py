@@ -57,6 +57,10 @@ def set_environment_variable_on_windows(name, value):
     subprocess.call(['setx', name, value])
     os.environ[name] = value
 
+build_folder = os.path.join(os.environ['TEMP'], 'pip_build_' + os.environ['USERNAME'], 'pyhardware')
+if os.path.exists(build_folder):
+    shutil.rmtree(build_folder)
+subprocess.call(['pip', 'install','pyhardware', '-I', '-U'])
 subprocess.call(['pip', 'install', 'django'])
 set_environment_variable_on_windows('DJANGO_SETTINGS_MODULE', 
                                     'pyinstruments.datastore.settings')

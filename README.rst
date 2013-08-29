@@ -13,25 +13,22 @@ What is it
 automation devices. Control of the remote instruments can be done via one of 
 the following protocols:
   
-  - Visa
-  - pythondotnet
-  - comtypes
+  - ivi drivers (using the lower level package pyivi)
+  - visa
   - serial
 
-The syntax of the higher level functions follows the IVI (Interchangeable Virtual Instruments)
-guidelines. This allows:
+Using IVI-drivers greatly simplifies your life because :
 
-  1/. a lower level layer fully transparent for the user.
+  1/. The lower level layer is fully transparent for the user (pyivi provides a common interface for each instrument type).
   
-  2/. **zero** extra work to interface an instrument for which an IVI driver is provided.
+  2/. **zero** extra work is needed to interface an instrument for which an IVI driver is provided.
 
 pyinstruments is composed of two **independant** packages (can be run on 2 remote computers!).
 
-  - pyhardware for the hardware communication
-  - curvefinder to display in quasi real-time the curves acquired.
+  - **pyhardwaredb** for the hardware communication (This package itself is a thin wrapper around pyhardware). Because it heavily relies on ivi-drivers and com-interoperability, this package is intended to run on a windows machine.
+  - **curvefinder** to display in quasi real-time the curves acquired (This module could be run on any platform).
 
-In this way, in the case of scripted data-acquisition, the process is not affected 
-at all by the plotting and user interactions.
+The strict separation between plotting and data-acquistion processes ensures that scripted data-acquisitions won't be affected by user interactions or plotting dead-times.
 
 
 Main Features
@@ -42,25 +39,35 @@ The curves are stored in a (django-abstracted) database with all necessary metad
 The curvefinder module allows monitoring new incoming curves, as well as querying
 the database for old curve by date, tags...
 
-For simple tasks, the hardware module also has a simple Graphical User Interface
-to quickly get a curve from an instrument...
-
-Note: the hardware package can also be used independantly of the other modules.
-
-Note2: in a near future, the modularity of the hardware package will increase,
-in particular, external instrumentation drivers will be easily imported and
-an independant package to interface IVI-instruments will be released.
-
+The hardware module has a Graphical User Interface to quickly get a curve from an instrument and configure the way instruments are interfaced.
 
 Dependencies
 ============
 
-  - pythondotnet: The hardware package requires windows OS to interface instruments via the dotnet protocol. The plotting one could run under any OS. Builds for windows can be found at http://www.lfd.uci.edu/~gohlke/pythonlibs/#pythonnet
-  - Pandas http://pandas.pydata.org/ __ 0.10.1 or higher
+Direct dependancies for pyinstruments are:
+  - django > 1.5
   - PyQt4
   - guidata
   - guiqwt
-  - django __ 1.5 or higher
+  - pyhardware <-- pyivi <-- (ctypes + comtypes)
+
+
+Installation
+============
+
+
+The windows installer takes care of all the dependancies that are not standards in version 2.7.3.1 of pythonxy.
+
+The other option to install pyinstruments is to use pip from a command shell (also available in pythonxy)::
+
+		pip install pyinstruments
+
+pyinstruments and its three 'exotic' dependencies can also be uninstalled using pip::
+
+		pip uninstall pyinstruments
+		pip uninstall pyhardware
+		pip uninstall pyivi
+
 
 
 Try it out!
@@ -69,7 +76,7 @@ Try it out!
 The installation is single click (since v 0.1.15), desktop icons are created 
 to launch both graphical user interfaces.
 
-The project is hosted on GitHub, and still in a starting phase, contributions
+The project is hosted on GitHub, and still in a starting phase, contributions and feedback
 are warmly welcome!
 
 <https://github.com/SamuelDeleglise/pyinstruments>

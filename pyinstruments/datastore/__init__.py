@@ -9,7 +9,7 @@ def create_super_user(login, password):
     from django.core import management
     management.call_command('createsuperuser', 
                             interactive=False,
-                            email = 'dummy.dummy@dummy.com',
+                            email='dummy.dummy@dummy.com',
                             username=login)
     from django.contrib.auth.management.commands import changepassword
     command = changepassword.Command()
@@ -26,9 +26,17 @@ if db == "":
     
     settings.setValue('database_file', dial.filename)
     import subprocess
-    subprocess.call(['python', 
-                os.path.join(os.path.dirname(os.path.abspath(__file__)),'..', 'manage.py'),
-                'syncdb', '--noinput'], shell = True)
+    if subprocess.call(
+                    ['python', 
+                      os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   '..',
+                                   'manage.py'),
+                     'syncdb',
+                     '--noinput'],
+                shell=True):
+        print __file__
+        print str(settings.value('database_file').toString())
+        raise ValueError("problem with db synchronization")
     
     settings.setValue('database_login', dial.login)
     settings.setValue('database_password', dial.password)

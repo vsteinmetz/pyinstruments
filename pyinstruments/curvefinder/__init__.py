@@ -6,6 +6,7 @@ while they are acquired by the instruments
 to launch the Graphical User Interface, type:
 curvefinder.gui()
 """
+
 from guidata import qapplication as __qapplication
 _APP = __qapplication()
 from pyinstruments.curvefinder.qtgui.curve_editor import CurveEditor as gui

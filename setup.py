@@ -1,8 +1,8 @@
 import os
-from distutils.core import setup
-from distutils.command.install import install
-from distutils.command.bdist_wininst import bdist_wininst
+from setuptools import setup
+from setuptools.command.install import install
 import subprocess
+import shutil
 
 
 
@@ -20,6 +20,10 @@ class installWithPost(install):
             os.environ[name] = value
         
         subprocess.call(['pip', 'install', 'django'])
+        build_folder = os.path.join(os.environ['TEMP'], 'pip_build_' + os.environ['USERNAME'], 'pyhardware')
+        if os.path.exists(build_folder):
+            shutil.rmtree(build_folder)
+        subprocess.call(['pip', 'install','pyhardware', '-I', '-U'])
         set_environment_variable_on_windows('DJANGO_SETTINGS_MODULE', 
                                             'pyinstruments.datastore.settings')
         subprocess.call(['pip', 'install', 'django-model-utils'])
@@ -36,11 +40,11 @@ setup(
     name = "pyinstruments",
     cmdclass={"install": installWithPost},
     scripts={'postinstallscript.py'},
-    version = "0.1.18",
+    version = "0.2.9",
     author = "Samuel Deleglise",
     author_email = "samuel.deleglise@gmail.com",
     description = ("""Control of data acquisition with remote instruments using 
-    (IVI-)dotnet, (IVI-)COM, Visa, and serial protocols.
+    IVI-C or IVI-COM, Visa, and serial protocols.
     python dotnet and/or comtypes should be installed"""),
     license = "BSD",
     keywords = "instruments data-acquisition IVI interface",
@@ -49,33 +53,13 @@ setup(
               'pyinstruments/curvefinder',
               'pyinstruments/curvefinder/qtgui',
               'pyinstruments/datastore',
-              'pyinstruments/pyhardware',
-              'pyinstruments/pyhardware/config',
-              'pyinstruments/pyhardware/config/gui',
-              'pyinstruments/pyhardware/drivers',
-              'pyinstruments/pyhardware/drivers/ivi_interop',
-              'pyinstruments/pyhardware/drivers/ivi_interop/ivicom',
-              'pyinstruments/pyhardware/drivers/ivi_interop/ividotnet',
-              'pyinstruments/pyhardware/drivers/ivi_interop',
-              'pyinstruments/pyhardware/drivers/serial',
-              'pyinstruments/pyhardware/drivers/visa',
-              'pyinstruments/pyhardware/factories',
-              'pyinstruments/pyhardware/instruments',
-              'pyinstruments/pyhardware/wrappers',
               'pyinstruments/pyhardwaredb',
-              'pyinstruments/utils',
-              'pyinstruments/utils/conf_xml',
-              'pyinstruments/utils/curve',
-              'pyinstruments/utils/guiwrappersutils'],
+              'pyinstruments/datalogger'],
     long_description=read('README.rst'),
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Topic :: Scientific/Engineering :: Human Machine Interfaces",
         "License :: OSI Approved :: BSD License",
     ],
-    install_requires=[
-                      'django>1.5',
-                      'guiqwt',
-                      'guidata'
-    ]
+    install_requires=[]
 )
