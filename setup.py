@@ -44,8 +44,7 @@ setup(
     author = "Samuel Deleglise",
     author_email = "samuel.deleglise@gmail.com",
     description = ("""Control of data acquisition with remote instruments using 
-    IVI-C or IVI-COM, Visa, and serial protocols.
-    python dotnet and/or comtypes should be installed"""),
+    IVI-C or IVI-COM, Visa, and serial protocols."""),
     license = "BSD",
     keywords = "instruments data-acquisition IVI interface",
     url = "https://github.com/SamuelDeleglise/pyinstruments",
