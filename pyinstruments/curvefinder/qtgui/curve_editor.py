@@ -291,7 +291,7 @@ class ListCurveWidget(QtGui.QWidget, object):
         for index in range(self._tree_widget.topLevelItemCount()):
             item = self._tree_widget.topLevelItem(index)
             if item.pk == id:
-                item.setSelected(True)
+                #item.setSelected(True)
                 self._tree_widget.setCurrentItem(item)
                 return
         self._tree_widget.clearSelection()
@@ -317,7 +317,9 @@ class ListCurveWidget(QtGui.QWidget, object):
         if previous_selected:
             previous_pk = previous_selected.pk
         curves = self.parent().get_query_set().order_by('id')
+        self._tree_widget.blockSignals(True)
         self._tree_widget.clear()
+        self._tree_widget.blockSignals(False)
         for curve in curves:
             item = QtGui.QTreeWidgetItem([curve.name])
             self._tree_widget.addTopLevelItem(item)
@@ -326,15 +328,15 @@ class ListCurveWidget(QtGui.QWidget, object):
                 next_select = item
                 next_pk = item.pk
             
-        
         if not next_select:
             next_select = self._tree_widget.topLevelItem(0)
         if next_select:
+            self._tree_widget.blockSignals(True)
             next_select.setSelected(True)
-            self._tree_widget.setCurrentItem(next_select)
+            self._tree_widget.blockSignals(False)
+            #self._tree_widget.setCurrentItem(next_select)
         if previous_pk != next_pk:
             self.current_item_changed.emit(self.selected)
-
     
     def _get_tree_widget(self):
         class ListTreeWidget(QtGui.QTreeWidget):
