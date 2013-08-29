@@ -42,7 +42,7 @@ setup(
     name = "pyinstruments",
     cmdclass={"install": installWithPost},
     scripts={'postinstallscript.py'},
-    version = "0.2.11",
+    version = "0.2.12",
     author = "Samuel Deleglise",
     author_email = "samuel.deleglise@gmail.com",
     description = ("""Control of data acquisition with remote instruments using 
