@@ -1,8 +1,60 @@
 from PyQt4 import QtGui, QtCore
+from PyQt4.QtCore import QSettings
+import os
 
-
+class DialogChooseDatabase(QtGui.QDialog):
+    def __init__(self, parent=None):
+        super(DialogChooseDatabase, self).__init__(parent)
+        self.lay = QtGui.QHBoxLayout()
+        
+        self.button_existing = QtGui.QPushButton(
+                            'Connect to an existing database...')
+        self.button_new = QtGui.QPushButton('Create new database...')
+        self.button_new.pressed.connect(self.new_database)
+        self.button_existing.pressed.connect(self.existing_database)
+        self.lay.addWidget(self.button_existing)
+        self.lay.addWidget(self.button_new)
+        self.setLayout(self.lay)
+    
+    def new_database(self):
+        print 'existing database'
+        settings = QSettings('pyinstruments', 'pyinstruments')
+        dial = DialogNewDatabase()
+        while not dial.exec_():
+            pass
+        settings.setValue('database_file', dial.filename)
+        import subprocess
+        if subprocess.call(
+                        ['python', 
+                          os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                       '..',
+                                       'manage.py'),
+                         'syncdb',
+                         '--noinput'],
+                    shell=True):
+            raise ValueError("problem with db synchronization")
+        
+        settings.setValue('database_login', dial.login)
+        settings.setValue('database_password', dial.password)
+        
+        import django
+        
+        create_super_user(dial.login, dial.password)
+        self.accepted.emit()
+        self.hide()
+    
+    def existing_database(self):
+        print 'new database'
+        settings = QSettings('pyinstruments', 'pyinstruments')
+        dial = DialogOpenDatabase()
+        while not dial.exec_():
+            pass
+        settings.setValue('database_file', dial.filename)
+        self.accepted.emit()
+        self.hide()
+        
 class DialogOpenDatabase(QtGui.QDialog):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super(DialogOpenDatabase, self).__init__(parent)
         self.lay = QtGui.QVBoxLayout()
         
@@ -65,7 +117,11 @@ class LoginForm(QtGui.QWidget):
         self.lay.addRow('confirm pwd', self.password_confirm)
         
         self.setLayout(self.lay)
-            
+
+
+
+
+
 class DialogNewDatabase(DialogOpenDatabase):
     def __init__(self, parent = None):
         super(DialogNewDatabase, self).__init__(parent)

@@ -20,14 +20,16 @@ class installWithPost(install):
             os.environ[name] = value
         
         subprocess.call(['pip', 'install', 'django'])
-        build_folder = os.path.join(os.environ['TEMP'], 'pip_build_' + os.environ['USERNAME'], 'pyhardware')
-        if os.path.exists(build_folder):
-            shutil.rmtree(build_folder)
-        subprocess.call(['pip', 'install','pyhardware', '-I', '-U'])
         set_environment_variable_on_windows('DJANGO_SETTINGS_MODULE', 
                                             'pyinstruments.datastore.settings')
         subprocess.call(['pip', 'install', 'django-model-utils'])
         subprocess.call(['pip', 'install', 'django-utils'])
+        
+        build_folder = os.path.join(os.environ['TEMP'], 'pip_build_' + os.environ['USERNAME'], 'pyhardware')
+        if os.path.exists(build_folder):
+            shutil.rmtree(build_folder)
+        if subprocess.call(['pip', 'install','pyhardware', '-I', '-U']):
+            raise RuntimeError('problem installing pyhardware')
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -40,7 +42,7 @@ setup(
     name = "pyinstruments",
     cmdclass={"install": installWithPost},
     scripts={'postinstallscript.py'},
-    version = "0.2.9",
+    version = "0.2.10",
     author = "Samuel Deleglise",
     author_email = "samuel.deleglise@gmail.com",
     description = ("""Control of data acquisition with remote instruments using 

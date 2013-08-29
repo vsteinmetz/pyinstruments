@@ -1,5 +1,5 @@
 from PyQt4.QtCore import QSettings
-from db_dialogs import DialogOpenDatabase, DialogNewDatabase
+from db_dialogs import DialogChooseDatabase
 import os
 from guidata import qapplication
 APP = qapplication()
@@ -20,28 +20,6 @@ def create_super_user(login, password):
 settings = QSettings('pyinstruments', 'pyinstruments')
 db = str(settings.value('database_file').toString())
 if db == "":
-    dial = DialogNewDatabase()
-    while not dial.exec_():
-        pass
-    
-    settings.setValue('database_file', dial.filename)
-    import subprocess
-    if subprocess.call(
-                    ['python', 
-                      os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                   '..',
-                                   'manage.py'),
-                     'syncdb',
-                     '--noinput'],
-                shell=True):
-        print __file__
-        print str(settings.value('database_file').toString())
-        raise ValueError("problem with db synchronization")
-    
-    settings.setValue('database_login', dial.login)
-    settings.setValue('database_password', dial.password)
-    
-    import django
-    
-    create_super_user(dial.login, dial.password)
+    dial = DialogChooseDatabase()
+    dial.exec_()
     
