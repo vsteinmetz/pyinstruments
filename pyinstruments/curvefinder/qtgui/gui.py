@@ -162,6 +162,7 @@ class CurveTagWidget(QtGui.QWidget, object):
         self.tree_widget.itemSelectionChanged.connect(self._update_tag_list)
         self._update_tag_list()
         model_monitor.tag_added.connect(self.refresh)
+        model_monitor.tag_deletted.connect(self.refresh)
         
     value_changed = QtCore.pyqtSignal(name = "value_changed")
     
@@ -351,10 +352,26 @@ class CurveTagWidget(QtGui.QWidget, object):
                     box.setText("tag " + tag + " allready exists")
                     box.exec_()
 
+        def remove_tag(dummy, name=name_clicked):
+            dial = QtGui.QMessageBox()
+            dial.setText("Delete tag '" + name + "': are you sure ?")
+            dial.setInformativeText("Tag will be removed from all referenced curves...")
+            dial.setStandardButtons(QtGui.QMessageBox.Cancel|QtGui.QMessageBox.Ok)
+            dial.setDefaultButton(QtGui.QMessageBox.Ok);
+            if dial.exec_():
+                tag = Tag.objects.get(name=name)
+                tag.delete()
+                model_monitor.tag_deletted.emit()
+                self.refresh()
+        
         menu = QtGui.QMenu(self)
         action_add_tag = QtGui.QAction("add tag...", self)
         action_add_tag.triggered.connect(add_tag)
         menu.addAction(action_add_tag)
+        
+        action_remove_tag = QtGui.QAction("remove tag", self)
+        action_remove_tag.triggered.connect(remove_tag)
+        menu.addAction(action_remove_tag)
         
         action_refresh_list = QtGui.QAction("refresh list", self)
         action_refresh_list.triggered.connect(self.refresh)

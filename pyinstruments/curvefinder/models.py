@@ -456,4 +456,5 @@ class FitCurveDB(CurveDB):
     
 class ModelMonitor(QtCore.QObject):
     tag_added = QtCore.pyqtSignal()
+    tag_deletted = QtCore.pyqtSignal()
 model_monitor = ModelMonitor()

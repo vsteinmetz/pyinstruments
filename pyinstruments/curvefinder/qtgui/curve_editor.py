@@ -8,7 +8,7 @@ from pyinstruments.curvefinder.models import Window, CurveDB
 from pyinstruments.curvefinder.qtgui.gui import CurveCreateWidget
 from curve_editor_menus import CurveEditorMenuBar, CurveEditorToolBar, NamedCheckBox 
 import pyinstruments.datastore.settings
-import os
+from pyinstruments.curvefinder.qtgui.plot_window import PlotDialog
 
 from numpy import array
 from guiqwt import plot
@@ -17,7 +17,9 @@ import datetime
 import dateutil
 import json
 from collections import OrderedDict
+import os
 
+WINDOWS = dict()
 
 
 class CurveEditor(QtGui.QMainWindow, object):
@@ -345,6 +347,35 @@ class ListCurveWidget(QtGui.QWidget, object):
                 self.headerItem().setText(0, "curve name")
         return ListTreeWidget(self)
 
+
+    def get_window(self, name):
+        try:
+            win = WINDOWS[name]
+        except KeyError:
+            win = PlotDialog(name)
+            WINDOWS[name] = win
+        return win
+            
+
+    def contextMenuEvent(self, event):
+        """
+        Context Menu (right click on the treeWidget)
+        """
+        curve = self.selected
+        
+        def plot(dummy, win=curve.window_txt, curve=curve):
+            win = self.get_window(win)
+            win.plot(curve)
+        
+        menu = QtGui.QMenu(self)
+        action_add_tag = QtGui.QAction("plot in " + curve.window_txt, self)
+        action_add_tag.triggered.connect(plot)
+        menu.addAction(action_add_tag)
+        
+        menu.exec_(event.globalPos())
+    
+    
+    
 
 class AllFieldDisplayWidget(QtGui.QWidget):
     def __init__(self, parent, dic):
