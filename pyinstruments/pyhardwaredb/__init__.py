@@ -9,9 +9,6 @@ _APP = __qapplication()
 import dbinstruments
 from pyhardware import instrument, gui
 
-
-
-
 if __name__ == "__main__":
     GUI = gui()
     _APP.exec_()

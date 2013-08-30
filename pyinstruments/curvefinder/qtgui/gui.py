@@ -1,5 +1,5 @@
 from PyQt4 import QtGui, QtCore
-from pyinstruments.curvefinder.models import Tag, Curve
+from pyinstruments.curvefinder.models import Tag, Curve, model_monitor
 
 class ToolTiper(object):
     def __init__(self,parent_widget):
@@ -20,7 +20,10 @@ class CurveCommentWidget(QtGui.QWidget, object):
     def __init__(self):
         super(CurveCommentWidget, self).__init__()
         self.setup_ui()
+        self.comment_box.textChanged.connect(self.modified)
         
+    modified = QtCore.pyqtSignal()
+    
     def setup_ui(self):
         """sets up the GUI"""
         
@@ -50,13 +53,21 @@ class CurveCreateWidget(QtGui.QWidget, object):
                  tags = [], parent = None):
         super(CurveCreateWidget, self).__init__(parent)
         self.setup_ui()
+        
+        self.curve_tag_widget.value_changed.connect(self.curve_modified)
+        self.window_widget.textChanged.connect(self.curve_modified)
+        self.name_widget.textChanged.connect(self.curve_modified)
+        self.curve_comment_widget.modified.connect(self.curve_modified)
+        
         self.name = default_name
         self.window = default_window
         self.comment = comment
         self.tags = tags
         self.save_button.pressed.connect(self.save_pressed)
+        
     
-    save_pressed = QtCore.pyqtSignal(name = 'save_pressed')
+    save_pressed = QtCore.pyqtSignal()
+    curve_modified = QtCore.pyqtSignal()
     
     @property
     def tags(self):
@@ -140,13 +151,18 @@ class CurveCreateWidget(QtGui.QWidget, object):
     def hide_save_button(self):
         self.save_button.hide()
         
+
+    
 class CurveTagWidget(QtGui.QWidget, object):
+
+    
     def __init__(self, parent = None):
         super(CurveTagWidget, self).__init__(parent)
         self._setup_ui()
         self.tree_widget.itemSelectionChanged.connect(self._update_tag_list)
         self._update_tag_list()
-    
+        model_monitor.tag_added.connect(self.refresh)
+        
     value_changed = QtCore.pyqtSignal(name = "value_changed")
     
     @property
@@ -280,7 +296,9 @@ class CurveTagWidget(QtGui.QWidget, object):
         child = self._get_or_add_top_level(tag_elements[0])
             
         for tag_element in tag_elements[1:]:
-            child = self._get_or_add_child(child, tag_element)  
+            child = self._get_or_add_child(child, tag_element)
+        
+        
     
     def _get_tag_from_item(self, item):
         parent = item
@@ -326,8 +344,8 @@ class CurveTagWidget(QtGui.QWidget, object):
                 except Tag.DoesNotExist:
                     Tag.objects.create(name = tag)
                     self.add_item(tag)
-                    print tag
                     self.select(tag)
+                    model_monitor.tag_added.emit()
                 else:
                     box = QtGui.QMessageBox()
                     box.setText("tag " + tag + " allready exists")
@@ -337,4 +355,9 @@ class CurveTagWidget(QtGui.QWidget, object):
         action_add_tag = QtGui.QAction("add tag...", self)
         action_add_tag.triggered.connect(add_tag)
         menu.addAction(action_add_tag)
+        
+        action_refresh_list = QtGui.QAction("refresh list", self)
+        action_refresh_list.triggered.connect(self.refresh)
+        menu.addAction(action_refresh_list)
+        
         self._exec_menu_at_right_place(menu, point)

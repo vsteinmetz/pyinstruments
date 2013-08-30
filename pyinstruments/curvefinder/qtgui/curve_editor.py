@@ -106,7 +106,7 @@ class CurveEditor(QtGui.QMainWindow, object):
         settings.setValue("curve_editor_defaults", defaults_json)
     
     def refresh(self):
-        self._filter_widget.refresh()    
+        self._filter_widget.refresh()
     
     def get_filter_widget(self):
         """
@@ -441,6 +441,10 @@ class CurveDisplayWidget(QtGui.QWidget):
         self._lay.addWidget(self.plot_widget)
         self.setup_plot_widget()
         self.alter_curve_widget = CurveCreateWidget(parent = self)
+        self.alter_curve_widget.curve_modified.connect(
+                                    self.alter_curve_widget.save_button.show)
+        self.alter_curve_widget.save_pressed.connect(
+                                    self.alter_curve_widget.save_button.hide)
         self.alter_curve_widget.save_pressed.connect(self.save)
         self._lay.addWidget(self.alter_curve_widget)
         
@@ -488,3 +492,4 @@ class CurveDisplayWidget(QtGui.QWidget):
         
             curve.user_has_read = True
             curve.save()
+            self.alter_curve_widget.save_button.hide()

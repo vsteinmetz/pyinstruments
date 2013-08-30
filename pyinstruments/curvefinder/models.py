@@ -3,6 +3,7 @@ from pyinstruments.datastore.settings import MEDIA_ROOT
 from pyinstruments.curvefinder import choices
 
 from pyhardware.utils.curve import Curve
+from PyQt4 import QtCore, QtGui
 
 
 from django.db import models
@@ -34,7 +35,8 @@ class Tag(models.Model):
     """
     
     name = models.CharField(max_length=200)
-   
+        
+        
     def __unicode__(self):
         return self.name
     
@@ -173,6 +175,8 @@ class CurveDB(models.Model, Curve):
     def tags_txt(self, val):
         for tag_txt in val:
             (tag, new) = Tag.objects.get_or_create(name = tag_txt)
+            if new:
+                model_monitor.tag_added.emit()
             self.tags.add(tag)
         return val
     
@@ -448,3 +452,8 @@ class FitCurveDB(CurveDB):
     def fit_params(self, params):
         self.fit_params_json = json.dumps(params, self.fit_params_json)
         return params
+    
+    
+class ModelMonitor(QtCore.QObject):
+    tag_added = QtCore.pyqtSignal()
+model_monitor = ModelMonitor()
