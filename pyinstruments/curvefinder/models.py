@@ -1,8 +1,9 @@
 import pyinstruments.datastore
 from pyinstruments.datastore.settings import MEDIA_ROOT
+from pyinstruments.curvefinder import choices
 
 from pyhardware.utils.curve import Curve
-from pyivi import choices
+
 
 from django.db import models
 from django.core.urlresolvers import reverse
@@ -113,16 +114,16 @@ class CurveDB(models.Model, Curve):
     data_read_only = models.BooleanField(default = True)
     
     curve_types = Choices('Curve', 'ScopeCurve', 'NaCurve', 'SpecAnCurve')
-    curve_type  = models.CharField(max_length = 100, \
-                                   choices = tuple(curve_types), \
-                                   default = curve_types.Curve)
+    curve_type  = models.CharField(max_length=100, \
+                                   choices=tuple(curve_types), \
+                                   default=curve_types.Curve)
     
     def get_full_filename(self):
         return os.path.join(pyinstruments.datastore.settings.MEDIA_ROOT, \
                                  self.data_file.name)
     
     
-    def fit(self, func, guess = None, autosave = False):
+    def fit(self, func, guess=None, autosave=False):
         """
         Makes a fit of the curve and returns the child fit curve
         """

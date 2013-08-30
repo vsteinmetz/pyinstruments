@@ -5,6 +5,7 @@ import time
 import os
 import guidata
 from PyQt4 import QtCore, QtGui
+from zipfile import ZipFile
         
 class MenuFile(QtGui.QMenu):
     def __init__(self, parent, widget):
@@ -19,10 +20,36 @@ class MenuFile(QtGui.QMenu):
         self.open_django_admin.triggered.connect(self._open_django_admin)
         self.addAction(self.open_django_admin)
         
+        self.zip_database_and_files = QtGui.QAction(widget)
+        self.zip_database_and_files.setText('zip database and files...')
+        self.zip_database_and_files.triggered.connect(
+                                        self._zip_database_and_files)
+        self.addAction(self.zip_database_and_files)
+        
         self.quit = QtGui.QAction(widget)
         self.quit.setText('quit')
         self.quit.triggered.connect(self._quit)
         self.addAction(self.quit)
+    
+    
+    def _zip_database_and_files(self):
+        dial = QtGui.QFileDialog()
+        filename = str(dial.getSaveFileName(parent = self, filter = '*.zip'))
+        if filename:
+            with ZipFile(filename, 'w') as zpf:
+                db_file = pyinstruments.datastore.settings.DATABASE_FILE
+                zpf.write(db_file, os.path.split(db_file)[-1])
+                
+                rootdir = os.path.splitext(db_file)[0]
+                root_dir_minus_one = os.path.split(rootdir)[0]
+                
+                def archive_dir(zip_file, dirname, files):
+                    for filename in files:
+                        full_file_path = os.path.join(dirname, filename)
+                        zip_file.write(full_file_path,
+                                       os.path.join(os.path.relpath(full_file_path, 
+                                                       root_dir_minus_one)))
+                os.path.walk(rootdir, archive_dir, zpf)
         
     def _quit(self):
         guidata.qapplication().quit()
