@@ -21,6 +21,13 @@ import os
 
 WINDOWS = dict()
 
+def get_window(name):
+    try:
+        win = WINDOWS[name]
+    except KeyError:
+        win = PlotDialog(name)
+        WINDOWS[name] = win
+    return win
 
 class CurveEditor(QtGui.QMainWindow, object):
         
@@ -75,11 +82,20 @@ class CurveEditor(QtGui.QMainWindow, object):
         
         self.show()
 
+    @property
+    def plot_popups(self):
+        return self.toolbar._checkbox_plot_popups.check_state
+
     def popup_unread_curves(self):
-        unread = CurveDB.objects.filter(user_has_read = False)
+        unread = CurveDB.objects.filter(user_has_read=False)
         if unread:
             self._filter_widget.refresh()
-            self.display(unread[0])
+            curve = unread[0]
+            self.display(curve)
+            if self.plot_popups:
+                win = get_window(curve.window_txt)
+                win.plot(curve)
+                
 
     def activate_popup_unread(self):
         self.popup_unread = True
@@ -283,13 +299,15 @@ class ListCurveWidget(QtGui.QWidget, object):
         self.setMinimumWidth(180)
         
     def _current_item_changed(self):
-        self.current_item_changed.emit(self.selected)
+        if self.selected_curve:
+            self.current_item_changed.emit(self.selected_curve)
     
     def select_by_id(self, id):
         """if the curve is in the list, selects it, otherwise cancels
         the current selection
         """
-         
+        #import pdb
+        #pdb.set_trace()
         for index in range(self._tree_widget.topLevelItemCount()):
             item = self._tree_widget.topLevelItem(index)
             if item.pk == id:
@@ -299,22 +317,41 @@ class ListCurveWidget(QtGui.QWidget, object):
         self._tree_widget.clearSelection()
         
     @property
-    def selected(self):
+    def selected_curve(self):
+        """
+        Returns None if several or 0 curves are selected.
+        """
         sel = self._tree_widget.selectedItems()
-        if sel:
+        if len(sel)!=1:
+            return None
+        else:
             try:
                 curve = CurveDB.objects.get(pk = sel[0].pk)
             except CurveDB.DoesNotExist:
                 return None
             else:
                 return curve 
-        else:
-            return None
+
+    @property
+    def selected_curves(self):
+        """
+        Returns the list of selected curves
+        """ 
+        sel = self._tree_widget.selectedItems()
+        curves = []
+        for curve_item in sel:
+            try:
+                curve = CurveDB.objects.get(pk = curve_item.pk)
+            except CurveDB.DoesNotExist:
+                print "Didn't find curve id " + str(pk) + " in the db"
+            else:
+                curves.append(curve)
+        return curves
         
     def refresh(self):
         next_select = None
         next_pk = None
-        previous_selected = self.selected
+        previous_selected = self.selected_curve
         previous_pk = None
         if previous_selected:
             previous_pk = previous_selected.pk
@@ -338,37 +375,38 @@ class ListCurveWidget(QtGui.QWidget, object):
             self._tree_widget.blockSignals(False)
             #self._tree_widget.setCurrentItem(next_select)
         if previous_pk != next_pk:
-            self.current_item_changed.emit(self.selected)
+            self.current_item_changed.emit(self.selected_curve)
     
     def _get_tree_widget(self):
         class ListTreeWidget(QtGui.QTreeWidget):
             def __init__(self, parent):
                 super(ListTreeWidget, self).__init__(parent)                    
                 self.headerItem().setText(0, "curve name")
+                self.setSelectionMode( \
+                            QtGui.QAbstractItemView.ExtendedSelection)
         return ListTreeWidget(self)
 
 
-    def get_window(self, name):
-        try:
-            win = WINDOWS[name]
-        except KeyError:
-            win = PlotDialog(name)
-            WINDOWS[name] = win
-        return win
+
             
 
     def contextMenuEvent(self, event):
         """
         Context Menu (right click on the treeWidget)
         """
-        curve = self.selected
+        curves = self.selected_curves
+        if len(curves)==1:
+            message = "plot in " + curves[0].window_txt
+        else:
+            message = "plot these in their window"
         
-        def plot(dummy, win=curve.window_txt, curve=curve):
-            win = self.get_window(win)
-            win.plot(curve)
+        def plot(dummy, curves=curves):
+            for curve in curves:
+                win = get_window(curve.window_txt)
+                win.plot(curve)
         
         menu = QtGui.QMenu(self)
-        action_add_tag = QtGui.QAction("plot in " + curve.window_txt, self)
+        action_add_tag = QtGui.QAction(message, self)
         action_add_tag.triggered.connect(plot)
         menu.addAction(action_add_tag)
         

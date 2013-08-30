@@ -88,16 +88,21 @@ class CurveEditorToolBar(QtGui.QToolBar, object):
     popup_unread_activated = QtCore.pyqtSignal(\
                                             name='popup_unread_activated')
     popup_unread_deactivated = QtCore.pyqtSignal(\
-                                        name = 'popup_unread_deactivated')
+                                        name='popup_unread_deactivated')
 
     def __init__(self, parent):
         super(CurveEditorToolBar, self).__init__(parent)
-        self._checkbox_popup_unread = NamedCheckBox(self, \
+        self._checkbox_popup_unread = NamedCheckBox(self,
                                                     'popup unread curves')
         self.addWidget(self._checkbox_popup_unread)
         self._checkbox_popup_unread.checked.connect(self.popup_unread_activated)
         self._checkbox_popup_unread.unchecked.connect(\
                                         self.popup_unread_deactivated)
+        
+        self._checkbox_plot_popups = NamedCheckBox(self,
+                                                   'plot popups')
+        self.addWidget(self._checkbox_plot_popups)
+
     
 class NamedCheckBox(QtGui.QWidget):
     def __bool__(self):
