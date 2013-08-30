@@ -286,7 +286,10 @@ class NaCurve(FrequencyCurve):
         dic = super(NaCurve, self).get_fields_as_text_ordered_dict()
         dic["input_port"] = str(self.input_port)
         dic["output_port"] = str(self.output_port)
-        dic["format"] = str(self.formats._choice_dict[self.format])
+        try:
+            dic["format"] = str(self.formats._choice_dict[self.format])
+        except KeyError:
+            pass
         dic["averaging"] = str(self.averaging)
         dic["channel"] = str(self.channel)
         dic["measurement"] = str(self.measurement)
