@@ -431,6 +431,7 @@ def curve_db_from_curve(curve):
                   "start_freq":curve.meta.start_freq,
                   "stop_freq":curve.meta.stop_freq,
                   "span":curve.meta.span,
+                  "sweep_time":curve.meta.sweep_time,
                   "input_port":curve.meta.input_port,
                   "output_port":curve.meta.output_port,
                   "format":curve.meta.format,

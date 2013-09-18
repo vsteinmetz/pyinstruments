@@ -64,7 +64,7 @@ set_environment_variable_on_windows('DJANGO_SETTINGS_MODULE',
                                     'pyinstruments.datastore.settings')
 subprocess.call(['pip', 'install', 'django-model-utils'])
 subprocess.call(['pip', 'install', 'django-utils'])
-
+subprocess.call(['pip', 'install', 'django_evolution'])
 
 build_folder = os.path.join(os.environ['TEMP'], 'pip_build_' + os.environ['USERNAME'], 'pyhardware')
 if os.path.exists(build_folder):
