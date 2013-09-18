@@ -245,6 +245,7 @@ class FrequencyCurve(CurveDB):
     start_freq = models.FloatField(blank = True)
     stop_freq = models.FloatField(blank = True)
     span = models.FloatField(blank = True)
+    sweep_time = models.FloatField(blank = True)
     bandwidth = models.FloatField(blank = True)
     
     def get_fields_as_text_ordered_dict(self):
@@ -254,6 +255,7 @@ class FrequencyCurve(CurveDB):
         dic["stop_freq"] = str(self.stop_freq)
         dic["span"] = str(self.span)
         dic["bandwidth"] = str(self.bandwidth)
+        dic["sweep_time"] = str(self.sweep_time)
         return dic
     
     
@@ -420,7 +422,8 @@ def curve_db_from_curve(curve):
                   "span":curve.meta.span,
                   "trace":curve.meta.trace,
                   "detector_type":curve.meta.detector_type,
-                  "trace_type":curve.meta.trace_type}
+                  "trace_type":curve.meta.trace_type,
+                  "sweep_time":curve.meta.sweep_time}
     if curve.meta.curve_type == "NaCurve":
         kwds = {  "bandwidth": curve.meta.bandwidth,
                   "averaging":curve.meta.averaging,
