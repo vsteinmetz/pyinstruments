@@ -146,7 +146,8 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'pyinstruments.curvefinder',
-    'pyinstruments.datalogger'
+    'pyinstruments.datalogger',
+    'django_evolution'
 )
 
 # A sample logging configuration. The only tangible logging
