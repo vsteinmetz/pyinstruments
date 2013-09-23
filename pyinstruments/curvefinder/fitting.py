@@ -86,7 +86,7 @@ class Fit(object):
                             tol=1e-5, # tolerance for termination
                             callback=None, # optional function call after each iteration
                             #more at scipy.optimize.show_options('minimize')
-                            options={'maxiter': 10000, 'disp': self.verbosemode}) # max 1000 iterations and verbose mode on 
+                            options={'maxiter': 1000, 'disp': self.verbosemode}) # max 1000 iterations and verbose mode on 
         if self.verbosemode is True:
             print "Fit completed with sqerror = " + str(self.sqerror)
             print "Obtained parameter values: "
