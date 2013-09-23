@@ -1,6 +1,7 @@
 import pyinstruments.datastore
 from pyinstruments.datastore.settings import MEDIA_ROOT
 from pyinstruments.curvefinder import choices
+from pyinstruments.curvefinder import fitting
 
 from pyhardware.utils.curve import Curve
 from PyQt4 import QtCore, QtGui
@@ -13,7 +14,8 @@ from datetime import datetime
 from django.core.files.storage import default_storage
 import os
 import pandas
-from numpy import array, sin
+from numpy import array
+from scipy.optimize import curve_fit
 from collections import OrderedDict
 import json
 
@@ -129,14 +131,13 @@ class CurveDB(models.Model, Curve):
         """
         Makes a fit of the curve and returns the child fit curve
         """
-        
-        import pandas
-        data = pandas.Series(sin(array(self.data.index)), index = self.data.index)
-        fit_curve = FitCurveDB(data=data, parent=self)
-        fit_curve.fit_params = {'foo':4, 'bar':6}
+        fit_curve = FitCurveDB(data = self.data*0, parent=self)
+        fit_curve.fit_params = guess
+        fit_curve.fit_function = func
+        result = fit_curve.fit()
         if autosave:
             fit_curve.save()
-        return fit_curve
+        return result,fit_curve
     
     def save(self):
         """
@@ -447,6 +448,10 @@ def curve_db_from_curve(curve):
 class FitCurveDB(CurveDB):
     fit_params_json = models.TextField()
     fit_function = models.CharField(max_length = 255)
+    # sum of squares of the actual fit
+    sumofsquares = models.FloatField(blank = True)
+    # True if a human has verified the correctness of the fit
+    humanconfirmation = models.BooleanField(default = False)
 
     @property
     def fit_params(self):
@@ -457,7 +462,15 @@ class FitCurveDB(CurveDB):
         self.fit_params_json = json.dumps(params, self.fit_params_json)
         return params
     
-    
+    def fit(self, verbosemode = True):
+        fitter = fitting.Fit(data = self.parent.data, func = self.fit_function, \
+                      autoguessfunction = '', fixed_params = {}, manualguess_params = {}, \
+                      verbosemode = verbosemode)
+        self.data = fitter.fitdata
+        self.fit_params = fitter.getparams()
+        self.sumofsquares = fitter.sqerror
+        return fitter
+   
 class ModelMonitor(QtCore.QObject):
     tag_added = QtCore.pyqtSignal()
     tag_deletted = QtCore.pyqtSignal()
