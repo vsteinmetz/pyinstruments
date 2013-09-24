@@ -9,6 +9,7 @@ from pyinstruments.curvefinder.qtgui.gui import CurveCreateWidget
 from curve_editor_menus import CurveEditorMenuBar, CurveEditorToolBar, NamedCheckBox 
 import pyinstruments.datastore.settings
 from pyinstruments.curvefinder.qtgui.plot_window import PlotDialog
+from pyinstruments.curvefinder.fitting import FitFunctions
 
 from numpy import array
 from guiqwt import plot
@@ -18,6 +19,9 @@ import dateutil
 import json
 from collections import OrderedDict
 import os
+import functools
+
+
 
 WINDOWS = dict()
 
@@ -395,6 +399,7 @@ class ListCurveWidget(QtGui.QWidget, object):
         Context Menu (right click on the treeWidget)
         """
         curves = self.selected_curves
+        """ First option: Plot curve(s)"""
         if len(curves)==1:
             message = "plot in " + curves[0].window_txt
         else:
@@ -409,10 +414,28 @@ class ListCurveWidget(QtGui.QWidget, object):
         action_add_tag = QtGui.QAction(message, self)
         action_add_tag.triggered.connect(plot)
         menu.addAction(action_add_tag)
+         
+        """second option: fit curve(s)"""
+        
+        fitfuncs = list()
+        for f in dir(FitFunctions):
+            if not f.startswith('_'):
+                fitfuncs.append(f)
+        
+        fitsmenu = menu.addMenu(    'fits')
+
+        def fitcurve(curvestofit, funcname):
+            for curve in curvestofit:
+                curve.fit(func = funcname, autosave=True, maxiter=20)
+                
+        for f in fitfuncs:
+            specificfit = functools.partial(fitcurve,curvestofit=curves,funcname = f)
+            action_add_tag = QtGui.QAction(f, self)
+            action_add_tag.triggered.connect(specificfit)
+            fitsmenu.addAction(action_add_tag)
         
         menu.exec_(event.globalPos())
-    
-    
+     
     
 
 class AllFieldDisplayWidget(QtGui.QWidget):

@@ -78,7 +78,7 @@ class CurveDB(models.Model, Curve):
     """   
     
     objects = CurveManager()
-    
+
     def __init__(self, *args, **kwds):
         data = kwds.pop("data", None)
         meta = kwds.pop("meta", dict())
@@ -86,7 +86,9 @@ class CurveDB(models.Model, Curve):
         Curve.__init__(self, data=data, meta=meta)
         self.date_created = datetime.now()
 
-
+    class Meta: 
+        get_latest_by = 'date_created'
+    
     #@property
     #def meta(self):
     #    return self._meta
@@ -127,14 +129,16 @@ class CurveDB(models.Model, Curve):
                                  self.data_file.name)
     
     
-    def fit(self, func, guess=None, autosave=False):
+    def fit(self, func, guess=None, autosave=False, maxiter = 100, verbose = False):
         """
         Makes a fit of the curve and returns the child fit curve
         """
-        fit_curve = FitCurveDB(data = self.data*0, parent=self)
+        fit_curve = FitCurveDB(data = self.data*0, parent=self, \
+                               name =  "fit_" + func + "_of_" + self.name, \
+                               window = self.window)
         fit_curve.fit_params = guess
         fit_curve.fit_function = func
-        result = fit_curve.fit()
+        result = fit_curve.fit(maxiter = maxiter, verbosemode = False)
         if autosave:
             fit_curve.save()
         return result,fit_curve
@@ -449,7 +453,7 @@ class FitCurveDB(CurveDB):
     fit_params_json = models.TextField()
     fit_function = models.CharField(max_length = 255)
     # sum of squares of the actual fit
-    sumofsquares = models.FloatField(blank = True)
+    sumofsquares = models.FloatField(blank = True, default = 0.0)
     # True if a human has verified the correctness of the fit
     humanconfirmation = models.BooleanField(default = False)
 
@@ -462,14 +466,22 @@ class FitCurveDB(CurveDB):
         self.fit_params_json = json.dumps(params, self.fit_params_json)
         return params
     
-    def fit(self, verbosemode = True):
+    def fit(self, verbosemode = True, maxiter = 100):
         fitter = fitting.Fit(data = self.parent.data, func = self.fit_function, \
                       autoguessfunction = '', fixed_params = {}, manualguess_params = {}, \
-                      verbosemode = verbosemode)
+                      verbosemode = verbosemode, maxiter = maxiter)
         self.data = fitter.fitdata
         self.fit_params = fitter.getparams()
         self.sumofsquares = fitter.sqerror
+        self.comment += fitter.commentstring
         return fitter
+    
+    def plot(self, plotparent = True):
+        if plotparent is True:
+            self.parent.plot()
+            self.plot()
+        else:
+            self.data.plot()
    
 class ModelMonitor(QtCore.QObject):
     tag_added = QtCore.pyqtSignal()
