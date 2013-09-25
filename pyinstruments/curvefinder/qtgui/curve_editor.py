@@ -399,7 +399,7 @@ class ListCurveWidget(QtGui.QWidget, object):
         Context Menu (right click on the treeWidget)
         """
         curves = self.selected_curves
-        """ First option: Plot curve(s)"""
+        """ First a) option: Plot curve(s)"""
         if len(curves)==1:
             message = "plot in " + curves[0].window_txt
         else:
@@ -414,7 +414,24 @@ class ListCurveWidget(QtGui.QWidget, object):
         action_add_tag = QtGui.QAction(message, self)
         action_add_tag.triggered.connect(plot)
         menu.addAction(action_add_tag)
-         
+        
+        """ First b) option: Plot curve(s) with fits"""
+        if len(curves)==1:
+            messagefit = "plot with fits in " + curves[0].window_txt
+        else:
+            messagefit = "plot these with resp. fits in their window"
+        
+        def plotfit(dummy, curves=curves):
+            for curve in curves:
+                win = get_window(curve.window_txt)
+                win.plot(curve)
+                for children in curve.childs.all():
+                    win.plot(children)
+        
+        action_add_tag_fit = QtGui.QAction(messagefit, self)
+        action_add_tag_fit.triggered.connect(plotfit)
+        menu.addAction(action_add_tag_fit)
+          
         """second option: fit curve(s)"""
         
         fitfuncs = list()
