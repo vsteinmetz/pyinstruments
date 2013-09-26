@@ -128,17 +128,21 @@ class CurveDB(models.Model, Curve):
         return os.path.join(pyinstruments.datastore.settings.MEDIA_ROOT, \
                                  self.data_file.name)
     
-    
-    def fit(self, func, guess=None, autosave=False, maxiter = 100, verbose = False):
+    def fit(self, func, autoguessfunction='', autosave=False, maxiter = 100, verbosemode = False,\
+                    manualguess_params = {},fixed_params = {}):
         """
         Makes a fit of the curve and returns the child fit curve
         """
         fit_curve = FitCurveDB(data = self.data*0, parent=self, \
-                               name =  "fit_" + func + "_of_" + self.name, \
+                               name =  "fit_" + func + "_of_" + \
+                               str(self.pk) + " (" + autoguessfunction + ")",\
                                window = self.window)
-        fit_curve.fit_params = guess
+        fit_curve.fit_params = fixed_params
         fit_curve.fit_function = func
-        result = fit_curve.fit(maxiter = maxiter, verbosemode = False)
+        result = fit_curve.fit(maxiter = maxiter, verbosemode = verbosemode, \
+                               manualguess_params=manualguess_params, \
+                               fixed_params=fixed_params, \
+                               autoguessfunction = autoguessfunction)
         if autosave:
             fit_curve.save()
         return result,fit_curve
@@ -466,9 +470,11 @@ class FitCurveDB(CurveDB):
         self.fit_params_json = json.dumps(params, self.fit_params_json)
         return params
     
-    def fit(self, verbosemode = True, maxiter = 100):
+    def fit(self, verbosemode = True, maxiter = 100, \
+            manualguess_params = {},fixed_params = {}, autoguessfunction = ''):
         fitter = fitting.Fit(data = self.parent.data, func = self.fit_function, \
-                      autoguessfunction = '', fixed_params = {}, manualguess_params = {}, \
+                      autoguessfunction = autoguessfunction, fixed_params = fixed_params, \
+                      manualguess_params = manualguess_params, \
                       verbosemode = verbosemode, maxiter = maxiter)
         self.data = fitter.fitdata
         self.fit_params = fitter.getparams()

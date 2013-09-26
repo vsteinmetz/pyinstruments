@@ -1,0 +1,9 @@
+[
+  {
+    "model": "curvefindernew.window",
+    "pk": 1,
+    "fields": {
+      "name": "default"
+    }
+  }
+]
