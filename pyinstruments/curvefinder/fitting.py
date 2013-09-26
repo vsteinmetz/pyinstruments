@@ -2,6 +2,9 @@ import pandas
 import scipy.optimize
 import numpy
 import collections
+import math
+
+LAMBDA = 1.064e-6
 
 '''Here re-define the fitfunctions which shall appear in the fit context menu'''
 class FitFunctions(object):
@@ -18,6 +21,17 @@ class FitFunctions(object):
         return y0 + scale*(1/(1+((x-x0)/bandwidth)*((x-x0)/bandwidth))+\
                 SBscale/(1+((x-x0-SBwidth)/bandwidth)**2)+\
                 SBscale/(1+((x-x0+SBwidth)/bandwidth)**2))
+    
+    '''defines w(z) for 1064nm wavelength for all units in meters'''
+    def gaussianbeam(self,x0,w0):
+        x=self.x()
+        return w0*(((x-x0)**2/math.pi**2/w0**4*LAMBDA**2+1)**0.5)
+    
+    def _guessgaussianbeam(self):
+        tempfit = Fit(data=self.data,func='linear',maxiter=10)
+        res = tempfit.getparams()
+        params = dict(x0 = res['x0'], w0 = LAMBDA/math.pi/res['slope'])    
+        return params
     
     def _guesslorentz(self):
         x0 = float(self.x()[self.data.argmax()])
@@ -152,6 +166,20 @@ class Fit(FitFunctions):
         self.fitdata = pandas.Series(data = self.fn(**self.getparams()), index = self.x(), \
                             name = 'fitfunction: '+ self.func )
         return res
+    
+    def getoversampledfitdata(self,numbersamples):
+        datasafe = self.data
+        maxindex = self.x().max()
+        print maxindex
+        minindex = self.x().min()
+        print minindex
+        newindex = numpy.array(numpy.linspace(minindex,maxindex,numbersamples),dtype=float)
+        self.data = pandas.Series(data=newindex,index=newindex)
+        self.fitdata = pandas.Series(data = self.fn(**self.getparams()), index = self.x(), \
+                       name = 'fitfunction: '+ self.func )
+        self.data = datasafe
+        return self.fitdata
+
     
     def printstatus(self,dummy):
         self.stepcount += 1
