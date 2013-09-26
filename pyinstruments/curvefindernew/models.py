@@ -6,6 +6,7 @@ from PyQt4 import QtCore, QtGui
 from django.db import models
 import os
 from datetime import datetime
+import json
 from django.core.files.storage import default_storage
 
 class CurveType(models.Model):
@@ -56,7 +57,8 @@ class CurveManager(models.Manager):
         If you are looking for only those curves that have a parameter Q:
         filter_param('Q')
         """
-        return CurveDB.objects.filter(param___name__name=parname, *args, **kwds)
+        
+        return CurveDB.objects.filter(Q(floatparam__name__name=parname)|Q(stringparam__name__name=parname), *args, **kwds)
         
     def filter_float_param(self, parname, **kwds):
         """
@@ -65,9 +67,34 @@ class CurveManager(models.Manager):
         """
         new_kwds = dict()
         for key, val in kwds.iteritems():
-            query = 'param__paramfloat__float_' + key
+            query = 'param__floatparam__float_' + key
             new_kwds[query] = val
-        return CurveDB.objects.filter(param___name__name=parname, **new_kwds)
+        return CurveDB.objects.filter(param__name__name=parname, **new_kwds)
+
+    def filter_string_param(self, parname, **kwds):
+        new_kwds = dict()
+        for key, val in kwds.iteritems():
+            query = 'param__stringparam__string_' + key
+            new_kwds[query] = val
+        return CurveDB.objects.filter(param__name__name=parname, **new_kwds)
+
+class WrongTypeError(ValueError):
+    pass
+
+def get_column(name, type_):
+    """
+    If the column doesn't exists, creates a new one.
+    If it exists and has the required type, returns the existing one
+    otherwise throws a WrongTypeError.
+    """
+    col, new = ParamColumn.objects.get_or_create(name=name)
+    if new:
+        col.type = type_
+        col.save()
+    else:
+        if col.type!=type_:
+            raise WrongTypeError("column " + name + " allready exists and has the wong type " + type_)
+    return col
 
 class CurveDB(models.Model, Curve):
     """
@@ -78,35 +105,17 @@ class CurveDB(models.Model, Curve):
     objects = CurveManager()
        
     def __unicode__(self):
-        return self.name
+        return self.params["name"]
 
-    name = models.CharField(max_length = 255, default="some_curve")
-    comment = models.TextField(blank = True)
     tags_relation = models.ManyToManyField(Tag)
     tags_flatten = models.TextField(blank = True, null = True)
-    _window = models.ForeignKey(Window, default = 1)
     #read only
     data_file = models.FileField(upload_to = '%Y/%m/%d')
-    date_created = models.DateTimeField(auto_now_add=True, db_index = True)
-
-    user_has_read = models.BooleanField(default = False, db_index=True)
     # parent curve e.g., for fit curve...
     parent = models.ForeignKey("self", \
                                related_name = 'childs', \
                                blank = True, \
                                null = True)
-    data_read_only = models.BooleanField(default = True)
-    curve_type  = models.ForeignKey(CurveType, default = 1)
-    
-    @property
-    def window(self):
-        return self._window.name
-    
-    @window.setter
-    def window(self, name):
-        (win, new) = Window.objects.get_or_create(name=name)
-        self._window = win
-        return name
     
     @property
     def tags(self):
@@ -140,11 +149,16 @@ class CurveDB(models.Model, Curve):
 
 
     def load_params(self):
-        params = self.param_set.all()
+        subclasses = Param.__subclasses__()
         dic_param = dict()
-        for par in params:
-            dic_param[par.name] = par.value
+        for cls in subclasses:
+            name = cls.__name__.lower()
+            param_set = self.__getattribute__(name + '_set')
+            params = param_set.all()
+            for par in params:
+                dic_param[par.name_txt] = par.value
         self.set_params(**dic_param)
+        return dic_param
 
     @property
     def params(self):
@@ -154,13 +168,42 @@ class CurveDB(models.Model, Curve):
             self.load_params()
             return self._params
     
+    def save_string_param(self, col, val):
+        try:
+            column = get_column(col, 'string')
+        except WrongTypeError:
+            column = get_column(col, 'text')
+            param, new = TextParam.objects.get_or_create(col=column, curve=self, defaults={'value':val})
+        param, new = StringParam.objects.get_or_create(col=column, curve=self, defaults={'value':val})
+    
+    def _save_generic_param(self, col, val, cls):
+        column = get_column(col, cls.type)
+        param, new = cls.objects.get_or_create(col=column, curve=self, defaults={'value':val})
+        
+    def save_num_param(self, col, val):
+        self._save_generic_param(col, val, FloatParam)
+        
+    def save_date_param(self, col, val):
+        self._save_generic_param(col, val, DateParam)
+    
+    def save_bool_param(self, col, val):
+        self._save_generic_param(col, val, BooleanParam)        
+        
     def save_params(self):
         for par, val in self.params.iteritems():
-            parname, new = ParamName.objects.get_or_create(name=par)
             if isinstance(val, basestring):
-                param, new = ParamString.objects.get_or_create(_name=parname, curve=self, str_value=val)
-            else:
-                param, new = ParamFloat.objects.get_or_create(_name=parname, curve=self, float_value=val)
+                self.save_string_param(par, val)
+                continue
+            if isinstance(val, bool):
+                self.save_bool_param(par, val)
+                continue
+            if isinstance(val, (int, float, long)):
+                self.save_num_param(par, val)
+                continue
+            if isinstance(val, datetime):
+                self.save_date_param(par, val)
+                continue
+            raise ValueError('could not find the type of parameter ' + val)
     
     def get_full_filename(self):
         return os.path.join(MEDIA_ROOT, \
@@ -177,18 +220,34 @@ class CurveDB(models.Model, Curve):
                                 for tag in self.tags_relation.all()]) + \
                     ';'
     
+    def set_default_params(self):
+        """
+        Set all required parameters that have a default to that value
+        """
+        
+        columns = ParamColumn.objects.all()
+        for col in columns:
+            if col.required:
+                if not col.name in self.params:
+                    self.params[col.name] = col.default
+        
+    
     def save(self):
         """
         Saves the curve in the database. If the curve is data_read_only 
         The actual datafile will be saved only on the first call of save().
         """
         
-        if not self.date_created:
-            self.date_created = datetime.now()
+        self.set_default_params()
+        try:
+            date = self.params["date"]
+        except KeyError:
+            date = datetime.now()
+            self.params["date"] = date
         if not self.data_file:
             self.data_file = os.path.join( \
-                    self.date_created.strftime('%Y/%m/%d'), \
-                    self.name + '.h5')
+                    date.strftime('%Y/%m/%d'), \
+                    self.params["name"] + '.h5')
             full_path = self.get_full_filename()
             dirname = os.path.dirname(full_path)
             if not os.path.exists(dirname):
@@ -201,18 +260,27 @@ class CurveDB(models.Model, Curve):
         if self.pk == None:
             super(CurveDB, self).save()
         
-        
         self.save_tags()
 
         super(CurveDB, self).save()
         self.save_params()
     
-class ParamName(models.Model):
+class ParamColumn(models.Model):
     """
     Parameters can be easily looked up by name...
     """
     
-    name = models.CharField(max_length = 255)
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    type = models.CharField(max_length=255)
+    required = models.BooleanField(default=False)
+    default_json = models.CharField(max_length=1064)
+    
+    @property
+    def default(self):
+        if self.type == "date":
+            return datetime.now()
+        return json.loads(self.default_json)
     
     def __unicode__(self):
         return self.name
@@ -220,51 +288,79 @@ class ParamName(models.Model):
     
 class Param(models.Model):
     """
-    A parameter references a ParamName and a CurveDB
+    A parameter references a ParamColumn and a CurveDB
     """
     
-    _name = models.ForeignKey(ParamName)
-    curve = models.ForeignKey(CurveDB)
+    col = models.ForeignKey(ParamColumn)
     read_only = models.BooleanField(default=False)
-    type = models.CharField(max_length=255)
     
     @property
-    def name(self):
-        return self._name.name
+    def name_txt(self):
+        return self.col.name
     
-    @name.setter
-    def name(self, name):
-        (pname, new) = ParamName.objects.get_or_create(name=name)
-        self._name = pname
+    @name_txt.setter
+    def name_txt(self, name):
+        (pname, new) = ParamColumn.objects.get_or_create(name=name)
+        self.name = pname
         return name
     
     @property
-    def value(self):
-        if self.type == "string":
-            return self.paramstring.str_value
-        if self.type == "float":
-            return self.paramfloat.float_value
+    def val(self):
+        par_child = self.__getattribute__(self.type + 'param')
+        return self.par_child.value
+    
+    @val.setter
+    def val(self, value):
+        if self.read_only:
+            raise ValueError("parameter " + self.name_txt + "is read-only")
+        par_child = self.__getattribute__(self.type + 'param')
+        par_child.value = value
+        return value
     
     def __unicode__(self):
-        return self.name
+        return self.col.name
     
-class ParamString(Param):
+class StringParam(Param):
+    type = 'string'
     def __init__(self, *args, **kwds):
-        super(ParamString, self).__init__(*args, **kwds)
-        self.type = "string"
+        super(StringParam, self).__init__(*args, **kwds)
+    curve = models.ForeignKey(CurveDB)
+    value = models.CharField(max_length = 255)
     
-    str_value = models.CharField(max_length = 255)
-    
-class ParamFloat(Param):
+class FloatParam(Param):
+    type = 'float'
     def __init__(self, *args, **kwds):
-        super(ParamFloat, self).__init__(*args, **kwds)
-        self.type = "float"
+        super(FloatParam, self).__init__(*args, **kwds)
         
-    float_value = models.FloatField()
+    curve = models.ForeignKey(CurveDB)
+    value = models.FloatField()
 
+class BooleanParam(Param):
+    type = 'boolean'
+    def __init__(self, *args, **kwds):
+        super(BooleanParam, self).__init__(*args, **kwds)
+        
+    curve = models.ForeignKey(CurveDB)
+    value = models.BooleanField()
+
+class TextParam(Param):
+    type = 'text'
+    def __init__(self, *args, **kwds):
+        super(TextParam, self).__init__(*args, **kwds)
+        
+        
+    curve = models.ForeignKey(CurveDB)        
+    value = models.TextField(blank = True)
+
+class DateParam(Param):
+    type = 'date'
+    def __init__(self, *args, **kwds):
+        super(DateParam, self).__init__(*args, **kwds)
+        
+    curve = models.ForeignKey(CurveDB)
+    value = models.DateTimeField()
 
 class ModelMonitor(QtCore.QObject):
     tag_added = QtCore.pyqtSignal()
     tag_deletted = QtCore.pyqtSignal()
 model_monitor = ModelMonitor()
-    

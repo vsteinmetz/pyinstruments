@@ -1,9 +1,67 @@
 [
   {
-    "model": "curvefindernew.window",
+    "model": "curvefindernew.paramcolumn",
     "pk": 1,
     "fields": {
-      "name": "default"
+      "name": "date",
+      "type": "date",
+      "required": true,
+      "description": "date and time when the data was taken or first saved"
+   	}
+   },
+   {
+    "model": "curvefindernew.paramcolumn",
+    "pk": 2,
+    "fields": {
+      "name": "data_read_only",
+      "type": "boolean",
+      "required": true,
+      "default_json": "true",
+      "description": "Can the data be modified?"
+     }
+    },
+    {
+    "model": "curvefindernew.paramcolumn",
+    "pk": 3,
+    "fields": {
+      "name": "name",
+      "type": "string",
+      "required": true,
+      "default_json": "\"some_curve\"",
+      "description": "Name of the curve."
+    	}
+    },
+    {
+    "model": "curvefindernew.paramcolumn",
+    "pk": 4,
+    "fields": {
+      "name": "window",
+      "type": "string",
+      "required": true,
+      "default_json": "\"default_win\"",
+      "description": "Where to plot the curve."
+    	}
+    },
+    {
+    "model": "curvefindernew.paramcolumn",
+    "pk": 5,
+    "fields": {
+      "name": "comment",
+      "type": "text",
+      "required": true,
+      "default_json": "\"\"",
+      "description": "Anything relevant about the data."    
     }
-  }
+  },
+  {
+    "model": "curvefindernew.paramcolumn",
+    "pk": 6,
+    "fields": {
+      "name": "tags_flattened",
+      "type": "text",
+      "required": true,
+      "default_json": "\"\"",
+      "description": "A list of tag ids separeted by ;"
+     }
+    }
 ]
