@@ -4,6 +4,7 @@
     "pk": 1,
     "fields": {
       "name": "date",
+      "read_only": true,
       "type": "date",
       "required": true,
       "description": "date and time when the data was taken or first saved"
@@ -14,6 +15,7 @@
     "pk": 2,
     "fields": {
       "name": "data_read_only",
+      "read_only": false,
       "type": "boolean",
       "required": true,
       "default_json": "true",
@@ -25,7 +27,8 @@
     "pk": 3,
     "fields": {
       "name": "name",
-      "type": "string",
+      "type": "char",
+      "read_only": false,
       "required": true,
       "default_json": "\"some_curve\"",
       "description": "Name of the curve."
@@ -36,7 +39,8 @@
     "pk": 4,
     "fields": {
       "name": "window",
-      "type": "string",
+      "read_only": false,
+      "type": "char",
       "required": true,
       "default_json": "\"default_win\"",
       "description": "Where to plot the curve."
@@ -48,6 +52,7 @@
     "fields": {
       "name": "comment",
       "type": "text",
+      "read_only": false,
       "required": true,
       "default_json": "\"\"",
       "description": "Anything relevant about the data."    
@@ -57,11 +62,37 @@
     "model": "curvefindernew.paramcolumn",
     "pk": 6,
     "fields": {
-      "name": "tags_flattened",
+      "name": "tags_flatten",
+      "read_only": false,
       "type": "text",
       "required": true,
       "default_json": "\"\"",
-      "description": "A list of tag ids separeted by ;"
+      "description": "A list of tag names separated by \";\". private use only."
+     }
+    }
+    ,
+  {
+    "model": "curvefindernew.paramcolumn",
+    "pk": 7,
+    "fields": {
+      "name": "id",
+      "type": "float",
+      "read_only": true,
+      "required": true,
+      "default_json": "1",
+      "description": "The id of the curve. private use only."
+     }
+    },
+  {
+    "model": "curvefindernew.paramcolumn",
+    "pk": 8,
+    "fields": {
+      "name": "parent_id",
+      "type": "float",
+      "read_only": false,
+      "required": true,
+      "default_json": "0",
+      "description": "The id of the parent curve. 0 if none, private use only."
      }
     }
 ]

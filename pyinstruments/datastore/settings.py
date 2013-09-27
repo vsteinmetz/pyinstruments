@@ -146,6 +146,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'pyinstruments.curvefindernew',
+    'pyinstruments.curvefinder',
     'pyinstruments.datalogger',
     'django_evolution'
 )
