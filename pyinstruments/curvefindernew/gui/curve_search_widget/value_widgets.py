@@ -9,6 +9,8 @@ class HBoxLayoutTight(QtGui.QHBoxLayout):
 class DateSelectWidget(QtGui.QWidget, object):
     """a widget to select a date"""
     
+    value_changed = QtCore.pyqtSignal()
+    
     def __init__(self, default = None, parent = None):
         """defaults to today if no date is provided"""
         
@@ -29,8 +31,6 @@ class DateSelectWidget(QtGui.QWidget, object):
             self.date = default
         else:
             self.date = QtCore.QDate.currentDate().toPyDate()
-    
-    value_changed = QtCore.pyqtSignal(name = "value_changed")
     
     def _choose_date(self):
         calendar = CalendarValidateWidget(default = self.date)
@@ -68,4 +68,44 @@ class CalendarValidateWidget(QtGui.QMessageBox, object):
         if self.exec_():
             return self._calendar.selectedDate()
         
-        
+    
+class CharWidget(QtGui.QLineEdit, object):
+    """
+    A widget to select a string
+    """
+    
+    value_changed = QtCore.pyqtSignal()
+    
+    def __init__(self, parent=None):
+        super(CharWidget, self).__init__(parent)
+        self.editingFinished.connect(self.value_changed)
+    
+    @property
+    def value(self):
+        return self.text()
+    
+class BooleanWidget(QtGui.QCheckBox, object):
+    """
+    A widget to select a boolean
+    """
+    
+    value_changed = QtCore.pyqtSignal()
+
+    def __init__(self, parent=None):
+        super(BooleanWidget, self).__init__(parent)
+        self.stateChanged.connect(self.value_changed)
+    
+    @property
+    def value(self):
+        return self.checkState()==2
+    
+class FloatWidget(QtGui.QDoubleSpinBox, object):
+    """
+    A widget to select a float
+    """
+    
+    value_changed = QtCore.pyqtSignal()
+    
+    def __init__(self, parent=None):
+        super(FloatWidget, self).__init__(parent)
+        self.valueChanged.connect(self.value_changed)

@@ -1,5 +1,5 @@
 from PyQt4 import QtGui, QtCore
-from pyinstruments.curvefinder.models import Tag, Curve, model_monitor
+from pyinstruments.curvefindernew.models import Tag, model_monitor
 
 class ToolTiper(object):
     def __init__(self,parent_widget):
@@ -47,10 +47,10 @@ class CurveCreateWidget(QtGui.QWidget, object):
     input fields
     """
     
-    def __init__(self, default_name = "some_curve", \
-                 default_window = "default", \
-                 comment = "", \
-                 tags = [], parent = None):
+    def __init__(self, default_name="some_curve", \
+                 default_window="default", \
+                 comment="", \
+                 tags=[], parent=None):
         super(CurveCreateWidget, self).__init__(parent)
         self.setup_ui()
         
@@ -109,43 +109,43 @@ class CurveCreateWidget(QtGui.QWidget, object):
         """sets up the GUI"""
         
         self.h_lay1 = QtGui.QHBoxLayout()
-        self.name_label = QtGui.QLabel("name")
+        self.curve_tag_widget = CurveTagWidget()
+        self.h_lay1.addWidget(self.curve_tag_widget)
+        self.v_lay1 = QtGui.QVBoxLayout()
+        self.h_lay1.addLayout(self.v_lay1)
         
+        self.name_label = QtGui.QLabel("name")
         self.name_widget = QtGui.QLineEdit("some_curve")
         
-        self.h_lay1.addWidget(self.name_label)
-        self.h_lay1.addWidget(self.name_widget)
+        self.v_lay1.addWidget(self.name_label)
+        self.v_lay1.addWidget(self.name_widget)
         self.window_widget = QtGui.QLineEdit("default")
         self.window_label = QtGui.QLabel("plot window")
-        self.h_lay1.addWidget(self.window_label)
-        self.h_lay1.addWidget(self.window_widget)
+        self.v_lay1.addWidget(self.window_label)
+        self.v_lay1.addWidget(self.window_widget)
         
-        self.h_lay2 = QtGui.QHBoxLayout()
-        self.curve_tag_widget = CurveTagWidget()
+        
         self.curve_comment_widget = CurveCommentWidget()
-        self.h_lay2.addWidget(self.curve_tag_widget)
-        self.h_lay2.addWidget(self.curve_comment_widget)
+        self.v_lay1.addWidget(self.curve_comment_widget)
+        
         self.save_button = QtGui.QPushButton("save")
-        self.h_lay2.addWidget(self.save_button)
+        self.v_lay1.addWidget(self.save_button)
         
-        
-        self.v_lay = QtGui.QVBoxLayout()
-        
-        self.v_lay.addLayout(self.h_lay1)
-        self.v_lay.addLayout(self.h_lay2)
-        self.setLayout(self.v_lay)
+        self.setLayout(self.h_lay1)
         
     def dump_in_gui(self, curve):
-        self.comment = curve.comment
-        self.name = curve.name
-        self.window = curve.window_txt
-        self.tags = curve.tags_txt
+        self.comment = curve.params["comment"]
+        self.name = curve.params["name"]
+        self.window = curve.params["window"]
+        self.tags = curve.tags
         
+
+    
     def save_curve(self, curve):
-        curve.comment = self.comment
-        curve.name = self.name
-        curve.window_txt = self.window
-        curve.tags_txt = self.tags
+        curve.params["comment"] = self.comment
+        curve.params["name"] = self.name
+        curve.params["window"] = self.window
+        curve.tags = self.tags
         curve.save()
     
     def hide_save_button(self):
@@ -154,8 +154,6 @@ class CurveCreateWidget(QtGui.QWidget, object):
 
     
 class CurveTagWidget(QtGui.QWidget, object):
-
-    
     def __init__(self, parent = None):
         super(CurveTagWidget, self).__init__(parent)
         self._setup_ui()

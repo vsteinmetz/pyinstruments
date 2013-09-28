@@ -1,6 +1,9 @@
-from pyinstruments.curvefindernew.gui.value_widgets import DateSelectWidget
+from pyinstruments.curvefindernew.gui.curve_search_widget.value_widgets import DateSelectWidget, \
+                                                           BooleanWidget, \
+                                                           FloatWidget, \
+                                                           CharWidget
 from pyinstruments.curvefindernew import models
-from pyinstruments.curvefindernew.gui.tag_filter_widget import CurveTagWidget
+from pyinstruments.curvefindernew.gui.curve_search_widget.tag_filter_widget import CurveTagWidget
 
 from PyQt4 import QtGui, QtCore
 from datetime import timedelta
@@ -9,8 +12,12 @@ class MultiFilterWidget(QtGui.QWidget):
     """
     The big widget that contains all other filter widgets
     """
+    
+    value_changed = QtCore.pyqtSignal()
+    
     def __init__(self, parent=None):
         super(MultiFilterWidget, self).__init__(parent)
+        
         self.main_lay = QtGui.QVBoxLayout()
         self.setLayout(self.main_lay)
         
@@ -25,11 +32,14 @@ class MultiFilterWidget(QtGui.QWidget):
         self.filters = []
 
         self.tag_widget = FilterTagWidget()
+        self.tag_widget.value_changed.connect(self.value_changed)
         
         self.main_lay.addWidget(self.tag_widget)
         self.main_lay.setStretchFactor(self.lay, 0)
         self.main_lay.setStretchFactor(self.tag_widget, 1)
 
+        self.n_rows = 0
+        
     def query(self):
         qs = models.CurveDB.objects.all()
         for filter in self.filters:
@@ -38,22 +48,23 @@ class MultiFilterWidget(QtGui.QWidget):
             for tag in self.tag_widget.tags:
                 qs = qs.filter_tag(tag)
         return qs
-    
-    @property
-    def n_rows(self):
-        return len(self.filters)
 
     def add_row(self):
+        self.n_rows+=1
         gui_filter = GuiFilter(self)
+        gui_filter.value_changed.connect(self.value_changed)
         self.filters.append(gui_filter)
-        gui_filter.add_all_widgets_in_layout(len(self.filters))
+        gui_filter.add_all_widgets_in_layout(self.n_rows)
+        self.value_changed.emit()
 
     def remove_filter(self, guifilter):
-        row_number = self.filters.index(guifilter)
         guifilter.delete_all_widgets()
-
+        self.filters.remove(guifilter)
+        self.value_changed.emit()
 
 class FilterTagWidget(QtGui.QWidget):
+    value_changed = QtCore.pyqtSignal()
+
     def __init__(self, parent=None):
         super(FilterTagWidget, self).__init__(parent)
         self.active = False
@@ -68,19 +79,22 @@ class FilterTagWidget(QtGui.QWidget):
         self.button_remove.pressed.connect(self.remove)
         self.button_filter_by_tag.pressed.connect(self.filter_by_tag)        
         self.remove()
+        self.tag_widget.value_changed.connect(self.value_changed)
         
     def filter_by_tag(self):
         self.active = True
         self.tag_widget.show()
         self.button_filter_by_tag.hide()
         self.button_remove.show()
+        self.value_changed.emit()
         
     def remove(self):
         self.active = False
         self.button_remove.hide()
         self.tag_widget.hide()
         self.button_filter_by_tag.show()
-    
+        self.value_changed.emit()
+        
     @property
     def tags(self):
         return self.tag_widget.tags
@@ -90,14 +104,18 @@ class WidgetValue(QtGui.QStackedWidget, object):
     A cameleon widget that can help define a string, a bool, a date...
     """
     
+    value_changed = QtCore.pyqtSignal()
+    
     def __init__(self, parent=None):
         super(WidgetValue, self).__init__(parent)
         
         self.widget_value_stacked = dict()
         self.date_widget = DateSelectWidget()
+        self.date_widget.value_changed.connect(self.value_changed)
         self.widget_value_stacked['date'] = (self.addWidget(self.date_widget),
                                              self.date_widget)
-        self.string_widget = QtGui.QLineEdit()
+        self.string_widget = CharWidget()
+        self.string_widget.value_changed.connect(self.value_changed)
         val = self.addWidget(self.string_widget)
     
         self.widget_value_stacked['char'] = (val,
@@ -105,12 +123,14 @@ class WidgetValue(QtGui.QStackedWidget, object):
         self.widget_value_stacked['text'] = (val,
                                              self.string_widget)
         
-        self.boolean_widget = QtGui.QCheckBox()
+        self.boolean_widget = BooleanWidget()
+        self.boolean_widget.value_changed.connect(self.value_changed)
         self.widget_value_stacked['boolean'] = (self.addWidget(self.boolean_widget),
                                                 self.boolean_widget)
         
         
-        self.float_widget = QtGui.QDoubleSpinBox()
+        self.float_widget = FloatWidget()
+        self.float_widget.value_changed.connect(self.value_changed)
         self.widget_value_stacked['float'] = (self.addWidget(self.float_widget),
                                               self.float_widget)
 
@@ -121,7 +141,9 @@ class WidgetValue(QtGui.QStackedWidget, object):
         return self.currentWidget().value
     
     
-class GuiFilter(object):
+class GuiFilter(QtCore.QObject, object):
+    value_changed = QtCore.pyqtSignal()
+    
     def __init__(self, parent=None):
         super(GuiFilter, self).__init__()
         self.parent = parent
@@ -129,12 +151,16 @@ class GuiFilter(object):
         for col in models.ParamColumn.objects.all():
             self.combo_par.addItem(col.name)
         self.combo_rel = QtGui.QComboBox()
+        self.combo_rel.setMinimumWidth(100)
         self.widget_value = WidgetValue()
         
         self.button_remove = QtGui.QPushButton('remove')
         self.button_remove.pressed.connect(self.remove)
         self.combo_par.currentIndexChanged.connect(self.update_widgets)
         self.update_widgets()
+    
+        self.widget_value.value_changed.connect(self.value_changed)
+        self.combo_rel.currentIndexChanged.connect(self.value_changed)
         
     def rel_string(self):
         val = {'<':'lt', '<=':'lte', '>':'gt', '>=':'gte', '=':'', 'contains':'contains'}
@@ -160,6 +186,7 @@ class GuiFilter(object):
         return queryset.filter_param(self.col_name, **kwds)    
     
     def repopulate_combo_rel(self):
+        self.combo_rel.blockSignals(True)
         self.combo_rel.clear()
         if self.type_of_par=='char' or self.type_of_par=='text':
             self.combo_rel.addItems(['=', 'contains'])
@@ -167,10 +194,12 @@ class GuiFilter(object):
             self.combo_rel.addItems(['='])
         if self.type_of_par=='date' or self.type_of_par=='float':
             self.combo_rel.addItems(['=','<','<=','>','>='])
-    
+        self.combo_rel.blockSignals(False)
+        
     def update_widgets(self):
         self.widget_value.update(self.type_of_par)
         self.repopulate_combo_rel()
+        self.value_changed.emit()
     
     def delete_all_widgets(self):
         self.combo_par.deleteLater()

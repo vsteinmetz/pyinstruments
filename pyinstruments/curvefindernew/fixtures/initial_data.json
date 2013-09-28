@@ -94,5 +94,17 @@
       "default_json": "0",
       "description": "The id of the parent curve. 0 if none, private use only."
      }
+    },
+    {
+    "model": "curvefindernew.paramcolumn",
+    "pk": 9,
+    "fields": {
+      "name": "curve_type",
+      "type": "char",
+      "read_only": true,
+      "required": true,
+      "default_json": "\"user_curve\"",
+      "description": "Describes the type of curve present."
+     }
     }
 ]
