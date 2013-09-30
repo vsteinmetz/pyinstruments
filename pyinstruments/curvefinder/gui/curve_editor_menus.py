@@ -1,4 +1,3 @@
-
 import pyinstruments.datastore.settings
 
 import time

@@ -3,6 +3,7 @@ from PyQt4 import QtCore, QtGui
 
 class IdDisplayWidget(QtGui.QWidget):
     save_pressed = QtCore.pyqtSignal()
+    delete_done = QtCore.pyqtSignal()
     
     def __init__(self, parent = None):
         super(IdDisplayWidget, self).__init__(parent)
@@ -37,7 +38,6 @@ class IdDisplayWidget(QtGui.QWidget):
         if not self.curve_displayed:
             return
         if confirm:
-            
             message_box = QtGui.QMessageBox(self)
             answer = message_box.question(self, 'delete', \
                         'are you sure you want to delete curve id =' \
@@ -45,6 +45,7 @@ class IdDisplayWidget(QtGui.QWidget):
             if not answer:
                 return
         self.curve_displayed.delete()
+        self.delete_done.emit()
     
     def display_curve(self, curve):
         self.curve_displayed = curve

@@ -78,7 +78,7 @@ def get_column(name, type_):
         col.save()
     else:
         if col.type!=type_:
-            raise WrongTypeError("column " + name + " allready exists and has the wong type " + type_)
+            raise WrongTypeError("column " + name + " allready exists and has the wong type " + col.type + " not " + type_)
     return col
 
 class CurveDB(models.Model, Curve):
@@ -217,8 +217,7 @@ class CurveDB(models.Model, Curve):
                 model_monitor.tag_added.emit()
             self.tags_relation.add(tag)
         self.params["tags_flatten"] = ';' + \
-                    ';'.join([str(tag.name) \
-                                for tag in self.tags_relation.all()]) + \
+                    ';'.join(self.tags) + \
                     ';'
     
     def set_default_params(self):
@@ -259,12 +258,32 @@ class CurveDB(models.Model, Curve):
             Curve.save(self, self.get_full_filename())
         
         if self.pk == None:
-            super(CurveDB, self).save()
+            models.Model.save(self)
         
         self.save_tags()
 
-        super(CurveDB, self).save()
+        models.Model.save(self)
         self.save_params()
+        
+    def fit(self, func, autoguessfunction='', autosave=False, maxiter = 100, verbosemode = False,\
+                    manualguess_params = {},fixed_params = {}):
+        fitter, fit_curve = super(CurveDB, self).fit(
+                        func, 
+                        autoguessfunction=autoguessfunction, 
+                        maxiter=maxiter, 
+                        verbosemode=verbosemode,
+                        manualguess_params=manualguess_params,
+                        fixed_params=fixed_params)
+        
+        fit_curve_db = curve_db_from_curve(fit_curve)
+        fit_curve_db.params['name']+='_of_' + str(self.id)
+        fit_curve_db.params['window']=self.params["window"]
+        fit_curve_db.parent = self
+        if autosave:
+            fit_curve_db.save()
+        model_monitor.fit_done.emit()
+        return fit_curve_db
+        
     
 class ParamColumn(models.Model):
     """
@@ -362,7 +381,15 @@ class DateParam(Param):
     curve = models.ForeignKey(CurveDB, related_name='dateparam')
     value = models.DateTimeField()
 
+
+def curve_db_from_curve(curve):
+    curve_db = CurveDB()
+    curve_db.set_params(**curve.params)
+    curve_db.set_data(curve.data)
+    return curve_db
+    
 class ModelMonitor(QtCore.QObject):
     tag_added = QtCore.pyqtSignal()
     tag_deletted = QtCore.pyqtSignal()
+    fit_done = QtCore.pyqtSignal()
 model_monitor = ModelMonitor()

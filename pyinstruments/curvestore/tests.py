@@ -5,7 +5,7 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 
-from pyinstruments.curvefindernew.models import CurveDB
+from pyinstruments.curvestore.models import CurveDB
 
 from django.test import TestCase
 import pandas

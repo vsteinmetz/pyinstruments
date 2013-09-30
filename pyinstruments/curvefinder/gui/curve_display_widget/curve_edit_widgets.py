@@ -1,5 +1,5 @@
 from PyQt4 import QtGui, QtCore
-from pyinstruments.curvefindernew.models import Tag, model_monitor
+from pyinstruments.curvestore.models import Tag, model_monitor
 
 class ToolTiper(object):
     def __init__(self,parent_widget):
@@ -134,10 +134,12 @@ class CurveCreateWidget(QtGui.QWidget, object):
         self.setLayout(self.h_lay1)
         
     def dump_in_gui(self, curve):
+        self.blockSignals(True)
         self.comment = curve.params["comment"]
         self.name = curve.params["name"]
         self.window = curve.params["window"]
         self.tags = curve.tags
+        self.blockSignals(False)
         
 
     

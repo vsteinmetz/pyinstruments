@@ -1,6 +1,6 @@
-from pyinstruments.curvefindernew.gui.curve_display_widget.curve_alter_widget import CurveAlterWidget
-from pyinstruments.curvefindernew.gui.curve_display_widget.params_display_widget import ParamsDisplayWidget
-from pyinstruments.curvefindernew.gui.curve_editor_menus import NamedCheckBox
+from pyinstruments.curvefinder.gui.curve_display_widget.curve_alter_widget import CurveAlterWidget
+from pyinstruments.curvefinder.gui.curve_display_widget.params_display_widget import ParamsDisplayWidget
+from pyinstruments.curvefinder.gui.curve_editor_menus import NamedCheckBox
 
 from PyQt4 import QtCore, QtGui
 from guiqwt import plot
@@ -8,6 +8,7 @@ from guiqwt.builder import make
 from numpy import array
 
 class CurveDisplayWidget(QtGui.QWidget):
+    delete_done = QtCore.pyqtSignal()
     def __init__(self, parent=None):
         super(CurveDisplayWidget, self).__init__(parent)
         self.plot_widget = plot.CurveWidget(self, 'curve graph', \
@@ -26,6 +27,7 @@ class CurveDisplayWidget(QtGui.QWidget):
         
         self.alter_curve_widget = CurveAlterWidget(self)
         self.alter_curve_widget.curve_saved.connect(self.refresh_params)
+        self.alter_curve_widget.delete_done.connect(self.delete_done)
         self.sublay.addWidget(self.alter_curve_widget)
         
         self.setLayout(self.lay)
@@ -80,6 +82,6 @@ class CurveDisplayWidget(QtGui.QWidget):
                 self.curve_item.plot().do_autoscale()
             self.curve_item.plot().replot()
         
-            curve.user_has_read = True
+            curve.params['user_has_read'] = True
             curve.save()
             self.alter_curve_widget.save_button.hide()

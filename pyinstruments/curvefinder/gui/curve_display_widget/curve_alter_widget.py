@@ -1,10 +1,11 @@
-from pyinstruments.curvefindernew.gui.curve_display_widget.curve_edit_widgets import CurveCreateWidget
-from pyinstruments.curvefindernew.gui.curve_display_widget.id_display_widget import IdDisplayWidget
+from pyinstruments.curvefinder.gui.curve_display_widget.curve_edit_widgets import CurveCreateWidget
+from pyinstruments.curvefinder.gui.curve_display_widget.id_display_widget import IdDisplayWidget
 
 from PyQt4 import QtCore, QtGui
 
 class CurveAlterWidget(CurveCreateWidget):
     curve_saved = QtCore.pyqtSignal()
+    delete_done = QtCore.pyqtSignal()
     def __init__(self, parent=None):
         super(CurveAlterWidget, self).__init__(parent=parent)
         self.id_widget = IdDisplayWidget()
@@ -20,6 +21,7 @@ class CurveAlterWidget(CurveCreateWidget):
         self.id_widget.save_pressed.connect(
                                     self.save_button.hide)
         self.id_widget.save_pressed.connect(self.save)
+        self.id_widget.delete_done.connect(self.delete_done)
         self.current_curve = None
         
     def save(self):

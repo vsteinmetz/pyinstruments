@@ -1,4 +1,4 @@
-from pyinstruments.curvefindernew.models import Tag, model_monitor
+from pyinstruments.curvestore.models import Tag, model_monitor
 
 from PyQt4 import QtGui, QtCore
 

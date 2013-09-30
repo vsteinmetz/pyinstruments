@@ -472,7 +472,7 @@ class FitCurveDB(CurveDB):
     
     def fit(self, verbosemode = True, maxiter = 100, \
             manualguess_params = {},fixed_params = {}, autoguessfunction = ''):
-        fitter = fitting.Fit(data = self.parent.data, func = self.fit_function, \
+        fitter = fitting.Fit(data=self.parent.data, func = self.fit_function, \
                       autoguessfunction = autoguessfunction, fixed_params = fixed_params, \
                       manualguess_params = manualguess_params, \
                       verbosemode = verbosemode, maxiter = maxiter)

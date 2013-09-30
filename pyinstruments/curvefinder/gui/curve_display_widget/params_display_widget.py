@@ -10,10 +10,13 @@ class ParamsDisplayWidget(QtGui.QWidget):
         self.tree.setHeaderLabels(["column name", "value"])
         self.tree.setColumnWidth(0,150)
         self.tree.setColumnWidth(1,150)
-        
+    
+    def format_nicely(self, val):
+        return str(val)[:255]
+    
     def display_curve(self, curve):
         self.tree.clear()
         for name, val in curve.params.iteritems():
-            self.tree.addTopLevelItem(QtGui.QTreeWidgetItem([name, str(val)]))
+            self.tree.addTopLevelItem(QtGui.QTreeWidgetItem([name, self.format_nicely(val)]))
         
 

@@ -1,9 +1,9 @@
-from pyinstruments.curvefindernew.gui.curve_search_widget.value_widgets import DateSelectWidget, \
+from pyinstruments.curvefinder.gui.curve_search_widget.value_widgets import DateSelectWidget, \
                                                            BooleanWidget, \
                                                            FloatWidget, \
                                                            CharWidget
-from pyinstruments.curvefindernew import models
-from pyinstruments.curvefindernew.gui.curve_search_widget.tag_filter_widget import CurveTagWidget
+from pyinstruments.curvestore import models
+from pyinstruments.curvefinder.gui.curve_search_widget.tag_filter_widget import CurveTagWidget
 
 from PyQt4 import QtGui, QtCore
 from datetime import timedelta

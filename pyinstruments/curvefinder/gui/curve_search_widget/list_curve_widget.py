@@ -1,6 +1,11 @@
-from pyinstruments.curvefindernew.models import CurveDB
+from pyinstruments.curvestore.models import CurveDB
+from pyinstruments.curvefinder.gui.plot_window import get_window
+
+from curve.fitting import FitFunctions
 
 from PyQt4 import QtCore, QtGui
+import functools
+import numpy
 
 class ListCurveWidget(QtGui.QWidget, object):
     current_item_changed = QtCore.pyqtSignal(object)
@@ -71,35 +76,67 @@ class ListCurveWidget(QtGui.QWidget, object):
             else:
                 curves.append(curve)
         return curves
+    
+    def add_curve(self, curve):
+        """
+        Adds a curve and all its childs in the list if not allready there.
+        If the curve is a child, then adds the parent with all the childs
+        """
+        # check if the curve is a child
+        if curve.parent:
+            return self.add_curve(curve.parent)
         
+        # check if curve already there
+        if curve in self:
+            return
+        
+        #otherwise, add the curve
+        item = QtGui.QTreeWidgetItem([curve.params['name']])
+        item.pk = curve.pk
+        self._tree_widget.addTopLevelItem(item)
+        
+        #and its childs
+        for child in curve.childs.all():
+            item_child = QtGui.QTreeWidgetItem([child.params['name']])
+            item.addChild(item_child)
+            item_child.pk = child.pk 
+        
+    def __contains__(self, curve):
+        if not isinstance(curve, int):
+            curve = curve.pk
+        return curve in self.ids()
+    
+    def ids(self):
+        return [self._tree_widget.topLevelItem(index).pk \
+               for index in \
+               range(self._tree_widget.topLevelItemCount())]
+    
     def refresh(self):
-        next_select = None
-        next_pk = None
-        previous_selected = self.selected_curve
-        previous_pk = None
+        previous_id = None
+        previous_selected = self._tree_widget.currentItem()
         if previous_selected:
-            previous_pk = previous_selected.pk
+            previous_id = previous_selected.pk
         curves = self.parent().query().order_by('id')
         self._tree_widget.blockSignals(True)
         self._tree_widget.clear()
-        self._tree_widget.blockSignals(False)
         for curve in curves:
-            item = QtGui.QTreeWidgetItem([curve.params['name']])
-            self._tree_widget.addTopLevelItem(item)
-            item.pk = curve.pk
-            if item.pk == previous_pk:
-                next_select = item
-                next_pk = item.pk
-            
-        if not next_select:
-            next_select = self._tree_widget.topLevelItem(0)
-        if next_select:
-            self._tree_widget.blockSignals(True)
-            next_select.setSelected(True)
-            self._tree_widget.blockSignals(False)
-            #self._tree_widget.setCurrentItem(next_select)
-        if previous_pk != next_pk:
-            self.current_item_changed.emit(self.selected_curve)
+            self.add_curve(curve)
+        self._tree_widget.blockSignals(False)
+        
+        if not previous_id:
+            return
+        if previous_id in self:
+            self.select_by_id(previous_id)
+        else:
+            dist = numpy.array(self.ids()) - previous_id
+            if len(dist[dist>0]):
+                next_id = min(dist[dist>0]) + previous_id
+            else:
+                if len(dist[dist<0]):
+                    next_id = max(dist[dist<0]) + previous_id
+                else:
+                    return
+            self.select_by_id(next_id)
     
     def _get_tree_widget(self):
         class ListTreeWidget(QtGui.QTreeWidget):
@@ -119,15 +156,15 @@ class ListCurveWidget(QtGui.QWidget, object):
         Context Menu (right click on the treeWidget)
         """
         curves = self.selected_curves
-        """ First option: Plot curve(s)"""
+        ### First option: Plot curve(s)
         if len(curves)==1:
-            message = "plot in " + curves[0].window_txt
+            message = "plot in " + curves[0].params['window']
         else:
             message = "plot these in their window"
         
         def plot(dummy, curves=curves):
             for curve in curves:
-                win = get_window(curve.window_txt)
+                win = get_window(curve.params["window"])
                 win.plot(curve)
         
         menu = QtGui.QMenu(self)
@@ -135,7 +172,7 @@ class ListCurveWidget(QtGui.QWidget, object):
         action_add_tag.triggered.connect(plot)
         menu.addAction(action_add_tag)
          
-        """second option: fit curve(s)"""
+        ###second option: fit curve(s)
         
         fitfuncs = list()
         for f in dir(FitFunctions):
@@ -149,7 +186,7 @@ class ListCurveWidget(QtGui.QWidget, object):
                 curve.fit(func = funcname, autosave=True, maxiter=20)
                 
         for f in fitfuncs:
-            specificfit = functools.partial(fitcurve,curvestofit=curves,funcname = f)
+            specificfit = functools.partial(fitcurve, curvestofit=curves, funcname=f)
             action_add_tag = QtGui.QAction(f, self)
             action_add_tag.triggered.connect(specificfit)
             fitsmenu.addAction(action_add_tag)

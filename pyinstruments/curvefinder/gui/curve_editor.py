@@ -1,15 +1,13 @@
 from PyQt4 import QtGui, QtCore
-from pyinstruments.curvefinder.qtgui.curvesearch_widget import DateConstraintWidget, \
-                                      StringFilterWidget, \
-                                      ComboFilterWidget, \
-                                      TagFilterWidget, \
-                                      BoolFilterWidget
-from pyinstruments.curvefinder.models import Window, CurveDB
-from pyinstruments.curvefinder.qtgui.gui import CurveCreateWidget
-from curve_editor_menus import CurveEditorMenuBar, CurveEditorToolBar, NamedCheckBox 
+from pyinstruments.curvefinder.gui.curve_search_widget import CurveSearchDockWidget
+from pyinstruments.curvefinder.gui.curve_display_widget import CurveDisplayWidget
+from pyinstruments.curvestore.models import CurveDB
+#from pyinstruments.curvefindernew.gui.curve_display_widget import CurveCreateWidget
+from pyinstruments.curvefinder.gui.curve_editor_menus import CurveEditorMenuBar, CurveEditorToolBar, NamedCheckBox 
 import pyinstruments.datastore.settings
-from pyinstruments.curvefinder.qtgui.plot_window import PlotDialog
-from pyinstruments.curvefinder.fitting import FitFunctions
+from pyinstruments.curvefinder.gui.plot_window import PlotDialog
+from curve.fitting import FitFunctions
+from pyinstruments.curvefinder.gui.plot_window import get_window
 
 from numpy import array
 from guiqwt import plot
@@ -22,17 +20,6 @@ import os
 import functools
 
 
-
-WINDOWS = dict()
-
-def get_window(name):
-    try:
-        win = WINDOWS[name]
-    except KeyError:
-        win = PlotDialog(name)
-        WINDOWS[name] = win
-    return win
-
 class CurveEditor(QtGui.QMainWindow, object):
         
     def __init__(self):
@@ -41,7 +28,7 @@ class CurveEditor(QtGui.QMainWindow, object):
         self.menubar = CurveEditorMenuBar(self)
             
         self.setMenuBar(self.menubar)
-        self.search_widget = CurveSearchWidget(self)
+        self.search_widget = CurveSearchDockWidget(self)
         self.addDockWidget(\
                 QtCore.Qt.DockWidgetArea(QtCore.Qt.LeftDockWidgetArea), \
                 self.search_widget)
@@ -54,11 +41,11 @@ class CurveEditor(QtGui.QMainWindow, object):
                                             self.deactivate_popup_unread)
         
         self.curve_display_widget = CurveDisplayWidget(self)
-        self.setCentralWidget(self._curve_display_widget)
+        self.setCentralWidget(self.curve_display_widget)
         self.search_widget.value_changed.connect(self.refresh)
         self.search_widget.value_changed.connect(self.save_defaults)        
         self.search_widget.current_item_changed.connect(self.display)
-        
+        self.curve_display_widget.delete_done.connect(self.refresh)
         
         settings = QtCore.QSettings("pyinstruments", "pyinstruments")
         default_json = str(settings.value("curve_editor_defaults").\
@@ -86,13 +73,13 @@ class CurveEditor(QtGui.QMainWindow, object):
         return self.toolbar._checkbox_plot_popups.check_state
 
     def popup_unread_curves(self):
-        unread = CurveDB.objects.filter(user_has_read=False)
+        unread = CurveDB.objects.filter_param('user_has_read', value=False)
         if unread:
             self.search_widget.refresh()
             curve = unread[0]
             self.display(curve)
             if self.plot_popups:
-                win = get_window(curve.window_txt)
+                win = get_window(curve.params['window'])
                 win.plot(curve)
                 
 
@@ -105,22 +92,24 @@ class CurveEditor(QtGui.QMainWindow, object):
         self.popup_timer.stop()
     
     def display(self, curve):
-        self._curve_display_widget.display(curve)
-        if  curve:
+        self.curve_display_widget.display_curve(curve)
+        if curve:
             self.search_widget.select_by_id(curve.id)
     
     def set_defaults(self, **kwds):
-        self.search_widget.set_defaults(**kwds)
+        pass
+        #self.search_widget.set_defaults(**kwds)
     
     def save_defaults(self):
-        defaults = self.search_widget.get_values()
-        for key in ["date_lte", "date_gte", "date_equals"]:
-            enabled, val = defaults[key]
-            val = str(val)
-            defaults[key] = enabled, val
-        defaults_json = json.dumps(defaults)
-        settings = QtCore.QSettings("pyinstruments", "pyinstruments")
-        settings.setValue("curve_editor_defaults", defaults_json)
+        pass
+        #defaults = self.search_widget.get_values()
+        #for key in ["date_lte", "date_gte", "date_equals"]:
+        #    enabled, val = defaults[key]
+        #    val = str(val)
+        #    defaults[key] = enabled, val
+        #defaults_json = json.dumps(defaults)
+        #settings = QtCore.QSettings("pyinstruments", "pyinstruments")
+        #settings.setValue("curve_editor_defaults", defaults_json)
     
     def refresh(self):
         self.search_widget.refresh()
