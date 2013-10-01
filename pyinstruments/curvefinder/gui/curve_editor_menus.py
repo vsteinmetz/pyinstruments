@@ -1,12 +1,14 @@
 import pyinstruments.datastore.settings
 from pyinstruments.curvestore import models
 from curve import Curve
+import curve
 
 import time
 import os
 import guidata
 from PyQt4 import QtCore, QtGui
 from zipfile import ZipFile
+from django.core.exceptions import ObjectDoesNotExist
         
 class MenuFile(QtGui.QMenu):
     def __init__(self, parent, widget):
@@ -37,6 +39,12 @@ class MenuDB(QtGui.QMenu):
         self.backup_all_files.triggered.connect(
                                         self._backup_all_files)
         self.addAction(self.backup_all_files)
+        
+        self.import_h5_files = QtGui.QAction(widget)
+        self.import_h5_files.setText('import h5 files...')
+        self.import_h5_files.triggered.connect(self._import_h5_files)
+        self.addAction(self.import_h5_files)
+        
     
     def _backup_all_files(self):
         dial = QtGui.QFileDialog()
@@ -47,8 +55,52 @@ class MenuDB(QtGui.QMenu):
         #    db_file = pyinstruments.datastore.settings.DATABASE_FILE
         #    zpf.write(db_file, os.path.split(db_file)[-1] + "_saved")
         for curve in models.CurveDB.objects.all():
+            curve.data
+            curve.params
+            directo = os.path.dirname(os.path.join(filename, curve.data_file.name))
+            if not os.path.exists(directo):
+                os.makedirs(directo)
             Curve.save(curve, os.path.join(filename, curve.data_file.name))
-            
+         
+    def _import_h5_files(self):
+        """
+        Import all .h5 files from a directory and subdirectories.
+        """
+        dial = QtGui.QFileDialog()
+        dirname = str(dial.getExistingDirectory(parent=self))
+        if not dirname:
+            return
+        
+        def archive_dir(arg, dirname, files):
+            for filename in files:
+                fname = os.path.join(dirname, filename)
+                if os.path.isfile(fname):
+                    if fname.endswith('.h5'):
+                        cur = curve.load(fname)
+                        cur_db = models.curve_db_from_curve(cur)
+                        id = int(cur.params['id'])
+                        try:
+                            old_one = models.CurveDB.objects.get(id=id)
+                        except ObjectDoesNotExist:
+                            cur_db.save()
+                            cur_db.id = cur.params['id']
+                        else:
+                            message = "A curve with the id " + str(id) + \
+                            " allready exists in your database." + "\n What should we do with curve " + \
+                            cur.params["name"] + " ?"
+                            
+                            message_box = QtGui.QMessageBox(self)
+                            answer = message_box.question(self, 'existing id', message, 'forget about it', 'overwrite ' + old_one.params['name'], "use new id")
+                            
+                            if answer==0:
+                                continue
+                            if answer==1:
+                                cur_db.id = cur.params['id']
+                                cur_db.save()
+                            if answer==2:
+                                cur_db.save()
+                        
+        os.path.walk(dirname, archive_dir, None)
 
     
     def _open_django_admin(self):

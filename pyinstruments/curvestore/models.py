@@ -8,6 +8,7 @@ import os
 from datetime import datetime
 import json
 from django.core.files.storage import default_storage
+import numpy
 
 
 
@@ -110,8 +111,7 @@ class CurveDB(models.Model, Curve):
 
     tags_relation = models.ManyToManyField(Tag)
     
-    params_json = models.TextField()
-    #tags_flatten = models.TextField(blank = True, null = True)
+    params_json = models.TextField(default="{}")
     #read only
     data_file = models.FileField(upload_to = '%Y/%m/%d')
     # parent curve e.g., for fit curve...
@@ -152,16 +152,6 @@ class CurveDB(models.Model, Curve):
 
 
     def load_params(self):
-        #subclasses = Param.__subclasses__()
-        #dic_param = dict()
-        #for cls in subclasses:
-        #    name = cls.__name__.lower()
-        #    param_set = self.__getattribute__(name)
-        #    params = param_set.all()
-        #    for par in params:
-        #        dic_param[par.name_txt] = par.value
-        #self.set_params(**dic_param)
-        #self.set_default_params()
         dic_param = json.loads(self.params_json, object_hook=date_to_date)
         self.set_params(**dic_param)
         self.set_default_params()
@@ -214,7 +204,7 @@ class CurveDB(models.Model, Curve):
             if isinstance(val, basestring):
                 self.save_char_param(par, val)
                 continue
-            if isinstance(val, bool):
+            if isinstance(val, (bool, numpy.bool_)):
                 self.save_bool_param(par, val)
                 continue
             if isinstance(val, (int, float, long)):
@@ -223,7 +213,7 @@ class CurveDB(models.Model, Curve):
             if isinstance(val, datetime):
                 self.save_date_param(par, val)
                 continue
-            raise ValueError('could not find the type of parameter fpr ' + str(val))
+            raise ValueError('could not find the type of parameter ' + str(val))
         
         self.params_json = json.dumps(self.params, default=default)
         models.Model.save(self)
@@ -262,13 +252,16 @@ class CurveDB(models.Model, Curve):
         
         self.set_default_params()
         try:
-            date = self.params["date"]
+            d = self.params["date"]
         except KeyError:
             date = datetime.now()
             self.params["date"] = date
+        else:
+            if isinstance(d, basestring):
+                self.params["date"] = datetime.strptime(d, "%y/%m/%d/%H/%M/%S/%f")
         if not self.data_file:
             self.data_file = os.path.join( \
-                    date.strftime('%Y/%m/%d'), \
+                    self.params["date"].strftime('%Y/%m/%d'), \
                     self.params["name"] + '.h5')
             full_path = self.get_full_filename()
             dirname = os.path.dirname(full_path)
@@ -276,8 +269,11 @@ class CurveDB(models.Model, Curve):
                 os.makedirs(dirname) 
             full_path = default_storage.get_available_name(full_path)
             self.data_file = os.path.relpath(full_path, MEDIA_ROOT)
-        if (self.pk is None) or (not self.params["data_read_only"]):
+        if not self.params["data_read_only"]:
             Curve.save(self, self.get_full_filename())
+        else:
+            if not os.path.exists(self.get_full_filename()):
+                Curve.save(self, self.get_full_filename())
         
         if self.pk == None:
             models.Model.save(self)

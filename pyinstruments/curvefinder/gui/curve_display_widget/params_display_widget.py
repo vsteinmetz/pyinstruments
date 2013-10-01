@@ -10,6 +10,7 @@ class ParamsDisplayWidget(QtGui.QWidget):
         self.tree.setHeaderLabels(["column name", "value"])
         self.tree.setColumnWidth(0,150)
         self.tree.setColumnWidth(1,150)
+        self.setMinimumWidth(200)
     
     def format_nicely(self, val):
         return str(val)[:255]
