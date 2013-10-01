@@ -1,0 +1,123 @@
+[
+  {
+    "model": "curvestore.paramcolumn",
+    "pk": 1,
+    "fields": {
+      "name": "date",
+      "read_only": true,
+      "type": "date",
+      "required": true,
+      "description": "date and time when the data was taken or first saved"
+   	}
+   },
+   {
+    "model": "curvestore.paramcolumn",
+    "pk": 2,
+    "fields": {
+      "name": "data_read_only",
+      "read_only": false,
+      "type": "boolean",
+      "required": true,
+      "default_json": "true",
+      "description": "Can the data be modified?"
+     }
+    },
+    {
+    "model": "curvestore.paramcolumn",
+    "pk": 3,
+    "fields": {
+      "name": "name",
+      "type": "char",
+      "read_only": false,
+      "required": true,
+      "default_json": "\"some_curve\"",
+      "description": "Name of the curve."
+    	}
+    },
+    {
+    "model": "curvestore.paramcolumn",
+    "pk": 4,
+    "fields": {
+      "name": "window",
+      "read_only": false,
+      "type": "char",
+      "required": true,
+      "default_json": "\"default_win\"",
+      "description": "Where to plot the curve."
+    	}
+    },
+    {
+    "model": "curvestore.paramcolumn",
+    "pk": 5,
+    "fields": {
+      "name": "comment",
+      "type": "text",
+      "read_only": false,
+      "required": true,
+      "default_json": "\"\"",
+      "description": "Anything relevant about the data."    
+    }
+  },
+  {
+    "model": "curvestore.paramcolumn",
+    "pk": 6,
+    "fields": {
+      "name": "tags_flatten",
+      "read_only": false,
+      "type": "text",
+      "required": true,
+      "default_json": "\"\"",
+      "description": "A list of tag names separated by \";\". private use only."
+     }
+    }
+    ,
+  {
+    "model": "curvestore.paramcolumn",
+    "pk": 7,
+    "fields": {
+      "name": "id",
+      "type": "float",
+      "read_only": true,
+      "required": true,
+      "default_json": "1",
+      "description": "The id of the curve. private use only."
+     }
+    },
+  {
+    "model": "curvestore.paramcolumn",
+    "pk": 8,
+    "fields": {
+      "name": "parent_id",
+      "type": "float",
+      "read_only": false,
+      "required": true,
+      "default_json": "0",
+      "description": "The id of the parent curve. 0 if none, private use only."
+     }
+    },
+    {
+    "model": "curvestore.paramcolumn",
+    "pk": 9,
+    "fields": {
+      "name": "curve_type",
+      "type": "char",
+      "read_only": true,
+      "required": true,
+      "default_json": "\"user_curve\"",
+      "description": "Describes the type of curve present."
+     }
+    }
+    ,
+    {
+    "model": "curvestore.paramcolumn",
+    "pk": 10,
+    "fields": {
+      "name": "user_has_read",
+      "type": "boolean",
+      "read_only": false,
+      "required": true,
+      "default_json": "false",
+      "description": "Needs to be plotted."
+     }
+    }
+]

@@ -1,5 +1,5 @@
-from pyinstruments.curvefinder.qtgui.gui import CurveCreateWidget
-from pyinstruments.curvefinder.models import Window, Tag, curve_db_from_curve
+from pyinstruments.curvestore.curve_create_widget import CurveCreateWidget
+from pyinstruments.curvestore.models import Tag, curve_db_from_curve
 
 from pyhardware.utils.guiwrappersutils import graphical_exception
 import pyhardware.utils.gui_fetch_utils
@@ -44,22 +44,17 @@ def _save_curve(self, curve):
     try:
         db_widget = self._dbwidget
     except AttributeError:
-        pass
+        print 'no widget'
     else:
-        curve.name = self._dbwidget.name
-        curve.window_txt = self._dbwidget.window
-        curve.save()
-    
-        tags = self._dbwidget.tags
-        for tag_name in tags:
-            (tag, new) = Tag.objects.get_or_create(name = tag_name)
-            curve.tags.add(tag)
-        curve.comment = self._dbwidget.comment
+        curve.params['name'] = self._dbwidget.name
+        curve.params['window'] = self._dbwidget.window
+        curve.tags = self._dbwidget.tags
+        curve.params['comment'] = self._dbwidget.comment
         
-        self._save_defaults(default_name=curve.name, \
-                            default_window=curve.window.name, \
-                            comment=curve.comment, \
-                            tags=tags)
+        self._save_defaults(default_name=curve.params['name'],
+                            default_window=curve.params['window'],
+                            comment=curve.params['comment'],
+                            tags=curve.tags)
     finally:
         curve.save()
 
