@@ -1,5 +1,6 @@
-from pyinstruments.curvefinder.gui.curve_display_widget.curve_edit_widgets import CurveCreateWidget
+from pyinstruments.curvestore.curve_create_widget import CurveCreateWidget
 from pyinstruments.curvefinder.gui.curve_display_widget.id_display_widget import IdDisplayWidget
+
 
 from PyQt4 import QtCore, QtGui
 

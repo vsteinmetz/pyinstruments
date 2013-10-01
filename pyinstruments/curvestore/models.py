@@ -9,6 +9,9 @@ from datetime import datetime
 import json
 from django.core.files.storage import default_storage
 
+
+
+
 class Tag(models.Model):
     """
     each curve can contain a list of tags. Tags could be hierarchical by 
@@ -81,6 +84,19 @@ def get_column(name, type_):
             raise WrongTypeError("column " + name + " allready exists and has the wong type " + col.type + " not " + type_)
     return col
 
+
+def default(obj):
+    """Default JSON serializer."""
+    import calendar, datetime
+
+    if isinstance(obj, datetime.datetime):
+        return obj.strftime("%y/%m/%d/%H/%M/%S/%f")
+
+def date_to_date(dic):
+     if 'date' in dic:
+         dic['date'] = datetime.strptime(dic['date'], "%y/%m/%d/%H/%M/%S/%f")
+     return dic
+ 
 class CurveDB(models.Model, Curve):
     """
     The base object containing the path to the curves, with all the meta 
@@ -93,6 +109,8 @@ class CurveDB(models.Model, Curve):
         return self.params["name"]
 
     tags_relation = models.ManyToManyField(Tag)
+    
+    params_json = models.TextField()
     #tags_flatten = models.TextField(blank = True, null = True)
     #read only
     data_file = models.FileField(upload_to = '%Y/%m/%d')
@@ -134,14 +152,17 @@ class CurveDB(models.Model, Curve):
 
 
     def load_params(self):
-        subclasses = Param.__subclasses__()
-        dic_param = dict()
-        for cls in subclasses:
-            name = cls.__name__.lower()
-            param_set = self.__getattribute__(name)
-            params = param_set.all()
-            for par in params:
-                dic_param[par.name_txt] = par.value
+        #subclasses = Param.__subclasses__()
+        #dic_param = dict()
+        #for cls in subclasses:
+        #    name = cls.__name__.lower()
+        #    param_set = self.__getattribute__(name)
+        #    params = param_set.all()
+        #    for par in params:
+        #        dic_param[par.name_txt] = par.value
+        #self.set_params(**dic_param)
+        #self.set_default_params()
+        dic_param = json.loads(self.params_json, object_hook=date_to_date)
         self.set_params(**dic_param)
         self.set_default_params()
         return dic_param
@@ -204,7 +225,8 @@ class CurveDB(models.Model, Curve):
                 continue
             raise ValueError('could not find the type of parameter fpr ' + str(val))
         
-    
+        self.params_json = json.dumps(self.params, default=default)
+        models.Model.save(self)
     
     def get_full_filename(self):
         return os.path.join(MEDIA_ROOT, \
@@ -264,6 +286,21 @@ class CurveDB(models.Model, Curve):
 
         models.Model.save(self)
         self.save_params()
+        
+    def delete(self):
+        try:
+            os.remove(self.get_full_filename())
+        except WindowsError:
+            print 'no file found at ' + self.get_full_filename()
+        super(CurveDB, self).delete()
+        subclasses = Param.__subclasses__()
+        dic_param = dict()
+        for cls in subclasses:
+            name = cls.__name__.lower()
+            param_set = self.__getattribute__(name)
+            params = param_set.all()
+            for par in params:
+                par.delete()
         
     def fit(self, func, autoguessfunction='', autosave=False, maxiter = 100, verbosemode = False,\
                     manualguess_params = {},fixed_params = {}):

@@ -1,4 +1,6 @@
 import pyinstruments.datastore.settings
+from pyinstruments.curvestore import models
+from curve import Curve
 
 import time
 import os
@@ -8,7 +10,18 @@ from zipfile import ZipFile
         
 class MenuFile(QtGui.QMenu):
     def __init__(self, parent, widget):
-        super(MenuFile, self).__init__(parent)
+        super(MenuFile, self).__init__(parent)        
+        self.quit = QtGui.QAction(widget)
+        self.quit.setText('quit')
+        self.quit.triggered.connect(self._quit)
+        self.addAction(self.quit)
+
+    def _quit(self):
+        guidata.qapplication().quit()
+        
+class MenuDB(QtGui.QMenu):
+    def __init__(self, parent, widget):
+        super(MenuDB, self).__init__(parent)
         self.forget_database_location = QtGui.QAction(widget)
         self.forget_database_location.setText('forget database location...')
         self.forget_database_location.triggered.connect(self._forget_db_location)
@@ -19,39 +32,24 @@ class MenuFile(QtGui.QMenu):
         self.open_django_admin.triggered.connect(self._open_django_admin)
         self.addAction(self.open_django_admin)
         
-        self.zip_database_and_files = QtGui.QAction(widget)
-        self.zip_database_and_files.setText('zip database and files...')
-        self.zip_database_and_files.triggered.connect(
-                                        self._zip_database_and_files)
-        self.addAction(self.zip_database_and_files)
-        
-        self.quit = QtGui.QAction(widget)
-        self.quit.setText('quit')
-        self.quit.triggered.connect(self._quit)
-        self.addAction(self.quit)
+        self.backup_all_files = QtGui.QAction(widget)
+        self.backup_all_files.setText('backup all files...')
+        self.backup_all_files.triggered.connect(
+                                        self._backup_all_files)
+        self.addAction(self.backup_all_files)
     
-    
-    def _zip_database_and_files(self):
+    def _backup_all_files(self):
         dial = QtGui.QFileDialog()
-        filename = str(dial.getSaveFileName(parent = self, filter = '*.zip'))
-        if filename:
-            with ZipFile(filename, 'w') as zpf:
-                db_file = pyinstruments.datastore.settings.DATABASE_FILE
-                zpf.write(db_file, os.path.split(db_file)[-1])
-                
-                rootdir = os.path.splitext(db_file)[0]
-                root_dir_minus_one = os.path.split(rootdir)[0]
-                
-                def archive_dir(zip_file, dirname, files):
-                    for filename in files:
-                        full_file_path = os.path.join(dirname, filename)
-                        zip_file.write(full_file_path,
-                                       os.path.join(os.path.relpath(full_file_path, 
-                                                       root_dir_minus_one)))
-                os.path.walk(rootdir, archive_dir, zpf)
-        
-    def _quit(self):
-        guidata.qapplication().quit()
+        filename = str(dial.getSaveFileName(parent=self))
+        if not filename:
+            return
+        #with ZipFile(filename, 'w') as zpf:
+        #    db_file = pyinstruments.datastore.settings.DATABASE_FILE
+        #    zpf.write(db_file, os.path.split(db_file)[-1] + "_saved")
+        for curve in models.CurveDB.objects.all():
+            Curve.save(curve, os.path.join(filename, curve.data_file.name))
+            
+
     
     def _open_django_admin(self):
         import subprocess
@@ -77,10 +75,16 @@ class MenuFile(QtGui.QMenu):
 class CurveEditorMenuBar(QtGui.QMenuBar):    
     def __init__(self, parent):
         super(CurveEditorMenuBar, self).__init__(parent)
-        self.menu_file_action = QtGui.QAction('file',parent)
+        self.menu_file_action = QtGui.QAction('file', parent)
         self.menu_file = MenuFile(self, parent)
         self.menu_file_action.setMenu(self.menu_file)
+        
+        self.menu_db_action = QtGui.QAction('database', parent)
+        self.menu_db = MenuDB(self, parent)
+        self.menu_db_action.setMenu(self.menu_db)
+        
         self.addAction(self.menu_file_action)
+        self.addAction(self.menu_db_action)
         
 
 class CurveEditorToolBar(QtGui.QToolBar, object):

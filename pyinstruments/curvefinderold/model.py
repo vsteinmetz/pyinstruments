@@ -197,6 +197,7 @@ class CurveDB(models.Model, Curve):
         except WindowsError:
             print 'no file found at ' + self.get_full_filename()
         super(CurveDB, self).delete()
+        
     
     @property
     def window_txt(self):

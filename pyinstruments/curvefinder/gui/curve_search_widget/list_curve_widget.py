@@ -159,18 +159,35 @@ class ListCurveWidget(QtGui.QWidget, object):
         ### First option: Plot curve(s)
         if len(curves)==1:
             message = "plot in " + curves[0].params['window']
+            message_delete = "delete " + curves[0].params['name']
         else:
             message = "plot these in their window"
+            message_delete = "delete " + str(len(curves)) + " curves ?"
+        
+        def delete(dummy, curves=curves):
+            message_box = QtGui.QMessageBox(self)
+            answer = message_box.question(self, 'delete', message_delete, 'No', 'Yes')
+            if not answer:
+                return
+            for curve in curves:
+                curve.delete()
+            self.refresh()
         
         def plot(dummy, curves=curves):
             for curve in curves:
                 win = get_window(curve.params["window"])
                 win.plot(curve)
+                win.show()
         
         menu = QtGui.QMenu(self)
-        action_add_tag = QtGui.QAction(message, self)
-        action_add_tag.triggered.connect(plot)
-        menu.addAction(action_add_tag)
+        action_plot = QtGui.QAction(message, self)
+        action_plot.triggered.connect(plot)
+        
+        action_delete = QtGui.QAction(message_delete, self)
+        action_delete.triggered.connect(delete)
+        
+        menu.addAction(action_plot)
+        menu.addAction(action_delete)
          
         ###second option: fit curve(s)
         
@@ -180,7 +197,8 @@ class ListCurveWidget(QtGui.QWidget, object):
                 fitfuncs.append(f)
         
         fitsmenu = menu.addMenu(    'fits')
-
+        
+        
         def fitcurve(curvestofit, funcname):
             for curve in curvestofit:
                 curve.fit(func = funcname, autosave=True, maxiter=20)

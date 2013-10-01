@@ -1,0 +1,1 @@
+from pyinstruments.curvefinder.gui.curve_editor import CurveEditor
