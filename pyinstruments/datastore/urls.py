@@ -1,6 +1,5 @@
 from django.conf.urls import patterns, include, url
-import pyinstruments.curvefinder.urls
-from pyinstruments.curvefinder.views import CurveMergeView
+import pyinstruments.curvestore.urls
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -15,8 +14,5 @@ urlpatterns = patterns('',
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^curves/', include(pyinstruments.curvefinder.urls)),
-    url(r'^merge/$', \
-        CurveMergeView.as_view(), name="curves_merge")
+    url(r'^admin/', include(admin.site.urls))
 )
