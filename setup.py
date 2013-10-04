@@ -23,7 +23,7 @@ setup(
     scripts={'postinstallscript.py'},
     data_files=[('pyinstruments/curvestore/fixtures',['pyinstruments/curvestore/fixtures/initial_data.json'])],
     include_package_data=True,
-    version = "0.3.04",
+    version = "0.3.11",
     author = "Samuel Deleglise",
     author_email = "samuel.deleglise@gmail.com",
     description = ("""Control of data acquisition with remote instruments using 

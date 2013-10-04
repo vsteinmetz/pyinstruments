@@ -15,13 +15,13 @@ import subprocess
 from PyQt4.QtCore import QSettings
 QSettings('pyinstruments', 'pyinstruments').setValue('database_file', '')
 
-def set_environment_variable_on_windows(name, value):
-    subprocess.call(['setx', name, value])
-    os.environ[name] = value
+#def set_environment_variable_on_windows(name, value):
+#    subprocess.call(['setx', name, value])
+#    os.environ[name] = value
 
 subprocess.call(['pip', 'install', 'django'])
-set_environment_variable_on_windows('DJANGO_SETTINGS_MODULE', 
-                                    'pyinstruments.datastore.settings')
+#set_environment_variable_on_windows('DJANGO_SETTINGS_MODULE', 
+#                                    'pyinstruments.datastore.settings')
 subprocess.call(['pip', 'install', 'django-model-utils'])
 subprocess.call(['pip', 'install', 'django-utils'])
 subprocess.call(['pip', 'install', 'django_evolution'])

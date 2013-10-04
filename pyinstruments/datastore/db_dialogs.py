@@ -17,12 +17,15 @@ class DialogChooseDatabase(QtGui.QDialog):
         self.setLayout(self.lay)
     
     def new_database(self):
-        print 'existing database'
+        print 'new database'
         settings = QSettings('pyinstruments', 'pyinstruments')
         dial = DialogNewDatabase()
         while not dial.exec_():
             pass
-        settings.setValue('database_file', dial.filename)
+        #settings.setValue('database_file', dial.filename)
+        change_default_database_name(dial.filename)
+        #settings.sync()
+        
         import subprocess
         if subprocess.call(
                         ['python', 
@@ -31,12 +34,12 @@ class DialogChooseDatabase(QtGui.QDialog):
                                        'manage.py'),
                          'syncdb',
                          '--noinput'],
-                    shell=True):
+                    shell=False):
             raise ValueError("problem with db synchronization")
         
         settings.setValue('database_login', dial.login)
         settings.setValue('database_password', dial.password)
-        
+        settings.sync()
         import django
         
         create_super_user(dial.login, dial.password)
@@ -44,12 +47,13 @@ class DialogChooseDatabase(QtGui.QDialog):
         self.hide()
     
     def existing_database(self):
-        print 'new database'
+        print 'existing database'
         settings = QSettings('pyinstruments', 'pyinstruments')
         dial = DialogOpenDatabase()
         while not dial.exec_():
             pass
         settings.setValue('database_file', dial.filename)
+        settings.sync()
         self.accepted.emit()
         self.hide()
         
@@ -130,7 +134,7 @@ class DialogNewDatabase(DialogOpenDatabase):
         self.help_widget = QtGui.QLabel("")
         self.lay.insertWidget(0, self.help_widget)
         
-    validated = QtCore.pyqtSignal(name = 'validated')
+    validated = QtCore.pyqtSignal(name='validated')
     
     def connect_buttons_to_slots(self):
         self.cancel_button.pressed.connect(self.reject)
@@ -198,13 +202,11 @@ def create_super_user(login, password):
     command.execute(login)
     
 def _new_database(dummy = True, cancel_allowed = True):
-    import pdb
-    pdb.set_trace()
     dialog_new_database = DialogNewDatabase()
     if not dialog_new_database.exec_():
         if cancel_allowed:
             return
-    change_default_databse_name(dialog_new_database.filename)
+    change_default_database_name(dialog_new_database.filename)
     create_database()
     create_super_user(dialog_new_database.login,
                       dialog_new_database.password)
@@ -212,18 +214,23 @@ def _new_database(dummy = True, cancel_allowed = True):
 def _open_database():
     dialog_new_database = DialogOpenDatabase()
     if dialog_open_database.exec_():
-        change_default_databse_name(dialog_open_database.filename)    
+        change_default_database_name(dialog_open_database.filename)    
     
 
-def change_default_databse_name(filename):
+def change_default_database_name(filename):
     """
     first, changes directly the 'living' dictionnary, but also stores  the value 
     for latter execution
     """
     
-    DATABASE_FILE = filename
-    DATABASES["default"]["NAME"] = filename
+    #DATABASE_FILE = filename
+    #DATABASES["default"]["NAME"] = filename
+    settings = QSettings('pyinstruments', 'pyinstruments')
     
     settings.setValue("database_file", filename)
-    MEDIA_ROOT = os.path.splitext(DATABASE_FILE)[0]
+    settings.sync()
+    if not settings.isWritable():
+        raise ValueError("the file " + settings.fileName() + " cannot be modified, please change permissions")
+    #MEDIA_ROOT = os.path.splitext(DATABASE_FILE)[0]
+    
 
