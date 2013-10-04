@@ -34,11 +34,10 @@ The strict separation between plotting and data-acquistion processes ensures tha
 Main Features
 =============
 
-The curves are stored in a (django-abstracted) database with all necessary metadata 
-(bandwidth, averaging...) together with a list of user-defined tags and comments. 
+The curves are stored in a (django-abstracted) database with all necessary metadata.
+(bandwidth, averaging, date, comment, name...) together with a list of user-defined tags to quickly identify the curves. 
 The curvefinder module allows monitoring new incoming curves, as well as querying
 the database for old curve by date, tags...
-
 The hardware module has a Graphical User Interface to quickly get a curve from an instrument and configure the way instruments are interfaced.
 
 Dependencies

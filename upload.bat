@@ -1,5 +1,5 @@
 set HOME=C:\Users\Samuel\
-cd C:\Users\Samuel\Documents\GitHub\pyinstruments
+cd C:\Users\Samuel\Documents\GitHub\pyinstruments-package
 
 rmdir /S build
 rmdir /S dist

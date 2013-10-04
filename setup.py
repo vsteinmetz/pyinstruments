@@ -7,30 +7,9 @@ import shutil
 
 class installWithPost(install):
     def run(self):
-        install.run(self)
-        ##===========================================
-        ##   COPIED FROM postinstallscript
-        ##===========================================   
-        from PyQt4.QtCore import QSettings
-        QSettings('pyinstruments', 'pyinstruments').setValue('database_file', '')
-        import subprocess
-        def set_environment_variable_on_windows(name, value):
-            subprocess.call(['setx', name, value])
-            os.environ[name] = value
+        install.run(self)  
+        import postinstallscript
         
-        subprocess.call(['pip', 'install', 'django'])
-        set_environment_variable_on_windows('DJANGO_SETTINGS_MODULE', 
-                                            'pyinstruments.datastore.settings')
-        subprocess.call(['pip', 'install', 'django-model-utils'])
-        subprocess.call(['pip', 'install', 'django-utils'])
-        subprocess.call(['pip', 'install', 'django_evolution'])
-        
-        build_folder = os.path.join(os.environ['TEMP'], 'pip_build_' + os.environ['USERNAME'], 'pyhardware')
-        if os.path.exists(build_folder):
-            shutil.rmtree(build_folder)
-        if subprocess.call(['pip', 'install','pyhardware', '-I', '-U']):
-            raise RuntimeError('problem installing pyhardware')
-
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
 # README file and 2) it's easier to type in the README file than to put a raw
@@ -42,7 +21,9 @@ setup(
     name = "pyinstruments",
     cmdclass={"install": installWithPost},
     scripts={'postinstallscript.py'},
-    version = "0.2.14",
+    data_files=[('pyinstruments/curvestore/fixtures',['pyinstruments/curvestore/fixtures/initial_data.json'])],
+    include_package_data=True,
+    version = "0.3.04",
     author = "Samuel Deleglise",
     author_email = "samuel.deleglise@gmail.com",
     description = ("""Control of data acquisition with remote instruments using 
@@ -52,10 +33,29 @@ setup(
     url = "https://github.com/SamuelDeleglise/pyinstruments",
     packages=['pyinstruments',
               'pyinstruments/curvefinder',
-              'pyinstruments/curvefinder/qtgui',
+              'pyinstruments/curvefinder/gui',
+              'pyinstruments/curvefinder/gui/curve_display_widget',
+              'pyinstruments/curvefinder/gui/curve_search_widget',
+              'pyinstruments/curvestore',
               'pyinstruments/datastore',
               'pyinstruments/pyhardwaredb',
-              'pyinstruments/datalogger'],
+              'pyinstruments/datalogger',
+              'curve',
+              'pyhardware',
+              'pyhardware/config',
+              'pyhardware/config/gui',
+              'pyhardware/drivers',
+              'pyhardware/drivers/ivi',
+              'pyhardware/drivers/serial',
+              'pyhardware/drivers/visa',
+              'pyhardware/utils',
+              'pyhardware/utils/conf_xml',
+              'pyhardware/utils/guiwrappersutils',
+              'pyivi',
+              'pyivi/ivic',
+              'pyivi/ivicom',
+              'pyivi/ivifactory'
+              ],
     long_description=read('README.rst'),
     classifiers=[
         "Development Status :: 3 - Alpha",
