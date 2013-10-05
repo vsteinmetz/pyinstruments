@@ -9,4 +9,5 @@ from pyhardware.drivers.serial.agilent34401a import \
 from pyhardware.drivers.serial.keithley2000 import \
                                                 Keithley2000
 from pyhardware.drivers.serial.arduino import \
-                                                Arduino
+                                                Arduino, ArduinoLockbox
+                                                

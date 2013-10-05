@@ -57,7 +57,10 @@ class IviSpecAnDriver(IviDriver, GuiWrapper, FetcherMixin):
             meta["instrument_type"] = "SpecAn"
             meta["instrument_logical_name"] = self.logical_name
             
-            curve = Curve(pandas.Series(x_y[1], index = x_y[0]), meta = meta)
+            #curve = Curve(pandas.Series(x_y[1], index = x_y[0]), meta = meta)
+            curve = Curve()
+            curve.set_data(pandas.Series(x_y[1], index = x_y[0]))
+            curve.set_params(**meta)
             return curve
         
 add_fields(IviSpecAnDriver, ShortCutSpecAn._fields)

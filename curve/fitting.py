@@ -2,22 +2,12 @@ import pandas
 import scipy.optimize
 import numpy
 import collections
+import math
+
+LAMBDA = 1.064e-6
 
 '''Here re-define the fitfunctions which shall appear in the fit context menu'''
 class FitFunctions(object):
-    def lorentz(self, scale, x0, y0, bandwidth):
-        pass
-    
-    def linear(self, x0, slope):
-        pass
-
-    def lorentzDSB(self,x = 0):
-        pass
-
-
-
-
-class Fit(object):
     def lorentz(self, scale, x0, y0, bandwidth):
         x = self.x()
         return scale/(1+((x-x0)/bandwidth)*((x-x0)/bandwidth))+y0
@@ -26,12 +16,24 @@ class Fit(object):
         x=self.x()
         return slope * (x-x0)
 
-    def lorentzSB(self,x = 0):
+    def lorentzSB(self, scale, x0, y0, bandwidth, SBwidth, SBscale):
         x = self.x()
-        return scale/(1+((x-x0)/bandwidth)*((x-x0)/bandwidth))+y0
+        return y0 + scale*(1/(1+((x-x0)/bandwidth)*((x-x0)/bandwidth))+\
+                SBscale/(1+((x-x0-SBwidth)/bandwidth)**2)+\
+                SBscale/(1+((x-x0+SBwidth)/bandwidth)**2))
     
-
-    def lorentz_guess(self):
+    '''defines w(z) for 1064nm wavelength for all units in meters'''
+    def gaussianbeam(self,x0,w0):
+        x=self.x()
+        return w0*(((x-x0)**2/math.pi**2/w0**4*LAMBDA**2+1)**0.5)
+    
+    def _guessgaussianbeam(self):
+        tempfit = Fit(data=self.data,func='linear',maxiter=10)
+        res = tempfit.getparams()
+        params = dict(x0 = res['x0'], w0 = LAMBDA/math.pi/res['slope'])    
+        return params
+    
+    def _guesslorentz(self):
         x0 = float(self.x()[self.data.argmax()])
         max = self.data.max()
         min = self.data.min()
@@ -39,16 +41,16 @@ class Fit(object):
         fit_params = {'x0': x0, 'y0': min, 'scale': max-min, 'bandwidth': bw}
         return fit_params
 
-    def lorentzSB_guess(self):
+    def _guesslorentzSB(self):
         x0 = float(self.x()[self.data.argmax()])
         max = self.data.max()
         min = self.data.min()
         bw = 0.1*(self.x().max() - self.x().min())
         fit_params = {'x0': x0, 'y0': min, 'scale': max-min, 'bandwidth': bw, \
-                      'SBwidth': 3.0*bw, 'SBscale' : 0.5}
+                      'SBwidth': 1.8*bw, 'SBscale' : 0.3}
         return fit_params
-    
-    def linear_guess(self):
+
+    def _guesslinear(self):
         max = self.data.max()
         min = self.data.min()
         slope = (max-min)/(self.x().max() - self.x().min())
@@ -56,6 +58,9 @@ class Fit(object):
         fit_params = {'x0': x0, 'slope': slope}
         return fit_params
     
+
+
+class Fit(FitFunctions):
     def __init__(self, data, func, fixed_params = {}, manualguess_params = {}, \
                  autoguessfunction = '' , verbosemode = True, maxiter = 100):
         self.data = data
@@ -65,6 +70,8 @@ class Fit(object):
         self.maxiter = maxiter
         self.fitfunctions = FitFunctions()
         self.commentstring = ''
+        self.fixed_params = collections.OrderedDict(fixed_params)
+        self.manualguess_params = collections.OrderedDict(manualguess_params)
         
         # dynamically choose the fit function according to the passed func string
         self.func = func
@@ -73,9 +80,9 @@ class Fit(object):
         # choose automatic guess function for starting parameter estimation
         self.autoguessfunction = autoguessfunction
         if self.autoguessfunction =='':
-            self.fn_guess = self.__getattribute__(self.func + '_guess')
+            self.fn_guess = self.__getattribute__('_guess'+self.func)
         else:
-            self.fn_guess = self.__getattribute__(self.guess)
+            self.fn_guess = self.__getattribute__(self.autoguessfunction)
         
         # guess unfixed parameters
         self.autoguess_params = self.fn_guess()
@@ -85,8 +92,6 @@ class Fit(object):
         # fixed_params are invariably fixed
         # manualguess_params have been guessed manually
         # the remaining autoguess_params were guessed by the guess function
-        self.fixed_params = collections.OrderedDict(fixed_params)
-        self.manualguess_params = manualguess_params
         self.fit_params = collections.OrderedDict()
         for key in self.fn.func_code.co_varnames[1:self.fn.func_code.co_argcount]:
             if key in self.fixed_params:
@@ -107,7 +112,7 @@ class Fit(object):
         self.comment(str(res))
         
     def getparams(self):
-        params = self.fit_params
+        params = self.fit_params.copy()
         params.update(self.fixed_params)
         return params
     
@@ -124,13 +129,13 @@ class Fit(object):
         self.sqerror = float(((self.fn(**self.getparams())-self.data.values)**2).sum())
         return self.sqerror
         
-    def x(self):
-        return numpy.array(self.data.index,dtype=float)
-    
     def comment(self, string):
         if self.verbosemode is True:
             print string
         self.commentstring += str(string) + "\r\n"
+
+    def x(self):
+        return numpy.array(self.data.index,dtype=float)
     
     def fit(self):
         # by default use scipy standard function for optimization
@@ -162,9 +167,96 @@ class Fit(object):
                             name = 'fitfunction: '+ self.func )
         return res
     
+    def getoversampledfitdata(self,numbersamples):
+        datasafe = self.data
+        maxindex = self.x().max()
+        print maxindex
+        minindex = self.x().min()
+        print minindex
+        newindex = numpy.array(numpy.linspace(minindex,maxindex,numbersamples),dtype=float)
+        self.data = pandas.Series(data=newindex,index=newindex)
+        self.fitdata = pandas.Series(data = self.fn(**self.getparams()), index = self.x(), \
+                       name = 'fitfunction: '+ self.func )
+        self.data = datasafe
+        return self.fitdata
+
+    
     def printstatus(self,dummy):
         self.stepcount += 1
         self.comment("Step "+str(self.stepcount) + " with sqerror = " + str(self.sqerror)) 
         self.comment(dict(self.getparams()))
         self.comment("dummy: " + str(dummy))
-    
+
+
+    def _guesslorentzSBfromlorentzOld_tobedeleted(self):
+        self.comment("Estimating first fit parameters from simple lorentz fit")
+        tempfit = Fit(data = self.data, func = 'lorentz', \
+                      autoguessfunction = '', fixed_params = self.fixed_params, \
+                      manualguess_params = self.manualguess_params, \
+                      verbosemode = self.verbosemode, maxiter = 20)
+        tempfit_params = tempfit.getparams()
+        self.comment("")
+        self.comment("Estimating remaining fit parameters from lorentzSB fit with fixed previously determined parameters")
+        tempfit = Fit(data = self.data, func = 'lorentzSB', \
+                      autoguessfunction = '', fixed_params = tempfit_params, \
+                      manualguess_params = self.manualguess_params, \
+                      verbosemode = self.verbosemode, maxiter = 20)
+        fit_params = tempfit.getparams()
+        return fit_params
+
+    def _guesslorentzSBguessfixfromlorentzSB(self):
+        '''use the more evolved guess from guesslorentzSBfixfromlorentz'''
+        self.comment("perform guesslorentzSBfixfromlorentz...")
+        tempfit = Fit(data = self.data, func = 'lorentzSB', \
+                      autoguessfunction = '_guesslorentzSBfixfromlorentz', \
+                      fixed_params = self.fixed_params, \
+                      manualguess_params = self.manualguess_params, \
+                      verbosemode = self.verbosemode, maxiter = 15)
+        '''tempfit_params holds the parameters for the guess now, '''
+        '''which should be nearly optimal already'''
+        fit_params = tempfit.getparams()
+        '''if fixed_params are defined at the fit function call, '''
+        '''they automatically found their way into fit_params'''
+        self.fixed_params['bandwidth']=fit_params['bandwidth']
+        self.fixed_params['SBwidth']=fit_params['SBwidth']
+        return fit_params 
+
+    def _guesslorentzSBguessfromlorentzSB(self):
+        '''use the more evolved guess from guesslorentzSBfixfromlorentz'''
+        self.comment("perform guesslorentzSBfixfromlorentz...")
+        tempfit = Fit(data = self.data, func = 'lorentzSB', \
+                      autoguessfunction = '_guesslorentzSBfixfromlorentz', \
+                      fixed_params = self.fixed_params, \
+                      manualguess_params = self.manualguess_params, \
+                      verbosemode = self.verbosemode, maxiter = 15)
+        '''tempfit_params holds the parameters for the guess now, '''
+        '''which should be nearly optimal already'''
+        fit_params = tempfit.getparams()
+#        '''if fixed_params are defined at the fit function call, '''
+#        '''they automatically found their way into fit_params'''
+#        self.fixed_params['bandwidth']=fit_params['bandwidth']
+#        self.fixed_params['SBwidth']=fit_params['SBwidth']
+        return fit_params 
+
+    def _guesslorentzSBfixfromlorentz(self):
+        self.comment("Estimating first fit parameters from simple lorentz fit")
+        tempfit = Fit(data = self.data, func = 'lorentz', \
+                      autoguessfunction = '_guesslorentz', \
+                      fixed_params = self.fixed_params, \
+                      manualguess_params = self.manualguess_params, \
+                      verbosemode = self.verbosemode, maxiter = 15)
+        '''tempfit_params holds the parameters to keep fixed'''
+        '''bwguess is the guess for the bandwidth''' 
+        tempfit_params = tempfit.getparams()
+        bwguess = tempfit_params.pop('bandwidth')
+        '''however, the manually fixed parameters are left unchanged'''
+        tempfit_params.update(self.fixed_params)
+        self.fixed_params = tempfit_params.copy()
+        '''construct the remaining guess parameters and return them'''
+        fitparams = collections.OrderedDict({'bandwidth': bwguess/2., \
+                            'SBwidth': 1.1 * bwguess, 'SBscale' : 0.25})
+        self.comment("Prefit for parameter guess obtained the following results: ")
+        self.comment("Fixed: "+str(self.fixed_params))
+        self.comment("Manual: "+str(self.manualguess_params))
+        self.comment("Automatic: "+str(fitparams))
+        return fitparams

@@ -114,7 +114,6 @@ def convert_from_numpy(val):
     if isinstance(val, numpy.str_):
         return str(val)
     return val
-
 def load(filename):
     """loads the curve at filename"""
     with pandas.get_store(filename, "r") as store:
