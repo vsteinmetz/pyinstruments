@@ -10,7 +10,7 @@ If the driver is ivi-compliant, then it is embedded in an instrument which provi
 basic graphical user interface capabilities.
 """
 
-from pyhardware.utils import curve
+import curve
 
 from guidata import qapplication as __qapplication
 _APP = __qapplication()
