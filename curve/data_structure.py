@@ -82,7 +82,7 @@ class Curve(object):
             self._data = store["data"]
 
     def get_plottable_data(self):
-        if self.params['curve_type']=='NaCurveComplex':
+        if self.params['curve_type'].startswith('NaCurveComplex'):
             return abs(self.data)**2
         else:
             return self.data
@@ -106,7 +106,7 @@ class Curve(object):
         fit_curve.set_params(**fitter.getparams())
         fit_curve.params["sumofsquares"] = fitter.sqerror
         fit_curve.params["comment"] = fitter.commentstring
-        fit_curve.params["curve_type"] = 'fit_curve'
+        fit_curve.params["curve_type"] = self.params["curve_type"]+'_fit'
         fit_curve.params["fit_function"] = fitter.func
         fit_curve.params["name"] = 'fit_' + func
         

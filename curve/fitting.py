@@ -8,19 +8,42 @@ LAMBDA = 1.064e-6
 
 '''Here re-define the fitfunctions which shall appear in the fit context menu'''
 class FitFunctions(object):
+    
+    def linear_x0(self, x0, slope):
+        x=self.x()
+        return slope * (x-x0)
+
+    def linear(self, y0, slope):
+        x=self.x()
+        return slope*x-y0
+
+    '''positive lorentz'''
     def lorentz(self, scale, x0, y0, bandwidth):
         x = self.x()
         return scale/(1+((x-x0)/bandwidth)*((x-x0)/bandwidth))+y0
     
-    def linear(self, x0, slope):
-        x=self.x()
-        return slope * (x-x0)
-
     def lorentzSB(self, scale, x0, y0, bandwidth, SBwidth, SBscale):
         x = self.x()
         return y0 + scale*(1/(1+((x-x0)/bandwidth)*((x-x0)/bandwidth))+\
                 SBscale/(1+((x-x0-SBwidth)/bandwidth)**2)+\
                 SBscale/(1+((x-x0+SBwidth)/bandwidth)**2))
+
+    def lorentz_complex(self, bandwidth, scale_re, scale_im, x0, y0_re,y0_im):
+        x = self.x()
+        return (scale_re+scale_im*1j)/(1+(1j*(x-x0)/bandwidth))+y0_re+y0_im*1j
+    
+    def _guesslorentz_complex(self):
+        length = len(self.x())
+        '''estimate background from first and last 10% of datapoints in the trace'''
+        bg = (self.data[:length/10].mean()+self.data[-length/10:].mean())/2.0
+        magdata = (self.data-bg)*numpy.conjugate(self.data-bg)
+        x0 = float(self.x()[self.magdata.argmax()])
+        magmax=self.magdata[x0]
+        max=self.data[x0]
+        bw = magdata.sum()/magmax*(self.x().max()-self.x().min())/length
+        fit_params = dict(bandwidth=bw,scale_re=real(max),scale_im=imag(max),
+                          x0=x0,y0_re=real(bg),y0_im=imag(bg))
+        return 
     
     '''defines w(z) for 1064nm wavelength for all units in meters'''
     def gaussianbeam(self,x0,w0):
@@ -28,7 +51,7 @@ class FitFunctions(object):
         return w0*(((x-x0)**2/math.pi**2/w0**4*LAMBDA**2+1)**0.5)
     
     def _guessgaussianbeam(self):
-        tempfit = Fit(data=self.data,func='linear',maxiter=10)
+        tempfit = Fit(data=self.data,func='linear_x0',maxiter=10)
         res = tempfit.getparams()
         params = dict(x0 = res['x0'], w0 = LAMBDA/math.pi/res['slope'])    
         return params
@@ -51,6 +74,14 @@ class FitFunctions(object):
         return fit_params
 
     def _guesslinear(self):
+        max = self.data.max()
+        min = self.data.min()
+        slope = (max-min)/(self.x().max() - self.x().min())
+        y0 = self.data.mean() - self.x().mean()*slope
+        fit_params = {'x0': x0, 'slope': slope}
+        return fit_params
+
+    def _guesslinear_x0(self):
         max = self.data.max()
         min = self.data.min()
         slope = (max-min)/(self.x().max() - self.x().min())

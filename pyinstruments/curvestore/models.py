@@ -119,6 +119,8 @@ class CurveDB(models.Model, Curve):
                                related_name = 'childs', \
                                blank = True, \
                                null = True)
+#    class Meta:
+#        get_latest_by = ['params[\'date\']']
     
     @property
     def tags(self):
@@ -217,7 +219,7 @@ class CurveDB(models.Model, Curve):
         
         self.params_json = json.dumps(self.params, default=default)
         models.Model.save(self)
-    
+
     def get_full_filename(self):
         return os.path.join(MEDIA_ROOT, \
                                  self.data_file.name)
@@ -310,7 +312,7 @@ class CurveDB(models.Model, Curve):
         
         fit_curve_db = curve_db_from_curve(fit_curve)
         fit_curve_db.params['name']+='_of_' + str(self.id)
-        fit_curve_db.params['window']=self.params["window"]
+        fit_curve_db.params['window']=self.params['window']
         fit_curve_db.parent = self
         if autosave:
             fit_curve_db.save()
