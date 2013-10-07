@@ -18,6 +18,8 @@ class IdDisplayWidget(QtGui.QWidget):
         self.form_lay.addRow('name', self.label_name)
         self.label_type = QtGui.QLabel()
         self.form_lay.addRow('type', self.label_type)
+        self.label_date = QtGui.QLabel()
+        self.form_lay.addRow('date', self.label_date)
         
         font = QtGui.QFont()
         font.setPointSize(20)
@@ -52,3 +54,4 @@ class IdDisplayWidget(QtGui.QWidget):
         self.label_id.setText(str(curve.id))
         self.label_name.setText(curve.params["name"])
         self.label_type.setText(curve.params["curve_type"])
+        self.label_date.setText(curve.params["date"].strftime("%d/%m/%Y %H:%M"))
