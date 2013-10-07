@@ -38,7 +38,37 @@ class IviAgNADriver(IviDriver, GuiWrapper, FetcherMixin):
         widget._exit_layout()
         self._setup_fetch_buttons(widget)
         
+#get the curve automatically in a complex format in linear scale
     def _get_curve(self):
+        x_y = self.driver.sc_active_measurement.fetch_complex()
+        meta = dict()
+        
+        meta["name"] = "na_curve"
+        meta["curve_type"] = "NaCurveComplex"
+        meta["averaging"] = self.averaging_factor*self.averaging
+        meta["center_freq"] = self.frequency_center
+        meta["start_freq"] = self.frequency_start
+        meta["stop_freq"] = self.frequency_stop
+        meta["span"] = self.span
+        meta["bandwidth"] = self.if_bandwidth
+        meta["sweep_time"] = self.sweep_time
+        meta["output_port"] = self.output_port
+        meta["input_port"] = self.input_port
+
+        meta["format"] = self.formats[self.format]
+        
+        meta["measurement"] = self.measurement_idxs[self.measurement_idx]
+        meta["channel"] = self.channel_idxs[self.channel_idx]
+        meta["instrument_type"] = "NA"
+        meta["instrument_logical_name"] = self.logical_name 
+        
+        curve = Curve()
+        curve.set_data(pandas.Series(x_y[1], index = x_y[0]))
+        curve.set_params(**meta)
+        return curve
+
+#get the curve shown on the display
+    def _get_curve_disp(self):
         x_y = self.driver.sc.fetch()
         meta = dict()
         
