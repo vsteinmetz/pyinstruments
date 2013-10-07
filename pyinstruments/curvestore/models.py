@@ -114,13 +114,13 @@ class CurveDB(models.Model, Curve):
     #read only
     data_file = models.FileField(upload_to = '%Y/%m/%d')
     # parent curve e.g., for fit curve...
-    parent = models.ForeignKey("self", \
-                               related_name = 'childs', \
-                               blank = True, \
+    parent = models.ForeignKey("self",
+                               related_name = 'childs',
+                               blank = True,
                                null = True)
     has_childs = models.BooleanField(default=False)
     saved_in_db = models.BooleanField(default=False)
-
+    date = models.DateField(auto_now_add=True)
     
     
     @property
@@ -258,11 +258,12 @@ class CurveDB(models.Model, Curve):
         try:
             d = self.params["date"]
         except KeyError:
-            date = datetime.now()
-            self.params["date"] = date
+            #date = datetime.now()
+            self.params["date"] = self.date
         else:
             if isinstance(d, basestring):
                 self.params["date"] = datetime.strptime(d, "%y/%m/%d/%H/%M/%S/%f")
+                self.date = self.params["date"]
         if not self.data_file:
             self.data_file = os.path.join( \
                     self.params["date"].strftime('%Y/%m/%d'), \
@@ -430,6 +431,8 @@ def curve_db_from_curve(curve):
     curve_db.set_data(curve.data)
     if 'name' in curve.params:
         curve_db.name = curve.params['name']
+    if 'date' in curve.params:
+        curve_db.date = curve.params['date']
     if 'tags_flatten' in curve.params:
         curve_db.tags = curve.params['tags_flatten'].rstrip(";").split(";")[1:]
     return curve_db
