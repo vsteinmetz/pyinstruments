@@ -54,9 +54,9 @@ class CurveDisplayLeftPanel(QtGui.QWidget):
         self.displayed_curve = curve
         if curve:
             self.alter_curve_widget.display_curve(curve)
-            self.curve_item.set_data(array(curve.data.index, 
+            self.curve_item.set_data(array(curve.get_plottable_data().index, 
                                     dtype = float), 
-                                    array(curve.data, dtype = float))
+                                    array(curve.get_plottable_data(), dtype = float))
             if self.autoscale:
                 self.curve_item.plot().do_autoscale()
             self.curve_item.plot().replot()

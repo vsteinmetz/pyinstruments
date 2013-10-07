@@ -38,8 +38,8 @@ class PlotDialog(CurveDialog):
         
     def plot(self, curve):
         _plot = self.get_plot()
-        _plot.add_item(make.curve(array(curve.data.index, dtype=float),
-                                  curve.data.values,
+        _plot.add_item(make.curve(array(curve.get_plottable_data().index, dtype=float),
+                                  curve.get_plottable_data().values,
                                   color=self.get_next_color(),
                                   title='['+str(curve.id)+']'+curve.params['name'])
                        )

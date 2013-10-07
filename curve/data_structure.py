@@ -80,7 +80,13 @@ class Curve(object):
     def load_data(self, filename):
         with pandas.get_store(filename, "r") as store:
             self._data = store["data"]
-    
+
+    def get_plottable_data(self):
+        if self.params['curve_type']=='NaCurveComplex':
+            return abs(self.data)**2
+        else:
+            return self.data
+                       
     @property
     def data(self):
         return self._data

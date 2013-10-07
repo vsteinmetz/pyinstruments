@@ -151,8 +151,13 @@ class ShortCutNA(ShortCut):
     def create_measurement(self, input_port=2, output_port=1):
         self.active_measurement.create(input_port, output_port)
     
-    def fetch(self):
-        y_curve = self.active_measurement.fetch_formatted()
+    def fetch(self,format="formatted"):
+        if format not in ("formatted","complex"):
+            raise ValueError("Expected format either formatted or complex!")
+        if format == "complex":
+            y_curve = self.active_measurement.fetch_complex()
+        else: 
+            y_curve = self.active_measurement.fetch_formatted()
         x_curve = self.active_measurement.fetch_x()
         return x_curve, y_curve
     

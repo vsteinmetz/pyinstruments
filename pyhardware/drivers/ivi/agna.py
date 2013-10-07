@@ -40,7 +40,7 @@ class IviAgNADriver(IviDriver, GuiWrapper, FetcherMixin):
         
 #get the curve automatically in a complex format in linear scale
     def _get_curve(self):
-        x_y = self.driver.sc_active_measurement.fetch_complex()
+        x_y = self.driver.sc.fetch("complex")
         meta = dict()
         
         meta["name"] = "na_curve"
