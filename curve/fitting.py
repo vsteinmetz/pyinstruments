@@ -37,13 +37,13 @@ class FitFunctions(object):
         '''estimate background from first and last 10% of datapoints in the trace'''
         bg = (self.data[:length/10].mean()+self.data[-length/10:].mean())/2.0
         magdata = (self.data-bg)*numpy.conjugate(self.data-bg)
-        x0 = float(self.x()[self.magdata.argmax()])
+        x0 = float(self.x()[magdata.argmax()])
         magmax=self.magdata[x0]
         max=self.data[x0]
         bw = magdata.sum()/magmax*(self.x().max()-self.x().min())/length
         fit_params = dict(bandwidth=bw,scale_re=real(max),scale_im=imag(max),
                           x0=x0,y0_re=real(bg),y0_im=imag(bg))
-        return 
+        return fit_params
     
     '''defines w(z) for 1064nm wavelength for all units in meters'''
     def gaussianbeam(self,x0,w0):
