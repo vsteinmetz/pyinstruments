@@ -136,7 +136,7 @@ class CurveCreateWidget(QtGui.QWidget, object):
     def dump_in_gui(self, curve):
         self.blockSignals(True)
         self.comment = curve.params["comment"]
-        self.name = curve.params["name"]
+        self.name = curve.name
         self.window = curve.params["window"]
         self.tags = curve.tags
         self.blockSignals(False)
@@ -145,7 +145,7 @@ class CurveCreateWidget(QtGui.QWidget, object):
     
     def save_curve(self, curve):
         curve.params["comment"] = self.comment
-        curve.params["name"] = self.name
+        curve.name = self.name
         curve.params["window"] = self.window
         curve.tags = self.tags
         curve.save()
@@ -164,7 +164,7 @@ class CurveTagWidget(QtGui.QWidget, object):
         model_monitor.tag_added.connect(self.refresh)
         model_monitor.tag_deletted.connect(self.refresh)
         
-    value_changed = QtCore.pyqtSignal(name = "value_changed")
+    value_changed = QtCore.pyqtSignal(name="value_changed")
     
     @property
     def tags(self):
@@ -341,9 +341,9 @@ class CurveTagWidget(QtGui.QWidget, object):
                 raise ValueError("""tag should not end with /""")
             if confirm and tag != "":
                 try:
-                    Tag.objects.get(name = tag)
+                    Tag.objects.get(name=tag)
                 except Tag.DoesNotExist:
-                    Tag.objects.create(name = tag)
+                    Tag.objects.create(name=tag)
                     self.add_item(tag)
                     self.select(tag)
                     model_monitor.tag_added.emit()

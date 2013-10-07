@@ -41,7 +41,7 @@ class PlotDialog(CurveDialog):
         _plot.add_item(make.curve(array(curve.get_plottable_data().index, dtype=float),
                                   curve.get_plottable_data().values,
                                   color=self.get_next_color(),
-                                  title='['+str(curve.id)+']'+curve.params['name'])
+                                  title='['+str(curve.id)+']'+curve.name)
                        )
         _plot.replot()
         #_plot.set_axis_font("left", QFont("Courier"))

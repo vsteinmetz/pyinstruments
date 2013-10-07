@@ -20,7 +20,6 @@ class Tag(models.Model):
     """
     
     name = models.CharField(max_length=200)
-        
     def __unicode__(self):
         return self.name
 
@@ -107,10 +106,10 @@ class CurveDB(models.Model, Curve):
     objects = CurveManager()
        
     def __unicode__(self):
-        return self.params["name"]
+        return self.name
 
     tags_relation = models.ManyToManyField(Tag)
-    
+    name = models.CharField(max_length=255, default='some_curve')
     params_json = models.TextField(default="{}")
     #read only
     data_file = models.FileField(upload_to = '%Y/%m/%d')
@@ -119,8 +118,10 @@ class CurveDB(models.Model, Curve):
                                related_name = 'childs', \
                                blank = True, \
                                null = True)
-#    class Meta:
-#        get_latest_by = ['params[\'date\']']
+    has_childs = models.BooleanField(default=False)
+    saved_in_db = models.BooleanField(default=False)
+
+    
     
     @property
     def tags(self):
@@ -196,6 +197,7 @@ class CurveDB(models.Model, Curve):
         self._save_generic_param(col, val, BooleanParam)        
         
     def save_params(self):
+        self.params["name"] = self.name
         self.params["id"] = self.pk
         if self.parent_id is not None:
             self.params["parent_id"] = self.parent_id
@@ -264,7 +266,7 @@ class CurveDB(models.Model, Curve):
         if not self.data_file:
             self.data_file = os.path.join( \
                     self.params["date"].strftime('%Y/%m/%d'), \
-                    self.params["name"] + '.h5')
+                    self.name + '.h5')
             full_path = self.get_full_filename()
             dirname = os.path.dirname(full_path)
             if not os.path.exists(dirname):
@@ -277,8 +279,9 @@ class CurveDB(models.Model, Curve):
             if not os.path.exists(self.get_full_filename()):
                 Curve.save(self, self.get_full_filename())
         
-        if self.pk == None:
+        if self.saved_in_db==False:
             models.Model.save(self)
+            self.saved_in_db=True
         
         self.save_tags()
 
@@ -300,6 +303,10 @@ class CurveDB(models.Model, Curve):
             for par in params:
                 par.delete()
         
+    def add_child(self, curve):
+        curve.parent = self
+        self.has_childs = True        
+        
     def fit(self, func, autoguessfunction='', autosave=False, maxiter = 100, verbosemode = False,\
                     manualguess_params = {},fixed_params = {}):
         fitter, fit_curve = super(CurveDB, self).fit(
@@ -311,9 +318,9 @@ class CurveDB(models.Model, Curve):
                         fixed_params=fixed_params)
         
         fit_curve_db = curve_db_from_curve(fit_curve)
-        fit_curve_db.params['name']+='_of_' + str(self.id)
-        fit_curve_db.params['window']=self.params['window']
-        fit_curve_db.parent = self
+        fit_curve_db.name +='_of_' + str(self.id)
+        fit_curve_db.params['window']=self.params["window"]
+        self.add_child(fit_curve_db)
         if autosave:
             fit_curve_db.save()
         model_monitor.fit_done.emit()
@@ -421,6 +428,10 @@ def curve_db_from_curve(curve):
     curve_db = CurveDB()
     curve_db.set_params(**curve.params)
     curve_db.set_data(curve.data)
+    if 'name' in curve.params:
+        curve_db.name = curve.params['name']
+    if 'tags_flatten' in curve.params:
+        curve_db.tags = curve.params['tags_flatten'].rstrip(";").split(";")[1:]
     return curve_db
     
 class ModelMonitor(QtCore.QObject):

@@ -7,6 +7,16 @@ from PyQt4 import QtCore, QtGui
 import functools
 import numpy
 
+
+class MyItem(QtGui.QTreeWidgetItem):
+    def __init__(self, curve):
+        super(MyItem, self).__init__([curve.name])
+        self.pk = curve.pk
+        if curve.has_childs:
+            for child in curve.childs.all():
+                item_child = MyItem(child)
+                item.addChild(item_child)
+
 class ListCurveWidget(QtGui.QWidget, object):
     current_item_changed = QtCore.pyqtSignal(object)
     def __init__(self, parent):
@@ -91,13 +101,13 @@ class ListCurveWidget(QtGui.QWidget, object):
             return
         
         #otherwise, add the curve
-        item = QtGui.QTreeWidgetItem([curve.params['name']])
+        item = QtGui.QTreeWidgetItem([curve.name])
         item.pk = curve.pk
         self._tree_widget.addTopLevelItem(item)
         
         #and its childs
         for child in curve.childs.all():
-            item_child = QtGui.QTreeWidgetItem([child.params['name']])
+            item_child = QtGui.QTreeWidgetItem([child.name])
             item.addChild(item_child)
             item_child.pk = child.pk 
         
@@ -116,11 +126,14 @@ class ListCurveWidget(QtGui.QWidget, object):
         previous_selected = self._tree_widget.currentItem()
         if previous_selected:
             previous_id = previous_selected.pk
-        curves = self.parent().query().order_by('id')
+        curves = self.parent().query()
+        curves = curves.filter(parent=None).order_by('id')
         self._tree_widget.blockSignals(True)
         self._tree_widget.clear()
-        for curve in curves:
-            self.add_curve(curve)
+        
+        #for curve in curves:
+        #    self.add_curve(curve)
+        self._tree_widget.addTopLevelItems([MyItem(cu) for cu in curves])
         self._tree_widget.blockSignals(False)
         
         if not previous_id:
@@ -159,7 +172,7 @@ class ListCurveWidget(QtGui.QWidget, object):
         ### First option: Plot curve(s)
         if len(curves)==1:
             message = "plot in " + curves[0].params['window']
-            message_delete = "delete " + curves[0].params['name']
+            message_delete = "delete " + curves[0].name
         else:
             message = "plot these in their window"
             message_delete = "delete " + str(len(curves)) + " curves ?"

@@ -82,8 +82,8 @@ class MenuDB(QtGui.QMenu):
                         try:
                             old_one = models.CurveDB.objects.get(id=id)
                         except ObjectDoesNotExist:
-                            cur_db.save()
                             cur_db.id = cur.params['id']
+                            cur_db.save()
                         else:
                             message = "A curve with the id " + str(id) + \
                             " allready exists in your database." + "\n What should we do with curve " + \
