@@ -26,7 +26,8 @@ class CurveEditor(QtGui.QMainWindow, object):
         super(CurveEditor, self).__init__()
         
         self.menubar = CurveEditorMenuBar(self)
-            
+        self.menubar.import_done.connect(self.refresh)
+        
         self.setMenuBar(self.menubar)
         self.search_widget = CurveSearchDockWidget(self)
         self.addDockWidget(\

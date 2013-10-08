@@ -53,10 +53,14 @@ class CurveDisplayLeftPanel(QtGui.QWidget):
     def display_curve(self, curve):
         self.displayed_curve = curve
         if curve:
+            curvedata = curve.get_plottable_data()
+            #downsample large files for quick preview
+            if len(curvedata)>50000:
+                dsfactor = len(curvedata)//5000
+                curvedata = curvedata[range(0,len(curvedata),dsfactor)]
             self.alter_curve_widget.display_curve(curve)
-            self.curve_item.set_data(array(curve.get_plottable_data().index, 
-                                    dtype = float), 
-                                    array(curve.get_plottable_data(), dtype = float))
+            self.curve_item.set_data(array(curvedata.index, dtype = float), 
+                                    array(curvedata.values, dtype = float))
             if self.autoscale:
                 self.curve_item.plot().do_autoscale()
             self.curve_item.plot().replot()

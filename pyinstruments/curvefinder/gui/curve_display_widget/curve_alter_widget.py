@@ -24,7 +24,7 @@ class CurveAlterWidget(CurveCreateWidget):
         self.id_widget.save_pressed.connect(self.save)
         self.id_widget.delete_done.connect(self.delete_done)
         self.current_curve = None
-        
+    
     def save(self):
         if self.current_curve!=None:
             self.save_curve(self.current_curve)

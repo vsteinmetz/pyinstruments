@@ -86,6 +86,8 @@ class Curve(object):
             return abs(self.data)**2
         else:
             return self.data
+
+            
                        
     @property
     def data(self):
@@ -120,6 +122,7 @@ def convert_from_numpy(val):
     if isinstance(val, numpy.str_):
         return str(val)
     return val
+
 def load(filename):
     """loads the curve at filename"""
     with pandas.get_store(filename, "r") as store:
@@ -129,7 +132,7 @@ def load(filename):
         try:
             meta = the_file["params"]
         except KeyError:
-            pass
+            kwds['name'] = filename
         else:
             for key, value in meta.iteritems():
                 kwds[key] = convert_from_numpy(value.value)

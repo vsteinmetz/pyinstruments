@@ -120,8 +120,12 @@ class CurveDB(models.Model, Curve):
                                null = True)
     has_childs = models.BooleanField(default=False)
     saved_in_db = models.BooleanField(default=False)
-    date = models.DateTimeField(auto_now_add=True)
+    #for problems with django-evolution use:
+    date = models.DateTimeField(default=datetime.fromtimestamp(0))
+    #date = models.DateTimeField(auto_now_add=True)
     
+    class Meta:
+        get_latest_by = "date"
     
     @property
     def tags(self):
@@ -198,10 +202,11 @@ class CurveDB(models.Model, Curve):
         
     def save_params(self):
         self.params["name"] = self.name
+        self.params["date"] = self.date
         self.params["id"] = self.pk
-        if self.parent_id is not None:
-            self.params["parent_id"] = self.parent_id
-        else:
+        if self.parent is not None:
+            self.params["parent_id"] = self.parent.pk
+        elif not "parent_id" in self.params:
             self.params["parent_id"] = 0
         
         for par, val in self.params.iteritems():
@@ -255,15 +260,7 @@ class CurveDB(models.Model, Curve):
         """
         
         self.set_default_params()
-        try:
-            d = self.params["date"]
-        except KeyError:
-            #date = datetime.now()
-            self.params["date"] = self.date
-        else:
-            if isinstance(d, basestring):
-                self.params["date"] = datetime.strptime(d, "%y/%m/%d/%H/%M/%S/%f")
-                self.date = self.params["date"]
+            
         if not self.data_file:
             self.data_file = os.path.join( \
                     self.params["date"].strftime('%Y/%m/%d'), \
@@ -308,7 +305,6 @@ class CurveDB(models.Model, Curve):
         curve.parent = self
         self.has_childs = True        
         self.save()
-        
 
     def fit(self, func, autoguessfunction='', autosave=False, maxiter = 10, verbosemode = False,\
                     manualguess_params = {},fixed_params = {}):
@@ -426,7 +422,6 @@ class DateParam(Param):
     curve = models.ForeignKey(CurveDB, related_name='dateparam')
     value = models.DateTimeField()
 
-
 def curve_db_from_curve(curve):
     curve_db = CurveDB()
     curve_db.set_params(**curve.params)
@@ -434,7 +429,18 @@ def curve_db_from_curve(curve):
     if 'name' in curve.params:
         curve_db.name = curve.params['name']
     if 'date' in curve.params:
-        curve_db.date = curve.params['date']
+        #        try:
+        d = curve.params["date"]
+#exception does not exist because by default params has a date entry
+#        except KeyError:
+#            date = datetime.now()
+#            self.params["date"] = self.date
+#        else:
+        if isinstance(d, basestring):
+            curve_db.params["date"] = datetime.strptime(d, "%y/%m/%d/%H/%M/%S/%f")
+        curve_db.date = curve_db.params['date']
+    else:
+        curve_db.date = datetime.now()
     if 'tags_flatten' in curve.params:
         curve_db.tags = curve.params['tags_flatten'].rstrip(";").split(";")[1:]
     return curve_db

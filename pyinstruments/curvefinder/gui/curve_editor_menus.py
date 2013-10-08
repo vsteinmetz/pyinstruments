@@ -22,6 +22,7 @@ class MenuFile(QtGui.QMenu):
         guidata.qapplication().quit()
         
 class MenuDB(QtGui.QMenu):
+    import_done = QtCore.pyqtSignal()
     def __init__(self, parent, widget):
         super(MenuDB, self).__init__(parent)
         self.forget_database_location = QtGui.QAction(widget)
@@ -44,8 +45,12 @@ class MenuDB(QtGui.QMenu):
         self.import_h5_files.setText('import h5 files...')
         self.import_h5_files.triggered.connect(self._import_h5_files)
         self.addAction(self.import_h5_files)
-        
-    
+
+        self.update_all_files = QtGui.QAction(widget)
+        self.update_all_files.setText('update all files...')
+        self.update_all_files.triggered.connect(self._update_all_files)
+        self.addAction(self.update_all_files)
+
     def _backup_all_files(self):
         dial = QtGui.QFileDialog()
         filename = str(dial.getSaveFileName(parent=self))
@@ -61,6 +66,18 @@ class MenuDB(QtGui.QMenu):
             if not os.path.exists(directo):
                 os.makedirs(directo)
             Curve.save(curve, os.path.join(filename, curve.data_file.name))
+
+    def _update_all_files(self):
+        allcurves = models.CurveDB.objects.all()
+        for cur in allcurves:
+            cur.data
+            cur.params
+            file = cur.get_full_filename()
+            directo = os.path.dirname(file)
+            if not os.path.exists(directo):
+                os.makedirs(directo)
+            Curve.save(cur, file)
+        print "All "+str(len(allcurves))+" curve files are now up to date! "
          
     def _import_h5_files(self):
         """
@@ -71,7 +88,7 @@ class MenuDB(QtGui.QMenu):
         if not dirname:
             return
         
-        def archive_dir(arg, dirname, files):
+        def archive_dir(added_ids, dirname, files):
             for filename in files:
                 fname = os.path.join(dirname, filename)
                 if os.path.isfile(fname):
@@ -86,7 +103,7 @@ class MenuDB(QtGui.QMenu):
                             cur_db.save()
                         else:
                             message = "A curve with the id " + str(id) + \
-                            " allready exists in your database." + "\n What should we do with curve " + \
+                            " already exists in your database." + "\n What should we do with curve " + \
                             cur.params["name"] + " ?"
                             
                             message_box = QtGui.QMessageBox(self)
@@ -99,10 +116,32 @@ class MenuDB(QtGui.QMenu):
                                 cur_db.save()
                             if answer==2:
                                 cur_db.save()
-                        
-        os.path.walk(dirname, archive_dir, None)
+                        added_ids.append(cur_db.id)
 
-    
+        added_ids = list()
+        os.path.walk(dirname, archive_dir, added_ids)
+
+        #loop over all added ids to confirm that everything is set properly
+        for id in added_ids:
+            c = models.CurveDB.objects.get(id=id)
+            #if 'date' in c.params:
+            #    c.date = c.params['date']
+            if 'parent_id' in c.params:
+                if not c.params['parent_id']==0:
+                    parent = None
+                    try:
+                        parent = models.CurveDB.objects.get(pk=c.params['parent_id'])
+                    except ObjectDoesNotExist:
+                        print "Parent id "+str(c.params['parent_id'])+\
+                        " of curve with id "+str(id)+" does not exist. Orphan created!"
+                    else:
+                        parent.add_child(c)
+                    c.save()
+                
+        print "Added the following ids:"
+        print added_ids
+        self.import_done.emit()
+
     def _open_django_admin(self):
         import subprocess
         subprocess.Popen([   'python', 
@@ -124,7 +163,8 @@ class MenuDB(QtGui.QMenu):
 
 
     
-class CurveEditorMenuBar(QtGui.QMenuBar):    
+class CurveEditorMenuBar(QtGui.QMenuBar):
+    import_done = QtCore.pyqtSignal() 
     def __init__(self, parent):
         super(CurveEditorMenuBar, self).__init__(parent)
         self.menu_file_action = QtGui.QAction('file', parent)
@@ -133,6 +173,7 @@ class CurveEditorMenuBar(QtGui.QMenuBar):
         
         self.menu_db_action = QtGui.QAction('database', parent)
         self.menu_db = MenuDB(self, parent)
+        self.menu_db.import_done.connect(self.import_done)
         self.menu_db_action.setMenu(self.menu_db)
         
         self.addAction(self.menu_file_action)
