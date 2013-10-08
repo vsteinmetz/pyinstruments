@@ -6,44 +6,10 @@ import math
 
 LAMBDA = 1.064e-6
 
-'''Here re-define the fitfunctions which shall appear in the fit context menu'''
+'''Here define the fitfunctions which shall appear in the fit context menu;
+   Anything which starts with an underscore does not appear in that menu. 
+   Default guessfunction has the same name as the fitfunction and starts with _guess'''
 class FitFunctions(object):
-    
-    def linear_x0(self, x0, slope):
-        x=self.x()
-        return slope * (x-x0)
-
-    def linear(self, y0, slope):
-        x=self.x()
-        return slope*x-y0
-
-    '''positive lorentz'''
-    def lorentz(self, scale, x0, y0, bandwidth):
-        x = self.x()
-        return scale/(1+((x-x0)/bandwidth)*((x-x0)/bandwidth))+y0
-    
-    def lorentzSB(self, scale, x0, y0, bandwidth, SBwidth, SBscale):
-        x = self.x()
-        return y0 + scale*(1/(1+((x-x0)/bandwidth)*((x-x0)/bandwidth))+\
-                SBscale/(1+((x-x0-SBwidth)/bandwidth)**2)+\
-                SBscale/(1+((x-x0+SBwidth)/bandwidth)**2))
-
-    def lorentz_complex(self, bandwidth, scale_re, scale_im, x0, y0_re,y0_im):
-        x = self.x()
-        return (scale_re+scale_im*1j)/(1+(1j*(x-x0)/bandwidth))+y0_re+y0_im*1j
-    
-    def _guesslorentz_complex(self):
-        length = len(self.x())
-        '''estimate background from first and last 10% of datapoints in the trace'''
-        bg = (self.data[:length/10].mean()+self.data[-length/10:].mean())/2.0
-        magdata = (self.data-bg)*numpy.conjugate(self.data-bg)
-        x0 = float(self.x()[magdata.argmax()])
-        magmax=self.magdata[x0]
-        max=self.data[x0]
-        bw = magdata.sum()/magmax*(self.x().max()-self.x().min())/length
-        fit_params = dict(bandwidth=bw,scale_re=real(max),scale_im=imag(max),
-                          x0=x0,y0_re=real(bg),y0_im=imag(bg))
-        return fit_params
     
     '''defines w(z) for 1064nm wavelength for all units in meters'''
     def gaussianbeam(self,x0,w0):
@@ -56,22 +22,10 @@ class FitFunctions(object):
         params = dict(x0 = res['x0'], w0 = LAMBDA/math.pi/res['slope'])    
         return params
     
-    def _guesslorentz(self):
-        x0 = float(self.x()[self.data.argmax()])
-        max = self.data.max()
-        min = self.data.min()
-        bw = 0.1*(self.x().max() - self.x().min())
-        fit_params = {'x0': x0, 'y0': min, 'scale': max-min, 'bandwidth': bw}
-        return fit_params
-
-    def _guesslorentzSB(self):
-        x0 = float(self.x()[self.data.argmax()])
-        max = self.data.max()
-        min = self.data.min()
-        bw = 0.1*(self.x().max() - self.x().min())
-        fit_params = {'x0': x0, 'y0': min, 'scale': max-min, 'bandwidth': bw, \
-                      'SBwidth': 1.8*bw, 'SBscale' : 0.3}
-        return fit_params
+    '''linear function, fixed on ordinate axis'''
+    def linear(self, y0, slope):
+        x=self.x()
+        return slope*x-y0
 
     def _guesslinear(self):
         max = self.data.max()
@@ -81,6 +35,11 @@ class FitFunctions(object):
         fit_params = {'x0': x0, 'slope': slope}
         return fit_params
 
+    '''linear function, fixed on abscisse axis'''
+    def linear_x0(self, x0, slope):
+        x=self.x()
+        return slope * (x-x0)
+
     def _guesslinear_x0(self):
         max = self.data.max()
         min = self.data.min()
@@ -88,7 +47,199 @@ class FitFunctions(object):
         x0 = self.x().mean() - self.data.mean()/slope
         fit_params = {'x0': x0, 'slope': slope}
         return fit_params
+
+    '''ringdown'''
+    def ringdown(self,ringspersweeptime,gamma,y0,scale,ringscale):
+        fitonhigh = True
+        x = self.x()
+        length = len(x)
+        sweeptime = self.x.max()-self.x.min()
+        ringtime = sweeptime/ringspersweeptime
+        sweeps = ceil(ringspersweeptime)
+        result = self.data
+        '''conversion from decay rate to decay slope on a log scale'''
+        slope = gamma*2*math.pi*math.log10(math.e)
+        for sweep in range(sweeps):
+            '''be conservative, don't take the point at the intersection of domains'''
+            high = self.data[(sweep*ringtime+1):((sweep+0.5)*ringtime-1)]
+            low = self.data[((sweep+0.5)*ringtime+1):((sweep+1.0)*ringtime-1)]
+            if fitonhigh:
+                for i in high.index:
+                    result[i] = y0+scale
+            ringstart = low.index.min()
+            for i in low.index:
+                result[i]=y0+ringscale-slope*(i-ringstart)
+        return result
+
+    def _guessringdown(self):
+        ringspersweeptime = 1.0
+        y0 = self.data.min()
+        scale = self.data.max()-y0
+        ringscale = scale
+        sweeptime = self.x.max()-self.x.min()
+        ringtime = sweeptime/ringspersweeptime
+        slope = ringscale/ringtime/2.0
+        gamma = slope/(2*math.pi*math.log10(math.e))
+        fit_params = dict(ringspersweeptime=ringspersweeptime,gamma=gamma,y0=y0,scale=scale,ringscale=ringscale)
+        return fit_params
+
+    '''simple lorentzian in linear scale'''
+    def lorentz(self, scale, x0, y0, bandwidth):
+        x = self.x()
+        return scale/(1+((x-x0)/bandwidth)*((x-x0)/bandwidth))+y0
+
+    def _guesslorentz_simple(self):
+        x0 = float(self.x()[self.data.argmax()])
+        max = self.data.max()
+        min = self.data.min()
+        bw = 0.1*(self.x().max() - self.x().min())
+        fit_params = {'x0': x0, 'y0': min, 'scale': max-min, 'bandwidth': bw}
+        return fit_params
+
+    def _guesslorentz(self):
+        length = len(self.x())
+        '''estimate background from first and last 10% of datapoints in the trace'''
+        bg = (self.data[:length/10].mean()+self.data[-length/10:].mean())/2.0
+        magdata = abs(self.data-bg)
+        x0 = float(self.x()[magdata.argmax()])
+        magmax=self.magdata[x0]
+        max=self.data[x0]
+        bw = magdata.sum()/magmax*(self.x().max()-self.x().min())/length
+        fit_params = {'x0': x0, 'y0': bg, 'scale': max-bg, 'bandwidth': bw}
+        return fit_params
+
+    '''logarithmic lorentz, typ. SA traces'''
+    def lorentz_log(self, scale, x0, y0, bandwidth):
+        x = self.x()
+        return 10*log10(scale/(1+((x-x0)/bandwidth)*((x-x0)/bandwidth)))+y0
+
+    def _guesslorentz_log(self):
+        length = len(self.x())
+        '''estimate background from first and last 10% of datapoints in the trace'''
+        data = 10**(self.data/10.0)
+        bg = ((data[:length/10].mean()+data[-length/10:].mean())/2.0)
+        magdata = abs(data-bg)
+        x0 = float(self.x()[magdata.argmax()])
+        magmax=self.magdata[x0]
+        max=data[x0]
+        bw = magdata.sum()/magmax*(self.x().max()-self.x().min())/length
+        fit_params = {'x0': x0, 'y0': bg, 'scale': max-bg, 'bandwidth': bw}
+        return fit_params
+
+    '''complex lorentz in linear scale, typically from NA traces'''
+    def lorentz_complex(self, bandwidth, scale_re, scale_im, x0, y0_re,y0_im):
+        x = self.x()
+        return (scale_re+scale_im*1j)/(1+(1j*(x-x0)/bandwidth))+y0_re+y0_im*1j
     
+    def _guesslorentz_complex(self):
+        length = len(self.x())
+        '''estimate background from first and last 10% of datapoints in the trace'''
+        bg = (self.data[:length/10].mean()+self.data[-length/10:].mean())/2.0
+        magdata = (self.data-bg)*numpy.conjugate(self.data-bg)
+        x0 = float(self.x()[magdata.argmax()])
+        magmax=magdata[x0]
+        max=self.data[x0]
+        bw = magdata.sum()/magmax*(self.x().max()-self.x().min())/length
+        fit_params = dict(bandwidth=bw,scale_re=real(max),scale_im=imag(max),
+                          x0=x0,y0_re=real(bg),y0_im=imag(bg))
+        return 
+
+    '''lorentz with symmetric sidebands, typ. absorption/transmission dips of cavities'''
+    def lorentzSB(self, scale, x0, y0, bandwidth, SBwidth, SBscale):
+        x = self.x()
+        return y0 + scale*(1/(1+((x-x0)/bandwidth)*((x-x0)/bandwidth))+\
+                SBscale/(1+((x-x0-SBwidth)/bandwidth)**2)+\
+                SBscale/(1+((x-x0+SBwidth)/bandwidth)**2))
+
+    def _guesslorentzSB(self):
+        fit_params = self.guesslorentz()
+        replacement = {'bandwidth': fit_params['bandwidth']/2.0,\
+                       'SBwidth': fit_params['bandwidth']*1.1, 'SBscale' : 0.3}
+        fit_params.update(replacement)
+        return fit_params
+
+    def _guesslorentzSB_simple(self):
+        x0 = float(self.x()[self.data.argmax()])
+        max = self.data.max()
+        min = self.data.min()
+        bw = 0.1*(self.x().max() - self.x().min())
+        fit_params = {'x0': x0, 'y0': min, 'scale': max-min, 'bandwidth': bw, \
+                      'SBwidth': 1.8*bw, 'SBscale' : 0.3}
+        return fit_params
+
+    def _guesslorentzSBfromlorentzOld_tobedeleted(self):
+        self.comment("Estimating first fit parameters from simple lorentz fit")
+        tempfit = Fit(data = self.data, func = 'lorentz', \
+                      autoguessfunction = '', fixed_params = self.fixed_params, \
+                      manualguess_params = self.manualguess_params, \
+                      verbosemode = self.verbosemode, maxiter = 20)
+        tempfit_params = tempfit.getparams()
+        self.comment("")
+        self.comment("Estimating remaining fit parameters from lorentzSB fit with fixed previously determined parameters")
+        tempfit = Fit(data = self.data, func = 'lorentzSB', \
+                      autoguessfunction = '', fixed_params = tempfit_params, \
+                      manualguess_params = self.manualguess_params, \
+                      verbosemode = self.verbosemode, maxiter = 20)
+        fit_params = tempfit.getparams()
+        return fit_params
+
+    def _guesslorentzSBguessfixfromlorentzSB(self):
+        '''use the more evolved guess from guesslorentzSBfixfromlorentz'''
+        self.comment("perform guesslorentzSBfixfromlorentz...")
+        tempfit = Fit(data = self.data, func = 'lorentzSB', \
+                      autoguessfunction = '_guesslorentzSBfixfromlorentz', \
+                      fixed_params = self.fixed_params, \
+                      manualguess_params = self.manualguess_params, \
+                      verbosemode = self.verbosemode, maxiter = 15)
+        '''tempfit_params holds the parameters for the guess now, '''
+        '''which should be nearly optimal already'''
+        fit_params = tempfit.getparams()
+        '''if fixed_params are defined at the fit function call, '''
+        '''they automatically found their way into fit_params'''
+        self.fixed_params['bandwidth']=fit_params['bandwidth']
+        self.fixed_params['SBwidth']=fit_params['SBwidth']
+        return fit_params 
+
+    def _guesslorentzSBguessfromlorentzSB(self):
+        '''use the more evolved guess from guesslorentzSBfixfromlorentz'''
+        self.comment("perform guesslorentzSBfixfromlorentz...")
+        tempfit = Fit(data = self.data, func = 'lorentzSB', \
+                      autoguessfunction = '_guesslorentzSBfixfromlorentz', \
+                      fixed_params = self.fixed_params, \
+                      manualguess_params = self.manualguess_params, \
+                      verbosemode = self.verbosemode, maxiter = 15)
+        '''tempfit_params holds the parameters for the guess now, '''
+        '''which should be nearly optimal already'''
+        fit_params = tempfit.getparams()
+#        '''if fixed_params are defined at the fit function call, '''
+#        '''they automatically found their way into fit_params'''
+#        self.fixed_params['bandwidth']=fit_params['bandwidth']
+#        self.fixed_params['SBwidth']=fit_params['SBwidth']
+        return fit_params 
+
+    def _guesslorentzSBfixfromlorentz(self):
+        self.comment("Estimating first fit parameters from simple lorentz fit")
+        tempfit = Fit(data = self.data, func = 'lorentz', \
+                      autoguessfunction = '_guesslorentz', \
+                      fixed_params = self.fixed_params, \
+                      manualguess_params = self.manualguess_params, \
+                      verbosemode = self.verbosemode, maxiter = 15)
+        '''tempfit_params holds the parameters to keep fixed'''
+        '''bwguess is the guess for the bandwidth''' 
+        tempfit_params = tempfit.getparams()
+        bwguess = tempfit_params.pop('bandwidth')
+        '''however, the manually fixed parameters are left unchanged'''
+        tempfit_params.update(self.fixed_params)
+        self.fixed_params = tempfit_params.copy()
+        '''construct the remaining guess parameters and return them'''
+        fitparams = collections.OrderedDict({'bandwidth': bwguess/2., \
+                            'SBwidth': 1.1 * bwguess, 'SBscale' : 0.25})
+        self.comment("Prefit for parameter guess obtained the following results: ")
+        self.comment("Fixed: "+str(self.fixed_params))
+        self.comment("Manual: "+str(self.manualguess_params))
+        self.comment("Automatic: "+str(fitparams))
+        return fitparams
+
 
 
 class Fit(FitFunctions):
@@ -218,76 +369,3 @@ class Fit(FitFunctions):
         self.comment(dict(self.getparams()))
         self.comment("dummy: " + str(dummy))
 
-
-    def _guesslorentzSBfromlorentzOld_tobedeleted(self):
-        self.comment("Estimating first fit parameters from simple lorentz fit")
-        tempfit = Fit(data = self.data, func = 'lorentz', \
-                      autoguessfunction = '', fixed_params = self.fixed_params, \
-                      manualguess_params = self.manualguess_params, \
-                      verbosemode = self.verbosemode, maxiter = 20)
-        tempfit_params = tempfit.getparams()
-        self.comment("")
-        self.comment("Estimating remaining fit parameters from lorentzSB fit with fixed previously determined parameters")
-        tempfit = Fit(data = self.data, func = 'lorentzSB', \
-                      autoguessfunction = '', fixed_params = tempfit_params, \
-                      manualguess_params = self.manualguess_params, \
-                      verbosemode = self.verbosemode, maxiter = 20)
-        fit_params = tempfit.getparams()
-        return fit_params
-
-    def _guesslorentzSBguessfixfromlorentzSB(self):
-        '''use the more evolved guess from guesslorentzSBfixfromlorentz'''
-        self.comment("perform guesslorentzSBfixfromlorentz...")
-        tempfit = Fit(data = self.data, func = 'lorentzSB', \
-                      autoguessfunction = '_guesslorentzSBfixfromlorentz', \
-                      fixed_params = self.fixed_params, \
-                      manualguess_params = self.manualguess_params, \
-                      verbosemode = self.verbosemode, maxiter = 15)
-        '''tempfit_params holds the parameters for the guess now, '''
-        '''which should be nearly optimal already'''
-        fit_params = tempfit.getparams()
-        '''if fixed_params are defined at the fit function call, '''
-        '''they automatically found their way into fit_params'''
-        self.fixed_params['bandwidth']=fit_params['bandwidth']
-        self.fixed_params['SBwidth']=fit_params['SBwidth']
-        return fit_params 
-
-    def _guesslorentzSBguessfromlorentzSB(self):
-        '''use the more evolved guess from guesslorentzSBfixfromlorentz'''
-        self.comment("perform guesslorentzSBfixfromlorentz...")
-        tempfit = Fit(data = self.data, func = 'lorentzSB', \
-                      autoguessfunction = '_guesslorentzSBfixfromlorentz', \
-                      fixed_params = self.fixed_params, \
-                      manualguess_params = self.manualguess_params, \
-                      verbosemode = self.verbosemode, maxiter = 15)
-        '''tempfit_params holds the parameters for the guess now, '''
-        '''which should be nearly optimal already'''
-        fit_params = tempfit.getparams()
-#        '''if fixed_params are defined at the fit function call, '''
-#        '''they automatically found their way into fit_params'''
-#        self.fixed_params['bandwidth']=fit_params['bandwidth']
-#        self.fixed_params['SBwidth']=fit_params['SBwidth']
-        return fit_params 
-
-    def _guesslorentzSBfixfromlorentz(self):
-        self.comment("Estimating first fit parameters from simple lorentz fit")
-        tempfit = Fit(data = self.data, func = 'lorentz', \
-                      autoguessfunction = '_guesslorentz', \
-                      fixed_params = self.fixed_params, \
-                      manualguess_params = self.manualguess_params, \
-                      verbosemode = self.verbosemode, maxiter = 15)
-        '''tempfit_params holds the parameters to keep fixed'''
-        '''bwguess is the guess for the bandwidth''' 
-        tempfit_params = tempfit.getparams()
-        bwguess = tempfit_params.pop('bandwidth')
-        '''however, the manually fixed parameters are left unchanged'''
-        tempfit_params.update(self.fixed_params)
-        self.fixed_params = tempfit_params.copy()
-        '''construct the remaining guess parameters and return them'''
-        fitparams = collections.OrderedDict({'bandwidth': bwguess/2., \
-                            'SBwidth': 1.1 * bwguess, 'SBscale' : 0.25})
-        self.comment("Prefit for parameter guess obtained the following results: ")
-        self.comment("Fixed: "+str(self.fixed_params))
-        self.comment("Manual: "+str(self.manualguess_params))
-        self.comment("Automatic: "+str(fitparams))
-        return fitparams
