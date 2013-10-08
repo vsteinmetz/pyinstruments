@@ -53,9 +53,9 @@ class FitFunctions(object):
         fitonhigh = True
         x = self.x()
         length = len(x)
-        sweeptime = self.x.max()-self.x.min()
+        sweeptime = x.max()-x.min()
         ringtime = sweeptime/ringspersweeptime
-        sweeps = ceil(ringspersweeptime)
+        sweeps = int(math.ceil(ringspersweeptime))
         result = self.data
         '''conversion from decay rate to decay slope on a log scale'''
         slope = gamma*2*math.pi*math.log10(math.e)
@@ -66,17 +66,19 @@ class FitFunctions(object):
             if fitonhigh:
                 for i in high.index:
                     result[i] = y0+scale
-            ringstart = low.index.min()
-            for i in low.index:
-                result[i]=y0+ringscale-slope*(i-ringstart)
-        return result
+            if len(low)>0:
+                ringstart = low.index.min()
+                for i in low.index:
+                    result[i]=y0+ringscale-slope*(i-ringstart)
+        return numpy.array(result.values,dtype=float)
 
     def _guessringdown(self):
         ringspersweeptime = 1.0
+        x = self.x()
         y0 = self.data.min()
         scale = self.data.max()-y0
         ringscale = scale
-        sweeptime = self.x.max()-self.x.min()
+        sweeptime = x.max()-x.min()
         ringtime = sweeptime/ringspersweeptime
         slope = ringscale/ringtime/2.0
         gamma = slope/(2*math.pi*math.log10(math.e))
