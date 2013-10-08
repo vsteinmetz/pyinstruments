@@ -76,7 +76,12 @@ class FitFunctions(object):
         y0 = self.data.min()
         scale = self.data.max()-y0
         ringscale = scale
-        
+        sweeptime = self.x.max()-self.x.min()
+        ringtime = sweeptime/ringspersweeptime
+        slope = ringscale/ringtime/2.0
+        gamma = slope/(2*math.pi*math.log10(math.e))
+        fit_params = dict(ringspersweeptime=ringspersweeptime,gamma=gamma,y0=y0,scale=scale,ringscale=ringscale)
+        return fit_params
 
     '''simple lorentzian in linear scale'''
     def lorentz(self, scale, x0, y0, bandwidth):
