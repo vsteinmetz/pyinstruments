@@ -300,7 +300,7 @@ class CurveDB(models.Model, Curve):
             for par in params:
                 par.delete()
         
-    def fit(self, func, autoguessfunction='', autosave=False, maxiter = 20, verbosemode = False,\
+    def fit(self, func, autoguessfunction='', autosave=False, maxiter = 10, verbosemode = False,\
                     manualguess_params = {},fixed_params = {}):
         fitter, fit_curve = super(CurveDB, self).fit(
                         func, 
