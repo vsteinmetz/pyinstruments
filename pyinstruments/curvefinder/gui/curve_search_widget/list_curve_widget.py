@@ -10,12 +10,21 @@ import numpy
 
 class MyItem(QtGui.QTreeWidgetItem):
     def __init__(self, curve):
-        super(MyItem, self).__init__([curve.name])
+        super(MyItem, self).__init__([str(curve.id), curve.name, str(curve.date)])
         self.pk = curve.pk
         if curve.has_childs:
             for child in curve.childs.all():
+                print "adding child"
                 item_child = MyItem(child)
-                item.addChild(item_child)
+                self.addChild(item_child)
+
+
+    def __lt__(self, otherItem):
+        column = self.treeWidget().sortColumn()
+        if column==0:
+            return int(self.text(column)) < int(otherItem.text(column))
+        else:
+            return super(MyItem, self).__lt__(otherItem)
 
 class ListCurveWidget(QtGui.QWidget, object):
     current_item_changed = QtCore.pyqtSignal(object)
@@ -34,8 +43,9 @@ class ListCurveWidget(QtGui.QWidget, object):
         self.refresh()
         self._tree_widget.itemSelectionChanged.connect(
                                           self._current_item_changed)
+        self._tree_widget.setSortingEnabled(True)
         self.setLayout(self._lay)
-        self.setMinimumWidth(180)
+        self.setMinimumWidth(300)
         
     def _current_item_changed(self):
         if self.selected_curve:
@@ -86,30 +96,6 @@ class ListCurveWidget(QtGui.QWidget, object):
             else:
                 curves.append(curve)
         return curves
-    
-    def add_curve(self, curve):
-        """
-        Adds a curve and all its childs in the list if not allready there.
-        If the curve is a child, then adds the parent with all the childs
-        """
-        # check if the curve is a child
-        if curve.parent:
-            return self.add_curve(curve.parent)
-        
-        # check if curve already there
-        if curve in self:
-            return
-        
-        #otherwise, add the curve
-        item = QtGui.QTreeWidgetItem([curve.name])
-        item.pk = curve.pk
-        self._tree_widget.addTopLevelItem(item)
-        
-        #and its childs
-        for child in curve.childs.all():
-            item_child = QtGui.QTreeWidgetItem([child.name])
-            item.addChild(item_child)
-            item_child.pk = child.pk 
         
     def __contains__(self, curve):
         if not isinstance(curve, int):
@@ -154,8 +140,11 @@ class ListCurveWidget(QtGui.QWidget, object):
     def _get_tree_widget(self):
         class ListTreeWidget(QtGui.QTreeWidget):
             def __init__(self, parent):
-                super(ListTreeWidget, self).__init__(parent)                    
-                self.headerItem().setText(0, "curve name")
+                super(ListTreeWidget, self).__init__(parent) 
+                self.headerItem().setText(0, "curve id")                   
+                self.headerItem().setText(1, "curve name")
+                self.headerItem().setText(2, "curve date")
+                self.setSortingEnabled(True)
                 self.setSelectionMode( \
                             QtGui.QAbstractItemView.ExtendedSelection)
         return ListTreeWidget(self)

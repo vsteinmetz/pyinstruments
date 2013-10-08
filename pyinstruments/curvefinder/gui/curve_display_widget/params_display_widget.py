@@ -5,6 +5,7 @@ class ParamsDisplayWidget(QtGui.QWidget):
         super(ParamsDisplayWidget, self).__init__(parent)
         self.lay = QtGui.QVBoxLayout()
         self.tree = QtGui.QTreeWidget()
+        self.tree.setSortingEnabled(True)
         self.lay.addWidget(self.tree)
         self.setLayout(self.lay)
         self.tree.setHeaderLabels(["column name", "value"])

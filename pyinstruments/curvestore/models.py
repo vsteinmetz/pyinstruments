@@ -120,7 +120,7 @@ class CurveDB(models.Model, Curve):
                                null = True)
     has_childs = models.BooleanField(default=False)
     saved_in_db = models.BooleanField(default=False)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateTimeField(auto_now_add=True)
     
     
     @property
@@ -307,11 +307,12 @@ class CurveDB(models.Model, Curve):
     def add_child(self, curve):
         curve.parent = self
         self.has_childs = True        
+        self.save()
         
     def fit(self, func, autoguessfunction='', autosave=False, maxiter = 100, verbosemode = False,\
                     manualguess_params = {},fixed_params = {}):
         fitter, fit_curve = super(CurveDB, self).fit(
-                        func, 
+                        func,
                         autoguessfunction=autoguessfunction, 
                         maxiter=maxiter, 
                         verbosemode=verbosemode,
