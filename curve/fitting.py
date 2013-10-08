@@ -10,6 +10,12 @@ LAMBDA = 1.064e-6
    Anything which starts with an underscore does not appear in that menu. 
    Default guessfunction has the same name as the fitfunction and starts with _guess'''
 class FitFunctions(object):
+
+    def dummy(self,x):
+        return self.data
+    
+    def _guessdummy(self):
+        return dict(dummyfix=0.0)
     
     '''defines w(z) for 1064nm wavelength for all units in meters'''
     def gaussianbeam(self,x0,w0):
@@ -32,7 +38,8 @@ class FitFunctions(object):
         min = self.data.min()
         slope = (max-min)/(self.x().max() - self.x().min())
         y0 = self.data.mean() - self.x().mean()*slope
-        fit_params = {'x0': x0, 'slope': slope}
+
+        fit_params = {'y0': y0, 'slope': slope}
         return fit_params
 
     '''linear function, fixed on abscisse axis'''
@@ -49,41 +56,78 @@ class FitFunctions(object):
         return fit_params
 
     '''ringdown'''
-    def ringdown(self,ringspersweeptime,gamma,y0,scale,ringscale):
-        fitonhigh = True
-        x = self.x()
-        length = len(x)
-        sweeptime = self.x.max()-self.x.min()
+    def ringdown(self,ringspersweeptime,gamma,y0,scale,overshoot):
+        fitonhigh = False
+        length = len(self.x())
+        sweeptime = self.x().max()-self.x().min()
         ringtime = sweeptime/ringspersweeptime
-        sweeps = ceil(ringspersweeptime)
-        result = self.data
+        sweeps = int(math.ceil(ringspersweeptime))
+        delta = ringtime*0.001
+        result = self.data.copy()
         '''conversion from decay rate to decay slope on a log scale'''
         slope = gamma*2*math.pi*math.log10(math.e)
         for sweep in range(sweeps):
-            '''be conservative, don't take the point at the intersection of domains'''
-            high = self.data[(sweep*ringtime+1):((sweep+0.5)*ringtime-1)]
-            low = self.data[((sweep+0.5)*ringtime+1):((sweep+1.0)*ringtime-1)]
+            high = self.data[(sweep*ringtime+delta):((sweep+0.5)*ringtime-delta)]
+            low = self.data[((sweep+0.5)*ringtime+delta):((sweep+1.0)*ringtime-delta)]
             if fitonhigh:
                 for i in high.index:
                     result[i] = y0+scale
-            ringstart = low.index.min()
-            for i in low.index:
-                result[i]=y0+ringscale-slope*(i-ringstart)
-        return result
+            if len(low)>0:
+                ringstart = min(low.index)
+                for i in low.index:
+                    #result[i]=max([y0,y0+scale+overshoot-slope*(i-ringstart)])
+                    result[i]=math.log10(10**y0+10**(y0+scale+overshoot-slope*(i-ringstart)))
+        return numpy.array(result.values,dtype=float)
 
     def _guessringdown(self):
-        ringspersweeptime = 1.0
+        ringspersweeptime = 2.0
         y0 = self.data.min()
         scale = self.data.max()-y0
-        ringscale = scale
-        sweeptime = self.x.max()-self.x.min()
+        overshoot = 0.0
+        sweeptime = self.x().max()-self.x().min()
         ringtime = sweeptime/ringspersweeptime
-        slope = ringscale/ringtime/2.0
+        slope = (scale+overshoot)/ringtime/100.0
         gamma = slope/(2*math.pi*math.log10(math.e))
-        fit_params = dict(ringspersweeptime=ringspersweeptime,gamma=gamma,y0=y0,scale=scale,ringscale=ringscale)
+        fit_params = dict(ringspersweeptime=ringspersweeptime,gamma=gamma,y0=y0,\
+                          scale=scale,overshoot=overshoot)
         return fit_params
 
-    '''simple lorentzian in linear scale'''
+    def ringdown_fitonhigh(self,ringspersweeptime,gamma,y0,scale):
+        overshoot = 0.0
+        fitonhigh = True
+        length = len(self.x())
+        sweeptime = self.x().max()-self.x().min()
+        ringtime = sweeptime/ringspersweeptime
+        sweeps = int(math.ceil(ringspersweeptime))
+        delta = ringtime*0.0005
+        result = self.data.copy()
+        '''conversion from decay rate to decay slope on a log scale'''
+        slope = gamma*2*math.pi*math.log10(math.e)
+        for sweep in range(sweeps):
+            high = self.data[(sweep+0.25*ringtime+delta):((sweep+0.5)*ringtime-delta)]
+            low = self.data[((sweep+0.5)*ringtime+delta):((sweep+0.9)*ringtime-delta)]
+            if fitonhigh:
+                for i in high.index:
+                    result[i] = y0+scale
+            if len(low)>0:
+                ringstart = min(low.index)
+                for i in low.index:
+                    #result[i]=max([y0,y0+scale+overshoot-slope*(i-ringstart)])
+                    result[i]=math.log10(10**y0+10**(y0+scale+overshoot-slope*(i-ringstart)))
+        return numpy.array(result.values,dtype=float)
+
+    def _guessringdown_fitonhigh(self):
+        return self._guessringdown_noovershoot()
+
+    def ringdown_noovershoot(self,ringspersweeptime,gamma,y0,scale):
+        return self.ringdown(ringspersweeptime,gamma,y0,scale,0.0)
+
+    def _guessringdown_noovershoot(self):
+        params = self._guessringdown()
+        params.pop('overshoot')
+        return params
+
+    #simple lorentzian in linear scale
     def lorentz(self, scale, x0, y0, bandwidth):
         x = self.x()
         return scale/(1+((x-x0)/bandwidth)*((x-x0)/bandwidth))+y0
@@ -98,7 +142,7 @@ class FitFunctions(object):
 
     def _guesslorentz(self):
         length = len(self.x())
-        '''estimate background from first and last 10% of datapoints in the trace'''
+        #estimate background from first and last 10% of datapoints in the trace
         bg = (self.data[:length/10].mean()+self.data[-length/10:].mean())/2.0
         magdata = abs(self.data-bg)
         x0 = float(self.x()[magdata.argmax()])
@@ -108,8 +152,9 @@ class FitFunctions(object):
         fit_params = {'x0': x0, 'y0': bg, 'scale': max-bg, 'bandwidth': bw}
         return fit_params
 
-    '''logarithmic lorentz, typ. SA traces'''
+    
     def lorentz_log(self, scale, x0, y0, bandwidth):
+        """logarithmic lorentz, typ. SA traces"""
         x = self.x()
         return 10*log10(scale/(1+((x-x0)/bandwidth)*((x-x0)/bandwidth)))+y0
 
@@ -244,7 +289,9 @@ class FitFunctions(object):
 
 class Fit(FitFunctions):
     def __init__(self, data, func, fixed_params = {}, manualguess_params = {}, \
-                 autoguessfunction = '' , verbosemode = True, maxiter = 100):
+                 autoguessfunction = '' , verbosemode = True, maxiter = 100, \
+                 errfn='squareerror'):
+                 #errfn='squareerror_dbweighted'):
         self.data = data
         self.sqerror = float('nan')
         self.verbosemode = verbosemode
@@ -258,6 +305,10 @@ class Fit(FitFunctions):
         # dynamically choose the fit function according to the passed func string
         self.func = func
         self.fn = self.__getattribute__(self.func)
+        
+        # define the error function to be optimised
+        self.errfn = errfn
+        self.fn_error = self.__getattribute__(self.errfn)
         
         # choose automatic guess function for starting parameter estimation
         self.autoguessfunction = autoguessfunction
@@ -292,6 +343,26 @@ class Fit(FitFunctions):
         
         self.comment("Return of fit optimisation function: ")
         self.comment(str(res))
+ 
+    # define function for fit parameter optimisation, usually simple leastsquares method
+    def squareerror(self, kwds):
+        # unfold the list of parameters back into the dictionary 
+        for index, key in enumerate(self.fit_params):
+            self.fit_params[key] = float(kwds[index])
+        # calculate the square error
+        self.sqerror = float(((self.fn(**self.getparams())-self.data.values)**2).mean())
+        return self.sqerror
+
+    def squareerror_dbweighted(self, kwds):
+        # unfold the list of parameters back into the dictionary 
+        for index, key in enumerate(self.fit_params):
+            self.fit_params[key] = float(kwds[index])
+        # calculate the square error
+        sqtable = abs(self.fn(**self.getparams())-self.data.values)/10.0
+        wsqtable = 10**sqtable
+        #wsqtable = sqtable * 10**(self.data.values/10.0)
+        self.sqerror = float(wsqtable.mean())
+        return self.sqerror
         
     def getparams(self):
         params = self.fit_params.copy()
@@ -299,18 +370,9 @@ class Fit(FitFunctions):
         return params
     
 #get the square error for actual parameters
-    def sqerror(self):
+    def getsqerror(self):
         return self.squareerror(self.fit_params.values())
     
-# define function for fit parameter optimisation, usually simple leastsquares method
-    def squareerror(self, kwds):
-        # unfold the list of parameters back into the dictionary 
-        for index, key in enumerate(self.fit_params):
-            self.fit_params[key] = float(kwds[index])
-        # calculate the square error
-        self.sqerror = float(((self.fn(**self.getparams())-self.data.values)**2).sum())
-        return self.sqerror
-        
     def comment(self, string):
         if self.verbosemode is True:
             print string
@@ -322,7 +384,7 @@ class Fit(FitFunctions):
     def fit(self):
         # by default use scipy standard function for optimization
         res = scipy.optimize.minimize(\
-                            fun = self.squareerror,
+                            fun = self.fn_error,
                             # objective function to 
                             x0 = self.fit_params.values(), 
                             # ndarray of initial guess
@@ -338,12 +400,11 @@ class Fit(FitFunctions):
                             callback=self.printstatus, #N'one' optional function call after each iteration
                             #more at scipy.optimize.show_options('minimize')
                             options={'maxiter': self.maxiter, 'disp': self.verbosemode}) 
-                            # max iterations and verbose mode 
+                            # max iterations and verbose mode
+        self.sqerror = self.getsqerror() 
         self.comment("Fit completed with sqerror = " + str(self.sqerror))
         self.comment("Obtained parameter values: ")
         self.comment(dict(self.getparams()))
-        self.comment("Fit completed with sqerror = " + str(self.sqerror))
-        
         # evaluate the performed fit in fitdata
         self.fitdata = pandas.Series(data = self.fn(**self.getparams()), index = self.x(), \
                             name = 'fitfunction: '+ self.func )

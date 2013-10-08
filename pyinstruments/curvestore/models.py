@@ -309,7 +309,8 @@ class CurveDB(models.Model, Curve):
         self.has_childs = True        
         self.save()
         
-    def fit(self, func, autoguessfunction='', autosave=False, maxiter = 100, verbosemode = False,\
+
+    def fit(self, func, autoguessfunction='', autosave=False, maxiter = 10, verbosemode = False,\
                     manualguess_params = {},fixed_params = {}):
         fitter, fit_curve = super(CurveDB, self).fit(
                         func,
