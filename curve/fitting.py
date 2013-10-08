@@ -69,7 +69,7 @@ class FitFunctions(object):
             ringstart = low.index.min()
             for i in low.index:
                 result[i]=y0+ringscale-slope*(i-ringstart)
-    return result
+        return result
 
     def _guessringdown(self):
         ringspersweeptime = 1.0
