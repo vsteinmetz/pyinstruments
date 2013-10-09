@@ -2,6 +2,7 @@ import pyinstruments.datastore.settings
 from pyinstruments.curvestore import models
 from curve import Curve
 import curve
+from pyinstruments.datalogger.models import datalogger_backup, datalogger_recovery
 
 import time
 import os
@@ -56,6 +57,22 @@ class MenuDB(QtGui.QMenu):
         self.update_all_files.triggered.connect(self._update_all_files)
         self.addAction(self.update_all_files)
 
+        self.dlbackup = QtGui.QAction(widget)
+        self.dlbackup.setText('backup datalogger...')
+        self.dlbackup.triggered.connect(self._dlbackup)
+        self.addAction(self.dlbackup)
+
+        self.dlrecover = QtGui.QAction(widget)
+        self.dlrecover.setText('recover datalogger information from backup...')
+        self.dlrecover.triggered.connect(self._dlrecover)
+        self.addAction(self.dlrecover)
+    
+    def _dlrecover(self):
+        datalogger_recovery()
+        
+    def _dlbackup(self):
+        datalogger_backup()
+        
     def _backup_all_files(self):
         dial = QtGui.QFileDialog()
         filename = str(dial.getSaveFileName(parent=self))
@@ -82,6 +99,7 @@ class MenuDB(QtGui.QMenu):
             if not os.path.exists(directo):
                 os.makedirs(directo)
             Curve.save(cur, file)
+        
         print "All "+str(len(allcurves))+" curve files are now up to date! "
          
     def _import_h5_files(self):

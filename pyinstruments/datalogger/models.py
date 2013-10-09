@@ -1,8 +1,11 @@
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
+from pyinstruments.datastore.settings import MEDIA_ROOT
 import time
 from datetime import datetime
 import pandas
+import h5py
+import os.path
 
 NaN = float('NaN')
 
@@ -81,6 +84,20 @@ class SensingDevice(object):
     #        [MeasurementPoint.objects.filter(sensor = self.sensorlog).latest()])
     
     #return last point as tuple
+    def create_point(self,value,mtime):
+        try:
+            v = MeasurementPoint.objects.get(\
+                                sensor = self.sensorlog, time=mtime)
+        except ObjectDoesNotExist:
+            self.log(value,mtime)
+            return True
+        else:
+            if not v.value == value:
+                raise ValueError("Trying to overvrite an existing datapoint with a different value for "+\
+                                self.name+" at time "+str(mtime)+"!")
+            return False
+        
+    
     def getlastpoint(self):
         val = MeasurementPoint.objects.filter(\
                                 sensor = self.sensorlog).latest()
@@ -105,6 +122,10 @@ class SensingDevice(object):
         return self.toSeries(\
                 MeasurementPoint.objects.filter(sensor = self.sensorlog)) 
 
+    def getallpoints_raw(self):
+        return self.toSeries_raw(\
+                MeasurementPoint.objects.filter(sensor = self.sensorlog)) 
+
     def getallpointssince(self, sincetime):
         if sincetime <0:
             sincetime+=self.now()
@@ -123,10 +144,8 @@ class SensingDevice(object):
                                       time__range = (starttime,stoptime))) 
  
     def getallpointsaround(self, time = NaN, offset = NaN):
-
         if offset == NaN:
-            offset = timeout
-
+            offset = self.timeout
         if time == NaN:
             time=self.now()
         elif time < 0:
@@ -141,6 +160,11 @@ class SensingDevice(object):
         return pandas.Series(data = [i.value for i in res],\
                 index = [datetime.fromtimestamp(k.time) for k in res],\
                 name = self.sensorlog.name)
+
+    def toSeries_raw(self, res):
+        return pandas.Series(data = [i.value for i in res],\
+                index = [k.time for k in res],\
+                name = self.sensorlog.name)
     
     def plot(self,lastseconds=-1.):
         if lastseconds == -1:
@@ -149,4 +173,60 @@ class SensingDevice(object):
             since = self.now()-lastseconds
         df = pandas.DataFrame(self.getallpointssince(since))
         df.plot(style ='k.')
- 
+
+def datalogger_backup(filename='default'): 
+    "saves all datalogger data to filename"
+    if filename=='default':
+        filename = os.path.join(MEDIA_ROOT,'datalogger.h5')
+    metadata = dict()
+    data=dict()
+    sensors = Sensor.objects.all()
+    if sensors is None:
+        raise ValueError("No sensors in datalogger!")
+    for sens in sensors:
+        metadata[sens.name]=sens.description
+        sd = SensingDevice(name=sens.name)
+        data[sens.name]=sd.getallpoints_raw()
+    with pandas.get_store(filename) as store:
+        for sens in sensors:
+            store[sens.name] = data[sens.name]
+    with h5py.File(filename) as the_file:
+        try:
+            params = the_file["params"]
+        except KeyError:
+            params = the_file.create_group("params")
+        for key, value in metadata.iteritems():
+            try:
+                params[key]
+            except KeyError:  
+                params.create_dataset(key, data=value)
+            else:
+                del params[key]
+                params.create_dataset(key, data=value)
+    print "Backup finished! Data written to "+filename
+
+def datalogger_recovery(filename='default'):
+    "loads the curves at filename into the datalogger"
+    if filename=='default':
+        filename = os.path.join(MEDIA_ROOT,'datalogger.h5')
+    metadata = dict()
+    written = 0
+    with h5py.File(filename) as the_file:
+        try:
+            meta = the_file["params"]
+        except KeyError:
+            print "No descriptions available, no import will be done."
+        else:
+            for key, value in meta.iteritems():
+                metadata[key] = value
+    if metadata is {}:
+        raise ValueError("No sensors in datalogger backup file!")
+    with pandas.get_store(filename, "r") as store:
+        for sensorname in metadata:
+            sd = SensingDevice(name=sensorname, description=metadata[sensorname])
+            data = store[sensorname]
+            for (i,v) in data.iteritems():
+                if sd.create_point(v, i):
+                    written+=1
+    print "Datalogger import finished. Wrote "+str(written)+" MeasurementPoints. "    
+    return written    
