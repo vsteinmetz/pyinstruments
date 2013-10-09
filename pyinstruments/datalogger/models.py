@@ -52,7 +52,7 @@ class SensingDevice(object):
     def __init__(self, name, timeout = 30, description = '', minval = 0.0, maxval = 100000.0):
         sense = Sensor.objects.get_or_create(name = name)
         self.sensorlog = sense[0]
-        if sense[1] is False and description != ''  :
+        if description != ''  :
             self.sensorlog.description = description
             self.sensorlog.save()
         self.MINVAL = minval
@@ -176,6 +176,7 @@ class SensingDevice(object):
 
 def datalogger_backup(filename='default'): 
     "saves all datalogger data to filename"
+    written = 0
     if filename=='default':
         filename = os.path.join(MEDIA_ROOT,'datalogger.h5')
     metadata = dict()
@@ -190,6 +191,7 @@ def datalogger_backup(filename='default'):
     with pandas.get_store(filename) as store:
         for sens in sensors:
             store[sens.name] = data[sens.name]
+            written+=len(data[sens.name])
     with h5py.File(filename) as the_file:
         try:
             params = the_file["params"]
@@ -203,7 +205,7 @@ def datalogger_backup(filename='default'):
             else:
                 del params[key]
                 params.create_dataset(key, data=value)
-    print "Backup finished! Data written to "+filename
+    print "Backup finished! "+str(written)+" MeasurementPoints written to "+filename
 
 def datalogger_recovery(filename='default'):
     "loads the curves at filename into the datalogger"
@@ -221,12 +223,26 @@ def datalogger_recovery(filename='default'):
                 metadata[key] = value
     if metadata is {}:
         raise ValueError("No sensors in datalogger backup file!")
-    with pandas.get_store(filename, "r") as store:
-        for sensorname in metadata:
-            sd = SensingDevice(name=sensorname, description=metadata[sensorname])
-            data = store[sensorname]
-            for (i,v) in data.iteritems():
-                if sd.create_point(v, i):
+    old_sensors = Sensor.objects.all()
+    if old_sensors.count()==0:
+        print "No sensors configured, importing data without consistency checks..."
+        with pandas.get_store(filename, "r") as store:
+            for sensorname in metadata:
+                sens = Sensor(name=sensorname,description=metadata[sensorname])
+                sens.save()
+                data = store[sensorname]
+                for (i,v) in data.iteritems():
+                    mp=MeasurementPoint(sensor=sens,\
+                                        value = value, \
+                                        time = mtime)
                     written+=1
+    else:
+        with pandas.get_store(filename, "r") as store:
+            for sensorname in metadata:
+                sd = SensingDevice(name=sensorname, description=metadata[sensorname])
+                data = store[sensorname]
+                for (i,v) in data.iteritems():
+                    if sd.create_point(v, i):
+                        written+=1
     print "Datalogger import finished. Wrote "+str(written)+" MeasurementPoints. "    
     return written    
