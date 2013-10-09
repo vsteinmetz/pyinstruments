@@ -140,3 +140,29 @@ def load(filename):
     curve.set_data(data)
     curve.set_params(**kwds)
     return curve
+
+def load_oldformat(filename):
+    """loads the curve at filename"""
+    with pandas.get_store(filename, "r") as store:
+            data = store["data"]
+    kwds = dict()
+    with h5py.File(filename) as the_file:
+        try:
+            meta = the_file["meta"]
+        except KeyError:
+            print "In filename "+filename+" not even the meta attribute exists!"
+        else:
+            for key, value in meta.iteritems():
+                kwds[key] = convert_from_numpy(value.value)
+        dir_name, file_name = os.path.split(filename)
+        file_root, file_ext = os.path.splitext(file_name)
+        kwds["name"] = file_root
+        if file_ext!='.h5':
+            print "Error: file ended not with .h5"
+        kwds["id"]=1
+        kwds["date"]=datetime.fromtimestamp(os.path.getmtime(filename))
+        kwds["oldformat"]=True
+    curve = Curve()
+    curve.set_data(data)
+    curve.set_params(**kwds)
+    return curve

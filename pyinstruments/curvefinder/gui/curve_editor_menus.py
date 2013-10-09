@@ -46,6 +46,11 @@ class MenuDB(QtGui.QMenu):
         self.import_h5_files.triggered.connect(self._import_h5_files)
         self.addAction(self.import_h5_files)
 
+        self.import_oldformat_h5_files = QtGui.QAction(widget)
+        self.import_oldformat_h5_files.setText('import h5 files in old format (no full data recovery)...')
+        self.import_oldformat_h5_files.triggered.connect(self._import_oldformat_h5_files)
+        self.addAction(self.import_oldformat_h5_files)
+
         self.update_all_files = QtGui.QAction(widget)
         self.update_all_files.setText('update all files...')
         self.update_all_files.triggered.connect(self._update_all_files)
@@ -89,6 +94,7 @@ class MenuDB(QtGui.QMenu):
             return
         
         def archive_dir(added_ids, dirname, files):
+            allanswers = -2
             for filename in files:
                 fname = os.path.join(dirname, filename)
                 if os.path.isfile(fname):
@@ -105,10 +111,20 @@ class MenuDB(QtGui.QMenu):
                             message = "A curve with the id " + str(id) + \
                             " already exists in your database." + "\n What should we do with curve " + \
                             cur.params["name"] + " ?"
-                            
-                            message_box = QtGui.QMessageBox(self)
-                            answer = message_box.question(self, 'existing id', message, 'forget about it', 'overwrite ' + old_one.params['name'], "use new id")
-                            
+                            if allanswers <= -1:
+                                message_box = QtGui.QMessageBox(self)
+                                answer = message_box.question(self, 'existing id', message, 'forget about it', 'overwrite ' + old_one.params['name'], "use new id")
+                                if allanswers == -2:
+                                    secmessage_box = QtGui.QMessageBox(self)
+                                    secanswer = secmessage_box.question(self, 'repeat', "Remember choice for future id conflicts?", 'Yes', 'No','Ask again')
+                                    if secanswer == 0:
+                                        allanswers = answer
+                                    elif secanswer == 1:
+                                        allanswers = -1
+                                    elif secanswer == 2:
+                                        allanswers = -2
+                            else:
+                                answer = allanswers
                             if answer==0:
                                 continue
                             if answer==1:
@@ -138,6 +154,80 @@ class MenuDB(QtGui.QMenu):
                         parent.add_child(c)
                     c.save()
                 
+        print "Added the following ids:"
+        print added_ids
+        self.import_done.emit()
+
+    def _import_oldformat_h5_files(self):
+        """
+        Import all .h5 files from a directory and subdirectories.
+        """
+        dial = QtGui.QFileDialog()
+        dirname = str(dial.getExistingDirectory(parent=self))
+        if not dirname:
+            return
+        
+        def archive_dir(added_ids, dirname, files):
+            allanswers = -2
+            for filename in files:
+                fname = os.path.join(dirname, filename)
+                if os.path.isfile(fname):
+                    if fname.endswith('.h5'):
+                        cur = curve.load_oldformat(fname)
+                        cur_db = models.curve_db_from_curve(cur)
+                        id = int(cur.params['id'])
+                        try:
+                            old_one = models.CurveDB.objects.get(id=id)
+                        except ObjectDoesNotExist:
+                            cur_db.id = cur.params['id']
+                            cur_db.save()
+                        else:
+                            message = "A curve with the id " + str(id) + \
+                            " already exists in your database." + "\n What should we do with curve " + \
+                            cur.params["name"] + " ?"
+                            if allanswers <= -1:
+                                message_box = QtGui.QMessageBox(self)
+                                answer = message_box.question(self, 'existing id', message, 'forget about it', 'overwrite ' + old_one.params['name'], "use new id")
+                                if allanswers == -2:
+                                    secmessage_box = QtGui.QMessageBox(self)
+                                    secanswer = secmessage_box.question(self, 'repeat', "Remember choice for future id conflicts?", 'Yes', 'No','Ask again')
+                                    if secanswer == 0:
+                                        allanswers = answer
+                                    elif secanswer == 1:
+                                        allanswers = -1
+                                    elif secanswer == 2:
+                                        allanswers = -2
+                            else:
+                                answer = allanswers
+                            if answer==0:
+                                continue
+                            if answer==1:
+                                cur_db.id = cur.params['id']
+                                cur_db.save()
+                            if answer==2:
+                                cur_db.save()
+                        added_ids.append(cur_db.id)
+
+        added_ids = list()
+        os.path.walk(dirname, archive_dir, added_ids)
+
+        #loop over all added ids to confirm that everything is set properly
+        for id in added_ids:
+            c = models.CurveDB.objects.get(id=id)
+            #if 'date' in c.params:
+            #    c.date = c.params['date']
+            if 'parent_id' in c.params:
+                if not c.params['parent_id']==0:
+                    parent = None
+                    try:
+                        parent = models.CurveDB.objects.get(pk=c.params['parent_id'])
+                    except ObjectDoesNotExist:
+                        print "Parent id "+str(c.params['parent_id'])+\
+                        " of curve with id "+str(id)+" does not exist. Orphan created!"
+                    else:
+                        parent.add_child(c)
+                    c.save()
+            c.tags.append('oldformat/reimported')    
         print "Added the following ids:"
         print added_ids
         self.import_done.emit()
