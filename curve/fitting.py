@@ -31,21 +31,20 @@ class FitFunctions(object):
     '''linear function, fixed on ordinate axis'''
     def linear(self, y0, slope):
         x=self.x()
-        return slope*x-y0
+        return slope*x+y0
 
     def _guesslinear(self):
         max = self.data.max()
         min = self.data.min()
         slope = (max-min)/(self.x().max() - self.x().min())
         y0 = self.data.mean() - self.x().mean()*slope
-
         fit_params = {'y0': y0, 'slope': slope}
         return fit_params
 
     '''linear function, fixed on abscisse axis'''
     def linear_x0(self, x0, slope):
         x=self.x()
-        return slope * (x-x0)
+        return slope*(x-x0)
 
     def _guesslinear_x0(self):
         max = self.data.max()
@@ -56,23 +55,26 @@ class FitFunctions(object):
         return fit_params
 
     '''ringdown'''
+
     def ringdown(self,ringspersweeptime,gamma,y0,scale,overshoot):
-        fitonhigh = False
+        fitonhigh=True
+        fitonlow=True
+        dephase=0
         length = len(self.x())
         sweeptime = self.x().max()-self.x().min()
         ringtime = sweeptime/ringspersweeptime
         sweeps = int(math.ceil(ringspersweeptime))
-        delta = ringtime*0.001
+        delta = ringtime*0.000
         result = self.data.copy()
         '''conversion from decay rate to decay slope on a log scale'''
         slope = gamma*2*math.pi*10*math.log10(math.e)
         for sweep in range(sweeps):
-            high = self.data[(sweep*ringtime+delta):((sweep+0.5)*ringtime-delta)]
-            low = self.data[((sweep+0.5)*ringtime+delta):((sweep+1.0)*ringtime-delta)]
+            high = self.data[(sweep+0.2*ringtime+delta):((sweep+0.5)*ringtime-delta)]
+            low = self.data[((sweep+0.5)*ringtime+delta):((sweep+0.95)*ringtime-delta)]
             if fitonhigh:
                 for i in high.index:
-                    result[i] = y0+scale
-            if len(low)>0:
+                    result[i] = scale+y0
+            if fitonlow and len(low)>0:
                 ringstart = min(low.index)
                 for i in low.index:
                     #result[i]=max([y0,y0+scale+overshoot-slope*(i-ringstart)])
@@ -81,52 +83,136 @@ class FitFunctions(object):
 
     def _guessringdown(self):
         ringspersweeptime = 1.0
+        length = len(self.x())
+        sweeptime = self.x().max()-self.x().min()
+        ringtime = sweeptime/ringspersweeptime
+        sweeps = int(math.ceil(ringspersweeptime))
+        delta = ringtime*0.000
+        highsum=0
+        highs=0
+        lows=0
+        lowsum=0
+        for sweep in range(sweeps):
+            high = self.data[(sweep+0.2*ringtime+delta):((sweep+0.5)*ringtime-delta)]
+            low = self.data[((sweep+0.80)*ringtime+delta):((sweep+0.95)*ringtime-delta)]
+            for i in high.index:
+                highsum+=self.data[i]
+                highs+=1
+            for i in low.index:
+                lowsum+=self.data[i]
+                lows+=1
+        y0=(lowsum/lows)
+        scale=(highsum/highs)-y0
+        firstlows = self.data[0.5*ringtime+delta:(0.5)*ringtime+delta+sweeptime/length*math.ceil(length/ringspersweeptime/2/1000)]
+        tempfit = Fit(data = firstlows, func = 'linear', \
+                      autoguessfunction = '', \
+                      fixed_params = {}, \
+                      manualguess_params = {}, \
+                      verbosemode = False, maxiter = 10)
+        '''tempfit_params holds the parameters for the guess now, '''
+        '''which should be nearly optimal already'''
+        tempfitparams = tempfit.getparams()
+        gamma = abs(tempfitparams['slope'])/(2*math.pi*10*math.log10(math.e))
+        overshoot = tempfitparams['y0']+tempfitparams['slope']*min(firstlows.index)-scale-y0
+        fit_params = dict(ringspersweeptime=ringspersweeptime,gamma=gamma,y0=y0,\
+                          scale=scale,overshoot=overshoot)
+        self.fixed_params = dict(ringspersweeptime=ringspersweeptime,y0=y0,scale=scale) 
+        return fit_params
+
+    def _guessringdown_log(self):
+        ringspersweeptime = 1.0
+        length = len(self.x())
+        sweeptime = self.x().max()-self.x().min()
+        ringtime = sweeptime/ringspersweeptime
+        sweeps = int(math.ceil(ringspersweeptime))
+        delta = ringtime*0.000
+        highsum=0
+        highs=0
+        lows=0
+        lowsum=0
+        for sweep in range(sweeps):
+            high = self.data[(sweep+0.2*ringtime+delta):((sweep+0.5)*ringtime-delta)]
+            low = self.data[((sweep+0.80)*ringtime+delta):((sweep+0.95)*ringtime-delta)]
+            for i in high.index:
+                highsum+=10**self.data[i]
+                highs+=1
+            for i in low.index:
+                lowsum+=self.data[i]
+                lows+=1
+        y0=(lowsum/lows)
+        scale=math.log10(highsum/highs)-y0
+        firstlows = self.data[0.5*ringtime+delta:(0.5)*ringtime+delta+sweeptime/length*math.ceil(length/ringspersweeptime/2/1000)]
+        tempfit = Fit(data = firstlows, func = 'linear', \
+                      autoguessfunction = '', \
+                      fixed_params = {}, \
+                      manualguess_params = {}, \
+                      verbosemode = False, maxiter = 10)
+        '''tempfit_params holds the parameters for the guess now, '''
+        '''which should be nearly optimal already'''
+        tempfitparams = tempfit.getparams()
+        gamma = abs(tempfitparams['slope'])/(2*math.pi*10*math.log10(math.e))
+        overshoot = tempfitparams['y0']+tempfitparams['slope']*min(firstlows.index)-scale-y0
+        fit_params = dict(ringspersweeptime=ringspersweeptime,gamma=gamma,y0=y0,\
+                          scale=scale,overshoot=overshoot)
+        self.fixed_params = dict(ringspersweeptime=ringspersweeptime,y0=y0,scale=scale) 
+                                 #overshoot=overshoot)
+        return fit_params
+
+
+    def _guessringdown_linear(self):
+    #def _guessringdown_linear(self):
+        ringspersweeptime = 1.0
+        length = len(self.x())
+        sweeptime = self.x().max()-self.x().min()
+        ringtime = sweeptime/ringspersweeptime
+        sweeps = int(math.ceil(ringspersweeptime))
+        delta = ringtime*0.000
+        highsum=0
+        highs=0
+        lows=0
+        lowsum=0
+        for sweep in range(sweeps):
+            high = self.data[(sweep+0.2*ringtime+delta):((sweep+0.5)*ringtime-delta)]
+            low = self.data[((sweep+0.80)*ringtime+delta):((sweep+0.95)*ringtime-delta)]
+            for i in high.index:
+                highsum+=10**self.data[i]
+                highs+=1
+            for i in low.index:
+                lowsum+=10**self.data[i]
+                lows+=1
+        y0=math.log10(lowsum/lows)
+        scale=math.log10(highsum/highs)-y0
+        
+        firstlows = self.data[0.5*ringtime+delta:(0.5)*ringtime+delta+sweeptime/length*math.ceil(length/ringspersweeptime/2/1000)]
+        tempfit = Fit(data = firstlows, func = 'linear', \
+                      autoguessfunction = '', \
+                      fixed_params = {}, \
+                      manualguess_params = {}, \
+                      verbosemode = False, maxiter = 10)
+        '''tempfit_params holds the parameters for the guess now, '''
+        '''which should be nearly optimal already'''
+        tempfitparams = tempfit.getparams()
+        gamma = abs(tempfitparams['slope'])/(2*math.pi*10*math.log10(math.e))
+        overshoot = tempfitparams['y0']+tempfitparams['slope']*min(firstlows.index)-scale-y0
+        fit_params = dict(ringspersweeptime=ringspersweeptime,gamma=gamma,y0=y0,\
+                          scale=scale,overshoot=overshoot)
+        self.fixed_params = dict(ringspersweeptime=ringspersweeptime,y0=y0,scale=scale,\
+                                 overshoot=overshoot)
+        return fit_params
+
+    def _guessringdown_old(self):
+        ringspersweeptime = 1.0
         y0 = self.data.min()
         scale = self.data.max()-y0
         overshoot = 0.0
         sweeptime = self.x().max()-self.x().min()
         ringtime = sweeptime/ringspersweeptime
         slope = (scale+overshoot)/ringtime/100.0
-        gamma = slope/(2*math.pi*math.log10(math.e))
+        gamma = slope/(2*10*math.pi*math.log10(math.e))
         fit_params = dict(ringspersweeptime=ringspersweeptime,gamma=gamma,y0=y0,\
                           scale=scale,overshoot=overshoot)
         return fit_params
-
-    def ringdown_fitonhigh(self,ringspersweeptime,gamma,y0,scale):
-        overshoot = 0.0
-        fitonhigh = True
-        length = len(self.x())
-        sweeptime = self.x().max()-self.x().min()
-        ringtime = sweeptime/ringspersweeptime
-        sweeps = int(math.ceil(ringspersweeptime))
-        delta = ringtime*0.0005
-        result = self.data.copy()
-        '''conversion from decay rate to decay slope on a log scale'''
-        slope = gamma*2*math.pi*math.log10(math.e)
-        for sweep in range(sweeps):
-            high = self.data[(sweep+0.25*ringtime+delta):((sweep+0.5)*ringtime-delta)]
-            low = self.data[((sweep+0.5)*ringtime+delta):((sweep+0.9)*ringtime-delta)]
-            if fitonhigh:
-                for i in high.index:
-                    result[i] = y0+scale
-            if len(low)>0:
-                ringstart = min(low.index)
-                for i in low.index:
-                    #result[i]=max([y0,y0+scale+overshoot-slope*(i-ringstart)])
-                    result[i]=math.log10(10**y0+10**(y0+scale+overshoot-slope*(i-ringstart)))
-        return numpy.array(result.values,dtype=float)
-
-    def _guessringdown_fitonhigh(self):
-        return self._guessringdown_noovershoot()
-
-    def ringdown_noovershoot(self,ringspersweeptime,gamma,y0,scale):
-        return self.ringdown(ringspersweeptime,gamma,y0,scale,0.0)
-
-    def _guessringdown_noovershoot(self):
-        params = self._guessringdown()
-        params.pop('overshoot')
-        return params
-
+ 
     #simple lorentzian in linear scale
     def lorentz(self, scale, x0, y0, bandwidth):
         x = self.x()
@@ -396,10 +482,10 @@ class Fit(FitFunctions):
                             hessp=None,  # hessian times vector also numerically estimated
                             bounds=None, # no bounds
                             constraints=(), # no constrains
-                            tol=1e-1, # tolerance for termination
+                            tol=None, # tolerance for termination
                             callback=self.printstatus, #N'one' optional function call after each iteration
                             #more at scipy.optimize.show_options('minimize')
-                            options={'maxiter': self.maxiter, 'disp': self.verbosemode}) 
+                            options={'maxiter': self.maxiter, 'disp': self.verbosemode, 'gtol':1e-4}) 
                             # max iterations and verbose mode
         self.sqerror = self.getsqerror() 
         self.comment("Fit completed with sqerror = " + str(self.sqerror))

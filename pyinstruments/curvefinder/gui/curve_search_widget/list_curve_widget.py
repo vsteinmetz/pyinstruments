@@ -150,21 +150,22 @@ class ListCurveWidget(QtGui.QWidget, object):
         return ListTreeWidget(self)
 
 
-
-            
-
+    
     def contextMenuEvent(self, event):
         """
         Context Menu (right click on the treeWidget)
         """
         curves = self.selected_curves
         ### First option: Plot curve(s)
+
         if len(curves)==1:
             message = "plot in " + curves[0].params['window']
             message_delete = "delete " + curves[0].name
+            message_tags = "add a tag to selected curve"
         else:
             message = "plot these in their window"
             message_delete = "delete " + str(len(curves)) + " curves ?"
+            message_tags = "add a tag to selected " + str(len(curves)) + " curves"
         
         def delete(dummy, curves=curves):
             message_box = QtGui.QMessageBox(self)
@@ -181,15 +182,26 @@ class ListCurveWidget(QtGui.QWidget, object):
                 win.plot(curve)
                 win.show()
         
+        def addtag(dummy,curves=curves):
+            text,ok= QtGui.QInputDialog.getText(self, 'Add a tag','Tagname to add:')
+            if ok:
+                for curve in curves:
+                    curve.tags.append(text)
+                    curve.save()
+                
         menu = QtGui.QMenu(self)
         action_plot = QtGui.QAction(message, self)
         action_plot.triggered.connect(plot)
         
         action_delete = QtGui.QAction(message_delete, self)
         action_delete.triggered.connect(delete)
+
+        action_tags = QtGui.QAction(message_tags, self)
+        action_tags.triggered.connect(addtag)
         
         menu.addAction(action_plot)
         menu.addAction(action_delete)
+        menu.addAction(action_tags)
          
         ###second option: fit curve(s)
         
@@ -198,19 +210,17 @@ class ListCurveWidget(QtGui.QWidget, object):
             if not f.startswith('_'):
                 fitfuncs.append(f)
         
-        fitsmenu = menu.addMenu(    'fits')
-        
+        fitsmenu = menu.addMenu('fits')
         
         def fitcurve(curvestofit, funcname):
             for curve in curvestofit:
-                curve.fit(func = funcname, autosave=True, maxiter=20)
-                
+                curve.fit(func = funcname, autosave=True)
         for f in fitfuncs:
             specificfit = functools.partial(fitcurve, curvestofit=curves, funcname=f)
             action_add_tag = QtGui.QAction(f, self)
             action_add_tag.triggered.connect(specificfit)
             fitsmenu.addAction(action_add_tag)
-        
+
         menu.exec_(event.globalPos())
      
     

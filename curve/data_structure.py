@@ -101,17 +101,26 @@ class Curve(object):
         """
         Makes a fit of the curve and returns the child fit curve
         """ 
-        
         fit_curve = Curve()
         fitter = fitting.Fit(self.data, func, **kwds)
         fit_curve.set_data(fitter.fitdata)
         fit_curve.set_params(**fitter.getparams())
-        fit_curve.params["sumofsquares"] = fitter.sqerror
+        fit_curve.params["fit_rms"] = fitter.getsqerror()**0.5
+        fit_curve.params["fit_dataminmax"] = self.data.max()-self.data.min()
+        if not fit_curve.params["fit_dataminmax"]==0:
+            fit_curve.params["fit_quality"] = \
+                    fitter.getsqerror()**0.5/fit_curve.params["fit_dataminmax"]
         fit_curve.params["comment"] = fitter.commentstring
         fit_curve.params["curve_type"] = self.params["curve_type"]+'_fit'
         fit_curve.params["fit_function"] = fitter.func
         fit_curve.params["name"] = 'fit_' + func
-        
+        if "start_freq" in self.params and "stop_freq" in self.params:
+            freq=(self.params["start_freq"]+self.params["stop_freq"])/2
+            fit_curve.params["freq"]=freq
+            if "gamma" in fit_curve.params:
+                fit_curve.params["Q"]=freq/fit_curve.params["gamma"]          
+            elif "bw" in fit_curve.params:
+                fit_curve.params["Q"]=freq/(2*fit_curve.params["bw"])          
         return fitter, fit_curve
     
 def convert_from_numpy(val):

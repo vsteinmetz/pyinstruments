@@ -65,6 +65,12 @@ class SensingDevice(object):
     def now(self):
         return time.time()
     
+    def datetime_to_time(self, datetime):
+        return time.mktime(datetime.timetuple())
+
+    def time_to_datetime(self, time):
+        return datetime.fromtimestamp(time)
+    
     def log(self, value, mtime = -1.):
         if mtime == -1.:
             mtime = self.now()
@@ -127,6 +133,8 @@ class SensingDevice(object):
                 MeasurementPoint.objects.filter(sensor = self.sensorlog)) 
 
     def getallpointssince(self, sincetime):
+        if type(sincetime)==datetime:
+            sincetime=self.datetime_to_time(sincetime)
         if sincetime <0:
             sincetime+=self.now()
         return self.toSeries(\
@@ -134,6 +142,10 @@ class SensingDevice(object):
                                                     time__gt = sincetime)) 
 
     def getallpointsrange(self, starttime, stoptime=NaN):
+        if type(starttime)==datetime:
+            starttime=self.datetime_to_time(starttime)
+        if type(stoptime)==datetime.datetime:
+            stoptime=self.datetime_to_time(stoptime)
         if stoptime == NaN:
             stoptime = self.now()
         if starttime < 0:
@@ -143,15 +155,24 @@ class SensingDevice(object):
                 MeasurementPoint.objects.filter(sensor = self.sensorlog,\
                                       time__range = (starttime,stoptime))) 
  
-    def getallpointsaround(self, time = NaN, offset = NaN):
+    def getmeanaround(self, atime = NaN, offset = 60):
+        sel = self.getallpointsaround(atime, offset)
+        if len(sel)>0:
+            return sel.mean()
+        else:
+            return NaN
+ 
+    def getallpointsaround(self, atime = NaN, offset = NaN):
+        if type(atime)==datetime:
+            atime=self.datetime_to_time(atime)
         if offset == NaN:
             offset = self.timeout
-        if time == NaN:
-            time=self.now()
-        elif time < 0:
-            time+=self.now()
-        starttime = time-offset
-        stoptime = time+offset
+        if atime == NaN:
+            atime=self.now()
+        elif atime < 0:
+            atime+=self.now()
+        starttime = atime-offset
+        stoptime = atime+offset
         return self.toSeries(\
                 MeasurementPoint.objects.filter(sensor = self.sensorlog,\
                                       time__range = (starttime,stoptime))) 

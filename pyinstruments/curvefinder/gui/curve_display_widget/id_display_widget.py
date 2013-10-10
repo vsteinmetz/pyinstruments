@@ -55,3 +55,4 @@ class IdDisplayWidget(QtGui.QWidget):
         self.label_name.setText(curve.params["name"])
         self.label_type.setText(curve.params["curve_type"])
         self.label_date.setText(curve.params["date"].strftime("%d/%m/%Y %H:%M"))
+        

@@ -86,7 +86,6 @@ class CurveDisplayWidget(QtGui.QSplitter):
     
     def refresh_params(self):
         self.display_params.display_curve(self.displayed_curve)
-        
     
     def save(self):
         curve = self.displayed_curve
