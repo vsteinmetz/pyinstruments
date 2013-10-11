@@ -8,6 +8,7 @@ import os
 from datetime import datetime
 import json
 from django.core.files.storage import default_storage
+from django.template.defaultfilters import slugify
 import numpy
 
 
@@ -264,7 +265,7 @@ class CurveDB(models.Model, Curve):
         if not self.data_file:
             self.data_file = os.path.join( \
                     self.params["date"].strftime('%Y/%m/%d'), \
-                    self.name + '.h5')
+                    slugify(self.name) + '.h5')
             full_path = self.get_full_filename()
             dirname = os.path.dirname(full_path)
             if not os.path.exists(dirname):
