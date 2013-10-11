@@ -103,7 +103,7 @@ class FitFunctions(object):
                 lows+=1
         y0=(lowsum/lows)
         scale=(highsum/highs)-y0
-        firstlows = self.data[0.5*ringtime+delta:(0.5)*ringtime+delta+sweeptime/length*math.ceil(length/ringspersweeptime/2/1000)]
+        firstlows = self.data[0.505*ringtime+delta:(0.505)*ringtime+delta+sweeptime/length*math.ceil(length/ringspersweeptime/2/1000)]
         tempfit = Fit(data = firstlows, func = 'linear', \
                       autoguessfunction = '', \
                       fixed_params = {}, \
