@@ -82,7 +82,7 @@ class Curve(object):
             self._data = store["data"]
 
     def get_plottable_data(self):
-        if self.params['curve_type'].startswith('NaCurveComplex'):
+        if 'Complex' in self.params['curve_type']:
             return abs(self.data)**2
         else:
             return self.data
