@@ -6,6 +6,7 @@ from datetime import datetime
 import pandas
 import h5py
 import os.path
+import numpy as np
 
 NaN = float('NaN')
 
@@ -49,7 +50,7 @@ class MeasurementPoint(models.Model):
 # which provides basic functionality such as storing and retrieving data   
 
 class SensingDevice(object):
-    def __init__(self, name, timeout = 30, description = '', minval = 0.0, maxval = 100000.0):
+    def __init__(self, name, timeout = 30, description = '', minval = 0.0, maxval = 100000.0, raw=False):
         sense = Sensor.objects.get_or_create(name = name)
         self.sensorlog = sense[0]
         if description != ''  :
@@ -61,6 +62,7 @@ class SensingDevice(object):
         self.active = False
         self.timeout = timeout
         self.name = name
+        self.raw = raw
         
     def now(self):
         return time.time()
@@ -119,7 +121,7 @@ class SensingDevice(object):
     def getlastgoodvalue(self):
         val = MeasurementPoint.objects.filter(\
                                 sensor = self.sensorlog).latest()
-        if self.now()           -val.time < self.timeout:
+        if self.now()-val.time < self.timeout:
             return val.value
         else:
             return NaN
@@ -144,7 +146,7 @@ class SensingDevice(object):
     def getallpointsrange(self, starttime, stoptime=NaN):
         if type(starttime)==datetime:
             starttime=self.datetime_to_time(starttime)
-        if type(stoptime)==datetime.datetime:
+        if type(stoptime)==datetime:
             stoptime=self.datetime_to_time(stoptime)
         if stoptime == NaN:
             stoptime = self.now()
@@ -154,7 +156,7 @@ class SensingDevice(object):
         return self.toSeries(\
                 MeasurementPoint.objects.filter(sensor = self.sensorlog,\
                                       time__range = (starttime,stoptime))) 
- 
+
     def getmeanaround(self, atime = NaN, offset = 60):
         sel = self.getallpointsaround(atime, offset)
         if len(sel)>0:
@@ -165,11 +167,11 @@ class SensingDevice(object):
     def getallpointsaround(self, atime = NaN, offset = NaN):
         if type(atime)==datetime:
             atime=self.datetime_to_time(atime)
-        if offset == NaN:
+        if np.isnan(offset):
             offset = self.timeout
-        if atime == NaN:
+        if np.isnan(atime):
             atime=self.now()
-        elif atime < 0:
+        elif atime <= 0:
             atime+=self.now()
         starttime = atime-offset
         stoptime = atime+offset
@@ -178,7 +180,10 @@ class SensingDevice(object):
                                       time__range = (starttime,stoptime))) 
          
     def toSeries(self, res):
-        return pandas.Series(data = [i.value for i in res],\
+        if self.raw:
+            return self.toSeries_raw(res)
+        else:
+            return pandas.Series(data = [i.value for i in res],\
                 index = [datetime.fromtimestamp(k.time) for k in res],\
                 name = self.sensorlog.name)
 

@@ -118,7 +118,7 @@ class Curve(object):
             freq=(self.params["start_freq"]+self.params["stop_freq"])/2
             fit_curve.params["freq"]=freq
             if "gamma" in fit_curve.params:
-                fit_curve.params["Q"]=freq/fit_curve.params["gamma"]          
+                fit_curve.params["Q"]=abs(freq/fit_curve.params["gamma"])          
             elif "bw" in fit_curve.params:
                 fit_curve.params["Q"]=freq/(2*fit_curve.params["bw"])          
         return fitter, fit_curve

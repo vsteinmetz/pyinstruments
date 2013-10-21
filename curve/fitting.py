@@ -54,8 +54,30 @@ class FitFunctions(object):
         fit_params = {'x0': x0, 'slope': slope}
         return fit_params
 
-    '''ringdown'''
+    def saturatedlinear(self,y0,slope):
+        x=self.x()
+        return 1/(1/(slope*x)+1/y0)
 
+    def _guesssaturatedlinear(self):
+        max = self.data.max()
+        min = self.data.min()
+        slope = (max-min)/(self.x().max()-self.x().min())
+        y0 = self.data.mean() - self.x().mean()*slope
+        fit_params = {'y0': min, 'slope': slope}
+        return fit_params
+
+    '''tempconductivity'''
+    def exponential(self,scale,alpha):
+        x=self.x()
+        return scale*math.exp(-x*alpha)
+
+    def _guessexponential(self,scale,alpha):
+        alpha=-1.0
+        scale = (self.data.values/math.exp(self.x()*alpha)).mean()
+        fit_params = {'scale': scale, 'alpha': alpha}
+        return fit_params
+
+    '''ringdown'''
     def ringdown(self,ringspersweeptime,gamma,y0,scale,overshoot):
         fitonhigh=True
         fitonlow=True
@@ -78,7 +100,7 @@ class FitFunctions(object):
                 ringstart = min(low.index)
                 for i in low.index:
                     #result[i]=max([y0,y0+scale+overshoot-slope*(i-ringstart)])
-                    result[i]=math.log10(10**y0+10**(y0+scale+overshoot-slope*(i-ringstart)))
+                    result[i]=math.log10(10**y0+10**(y0+scale+overshoot-abs(slope)*(i-ringstart)))
         return numpy.array(result.values,dtype=float)
 
     def _guessringdown(self):
@@ -93,7 +115,7 @@ class FitFunctions(object):
         lows=0
         lowsum=0
         for sweep in range(sweeps):
-            high = self.data[(sweep+0.2*ringtime+delta):((sweep+0.5)*ringtime-delta)]
+            high = self.data[(sweep+0.25*ringtime+delta):((sweep+0.5)*ringtime-delta)]
             low = self.data[((sweep+0.80)*ringtime+delta):((sweep+0.95)*ringtime-delta)]
             for i in high.index:
                 highsum+=self.data[i]

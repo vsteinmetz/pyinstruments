@@ -10,13 +10,13 @@ class VisaDriver(Driver):
     Base class for device interfaced with Visa
     """
     
-    def __init__(self, *args):
+    def __init__(self, *args, **kwds):
         """
         args are logical_name, address, simulate
         """
         
         super(VisaDriver, self).__init__(*args)
-        self.visa_instr = visa.instrument(self.address)
+        self.visa_instr = visa.instrument(self.address,**kwds)
         
         
     def ask(self, val):

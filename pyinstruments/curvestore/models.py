@@ -193,8 +193,10 @@ class CurveDB(models.Model, Curve):
                     print "Modified value of read_only parameter " + column.name + " was not saved!"
         
     def save_num_param(self, col, val):
+        if numpy.isnan(val):
+            val=1e100
         self._save_generic_param(col, val, FloatParam)
-        
+            
     def save_date_param(self, col, val):
         self._save_generic_param(col, val, DateParam)
     

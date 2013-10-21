@@ -72,19 +72,10 @@ class PyInstrumentsConfig(dict):
         model = self[tag]['model']
         
         ##1/ check if an IVI driver works
-        string_ivi = """import pyivi
-from pyhardware.drivers.ivi import {0}
-driver = pyivi.ivi_instrument(address, model=model, simulate=simulate)
-instrument = {0}(logical_name, driver)
-"""
-        
-        for name, ivi_driver_type \
-                    in list_all_child_classes(IviDriver).iteritems():
-            if model in ivi_driver_type.supported_models():
-                return string_ivi.format(ivi_driver_type.__name__)
+ 
         
         string_visa = """from pyhardware.drivers.visa import {0}
-instrument = {0}(logical_name, address, simulate)
+instrument = {0}(logical_name, address, simulate, timeout=100)
 """
         
         ###2/ check a visa driver
@@ -103,3 +94,15 @@ instrument = {0}(logical_name, address, simulate)
                 return string_serial.format(serial_driver_type.__name__)
         
         return """no supporting drivers in ivi, visa or serial, sorry..."""
+    
+    
+        string_ivi = """import pyivi
+from pyhardware.drivers.ivi import {0}
+driver = pyivi.ivi_instrument(address, model=model, simulate=simulate)
+instrument = {0}(logical_name, driver)
+"""
+        
+        for name, ivi_driver_type \
+                    in list_all_child_classes(IviDriver).iteritems():
+            if model in ivi_driver_type.supported_models():
+                return string_ivi.format(ivi_driver_type.__name__)

@@ -23,7 +23,7 @@ class TDS2024B(VisaDriver):
         self.write("SELect:CH%i ON" %ch)
         self.write("DATa:SOUrce CH%i" %ch )
         #set Y format
-        self.write("WFRMPre:PT_Fmt Y")
+        self.write("WFMPre:PT_Fmt Y")
         
         #extract wafeform scaling parameters
         YZEro = float(self.ask("WFMPRe:YZEro?"))
