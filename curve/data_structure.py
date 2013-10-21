@@ -113,7 +113,11 @@ class Curve(object):
         fit_curve.params["comment"] = fitter.commentstring
         fit_curve.params["curve_type"] = self.params["curve_type"]+'_fit'
         fit_curve.params["fit_function"] = fitter.func
-        fit_curve.params["name"] = 'fit_' + func
+        if fitter.autofitgraphical:
+            fit_curve.params["name"] = 'manualfit_' + func
+            fit_curve.params["manualfit_concluded"] = fitter.gfit_concluded
+        else:
+            fit_curve.params["name"] = 'fit_' + func
         if "start_freq" in self.params and "stop_freq" in self.params:
             freq=(self.params["start_freq"]+self.params["stop_freq"])/2
             fit_curve.params["freq"]=freq

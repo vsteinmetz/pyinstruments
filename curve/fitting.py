@@ -1,8 +1,10 @@
 import pandas
 import scipy.optimize
 import numpy
+import numpy as np
 import collections
 import math
+from guiqwt.widgets.fit import FitParam, guifit
 
 LAMBDA = 1.064e-6
 
@@ -69,14 +71,37 @@ class FitFunctions(object):
     '''tempconductivity'''
     def exponential(self,scale,alpha):
         x=self.x()
-        return scale*math.exp(-x*alpha)
+        return scale*math.e**(-x*alpha)
 
-    def _guessexponential(self,scale,alpha):
+    def _guessexponential(self):
         alpha=-1.0
-        scale = (self.data.values/math.exp(self.x()*alpha)).mean()
+        scale = 1#(self.data/(math.e**(self.x()*alpha))).mean()
         fit_params = {'scale': scale, 'alpha': alpha}
         return fit_params
+    
+    def steinharthart(self,A,B,C):
+        x=self.x()
+        return 1/(A+B*np.log(x)+C*np.log(x)**3)
+    
+    def _guesssteinharthart(self):
+        max = self.data.max()
+        imax=self.data.index[self.data.argmax()]
+        min = self.data.min()
+        imin=self.data.index[self.data.argmin()]
+        imean=self.x()[int(math.floor(len(self.x())/2))]
+        mean=self.data[imean]
+        l1,l2,l3=math.log(imax),math.log(imin),math.log(imean)
+        y1,y2,y3=1/max,1/min,1/mean
+        g2=(y2-y1)/(l2-l1)
+        g3  =(y3-y1)/(l3-l1)
+        C=(g3-g2)/(l3-l2)/(l1+l2+l3)
+        B=g2-C*(l1**2+l1*l2+l2**2)
+        A=y1-(B -l1**2*C)*l1
+        fit_params = {'A': A, 'B': B, 'C':C}
+        return fit_params
 
+    
+            
     '''ringdown'''
     def ringdown(self,ringspersweeptime,gamma,y0,scale,overshoot):
         fitonhigh=True
@@ -254,7 +279,7 @@ class FitFunctions(object):
         bg = (self.data[:length/10].mean()+self.data[-length/10:].mean())/2.0
         magdata = abs(self.data-bg)
         x0 = float(self.x()[magdata.argmax()])
-        magmax=self.magdata[x0]
+        magmax=magdata[x0]
         max=self.data[x0]
         bw = magdata.sum()/magmax*(self.x().max()-self.x().min())/length
         fit_params = {'x0': x0, 'y0': bg, 'scale': max-bg, 'bandwidth': bw}
@@ -398,8 +423,10 @@ class FitFunctions(object):
 class Fit(FitFunctions):
     def __init__(self, data, func, fixed_params = {}, manualguess_params = {}, \
                  autoguessfunction = '' , verbosemode = True, maxiter = 100, \
-                 errfn='squareerror'):
+                 errfn='squareerror', autofit = True, graphicalfit=False):
                  #errfn='squareerror_dbweighted'):
+        self.autofit = autofit
+        self.autofitgraphical = graphicalfit
         self.data = data
         self.sqerror = float('nan')
         self.verbosemode = verbosemode
@@ -446,11 +473,50 @@ class Fit(FitFunctions):
         self.comment("Calling fit function with following guesses: ")
         self.comment(str(dict(self.getparams())))
         
+        if self.autofit:
         # the parameters in fixed_params and fit_params are now ready for the fit 
-        res = self.fit()
+            if not self.autofitgraphical:
+                res = self.fit()
+                self.comment("Return of fit optimisation function: ")
+                self.comment(str(res))
+            else:
+                res = self.graphicalfit()
+                self.comment("Return of fit optimisation function: ")
+                self.comment(str(res))
+                
+ 
+    def graphicalfit(self):
+        #SHOW = True # Show test in GUI-based test launcher
+        x=self.x()
+        y=self.y()
         
-        self.comment("Return of fit optimisation function: ")
-        self.comment(str(res))
+        def fitfn(x, params):
+            #ignore the x
+            for index, key in enumerate(self.fit_params):
+                self.fit_params[key] = float(params[index])
+            return self.fn(**self.getparams())
+        
+        self.graphical_params=list()
+        for index, key in enumerate(self.fit_params):
+                fp=FitParam(key,self.fit_params[key],0.001*abs(self.fit_params[key]),10.0*abs(self.fit_params[key]),logscale=False,steps=2000,format='%.8f')
+                self.graphical_params.append(fp)
+        values = guifit(x, y, fitfn, self.graphical_params, xlabel="x-axis", ylabel="y-axis")
+        if values is None:
+            self.gfit_concluded = False
+        else:
+            self.gfit_concluded = True
+            
+        self.comment("Graphical fit finished with the following values: ")        
+        self.comment(values)
+        self.comment([param.value for param in self.graphical_params])
+        self.sqerror = self.getsqerror() 
+        self.comment("Fit completed with sqerror = " + str(self.sqerror))
+        self.comment("Obtained parameter values: ")
+        self.comment(dict(self.getparams()))
+        # evaluate the performed fit in fitdata
+        self.fitdata = pandas.Series(data = self.fn(**self.getparams()), index = self.x(), \
+                            name = 'fitfunction: '+ self.func)    
+        return values
  
     # define function for fit parameter optimisation, usually simple leastsquares method
     def squareerror(self, kwds):
@@ -488,6 +554,9 @@ class Fit(FitFunctions):
 
     def x(self):
         return numpy.array(self.data.index,dtype=float)
+    
+    def y(self):
+        return numpy.array(self.data.values,dtype=float)
     
     def fit(self):
         # by default use scipy standard function for optimization

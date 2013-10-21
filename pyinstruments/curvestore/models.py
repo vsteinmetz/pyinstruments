@@ -310,21 +310,27 @@ class CurveDB(models.Model, Curve):
         self.save()
 
     def fit(self, func, autoguessfunction='', autosave=False, maxiter = 10, verbosemode = False,\
-                    manualguess_params = {},fixed_params = {}):
+                    manualguess_params = {},fixed_params = {},graphicalfit=False):
         fitter, fit_curve = super(CurveDB, self).fit(
                         func,
                         autoguessfunction=autoguessfunction, 
                         maxiter=maxiter, 
                         verbosemode=verbosemode,
                         manualguess_params=manualguess_params,
-                        fixed_params=fixed_params)
+                        fixed_params=fixed_params, 
+                        graphicalfit=graphicalfit)
         
         fit_curve_db = curve_db_from_curve(fit_curve)
         fit_curve_db.name +='_of_' + str(self.id)
         fit_curve_db.params['window']=self.params["window"]
-        self.add_child(fit_curve_db)
         if autosave:
-            fit_curve_db.save()
+            if "manualfit_concluded" in fit_curve_db.params:
+                 if fit_curve_db.params["manualfit_concluded"]: 
+                     self.add_child(fit_curve_db)
+                     fit_curve_db.save()
+            else:
+                self.add_child(fit_curve_db)
+                fit_curve_db.save()
         model_monitor.fit_done.emit()
         return fit_curve_db
         
