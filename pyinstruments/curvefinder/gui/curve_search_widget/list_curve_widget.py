@@ -1,11 +1,14 @@
 from pyinstruments.curvestore.models import CurveDB
 from pyinstruments.curvefinder.gui.plot_window import get_window
+from pyinstruments.curvefinder import _APP
 
 from curve.fitting import FitFunctions
 
 from PyQt4 import QtCore, QtGui
 import functools
 import numpy
+from StringIO import StringIO
+import pandas
 
 
 class MyItem(QtGui.QTreeWidgetItem):
@@ -14,7 +17,6 @@ class MyItem(QtGui.QTreeWidgetItem):
         self.pk = curve.pk
         if curve.has_childs:
             for child in curve.childs.all():
-                print "adding child"
                 item_child = MyItem(child)
                 self.addChild(item_child)
 
@@ -182,6 +184,24 @@ class ListCurveWidget(QtGui.QWidget, object):
                 win.plot(curve)
                 win.show()
         
+        def create_csv(curves, buffer):
+            df = pandas.DataFrame(dict([(str(curve.id) +\
+                             '_' + curve.params["name"],
+                              curve.data) for curve in curves]))
+            df.to_csv(buffer, index_label='index')
+            
+        def export_clipboard(dummy, curves=curves):
+            string = StringIO()
+            create_csv(curves, string)
+            clip = _APP.clipboard()
+            clip.setText(string.getvalue())
+                
+                
+        def export_csv(dummy, curves=curves):
+            filename = str(QtGui.QFileDialog().getSaveFileName())
+            with open(filename,'w') as f:
+                create_csv(curves, f)
+                
         def addtag(dummy,curves=curves):
             text,ok= QtGui.QInputDialog.getText(self, 'Add a tag','Tagname to add:')
             if ok:
@@ -202,7 +222,8 @@ class ListCurveWidget(QtGui.QWidget, object):
         menu.addAction(action_plot)
         menu.addAction(action_delete)
         menu.addAction(action_tags)
-         
+        
+        
         ###second option: fit curve(s)
         
         fitfuncs = list()
@@ -220,6 +241,15 @@ class ListCurveWidget(QtGui.QWidget, object):
             action_add_tag = QtGui.QAction(f, self)
             action_add_tag.triggered.connect(specificfit)
             fitsmenu.addAction(action_add_tag)
+
+
+        exportmenu = menu.addMenu('export as csv')
+        action_export_clipboard = QtGui.QAction('to clipboard', self)
+        action_export_clipboard.triggered.connect(export_clipboard)
+        action_export_csv = QtGui.QAction('to file ...', self)
+        action_export_csv.triggered.connect(export_csv)
+        exportmenu.addAction(action_export_clipboard)
+        exportmenu.addAction(action_export_csv)
 
         menu.exec_(event.globalPos())
      
