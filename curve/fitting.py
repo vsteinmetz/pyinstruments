@@ -12,6 +12,23 @@ LAMBDA = 1.064e-6
    Anything which starts with an underscore does not appear in that menu. 
    Default guessfunction has the same name as the fitfunction and starts with _guess'''
 class FitFunctions(object):
+    
+    def doublelorentz(self,x1,x2,bandwidth,scale,y0):
+        x = self.x()
+        return self.lorentz(scale=scale, x0=x1, y0=y0, bandwidth=bandwidth)+self.lorentz(scale=scale, x0=x2, y0=0, bandwidth=bandwidth)
+
+    def _guessdoublelorentz(self):
+        length = len(self.x())
+        #estimate background from first and last 10% of datapoints in the trace
+        bg = (self.data[:length/20].mean()+self.data[-length/20:].mean())/2.0
+        magdata = abs(self.data-bg)
+        x0 = float(self.x()[magdata.argmax()])
+        magmax=magdata[x0]
+        max=self.data[x0]
+        bw = magdata.sum()/magmax*(self.x().max()-self.x().min())/length
+        fit_params = {'x1': x0, 'y0': bg, 'scale': max-bg, 'bandwidth': bw,'x2':x0}
+        return fit_params
+
 
     def dummy(self,x):
         return self.data
