@@ -56,8 +56,7 @@ class FitFunctions(object):
         return fit_params
 
     '''ringdown'''
-    def ringdown(self,ringspersweeptime,gamma,y0,scale,overshoot):
-        fitonhigh = False
+    def ringdown(self,fitonhigh=False,fitonlow=True,ringspersweeptime,gamma,y0,scale,overshoot):
         length = len(self.x())
         sweeptime = self.x().max()-self.x().min()
         ringtime = sweeptime/ringspersweeptime
@@ -72,7 +71,7 @@ class FitFunctions(object):
             if fitonhigh:
                 for i in high.index:
                     result[i] = y0+scale
-            if len(low)>0:
+            if fitonlow:
                 ringstart = min(low.index)
                 for i in low.index:
                     #result[i]=max([y0,y0+scale+overshoot-slope*(i-ringstart)])
