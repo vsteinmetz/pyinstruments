@@ -330,7 +330,7 @@ class FitFunctions(object):
                 SBscale/(1+((x-x0+SBwidth)/bandwidth)**2))
 
     def _guesslorentzSB(self):
-        fit_params = self.guesslorentz()
+        fit_params = self._guesslorentz()
         replacement = {'bandwidth': fit_params['bandwidth']/2.0,\
                        'SBwidth': fit_params['bandwidth']*1.1, 'SBscale' : 0.3}
         fit_params.update(replacement)
