@@ -6,7 +6,7 @@ import collections
 import math
 from guiqwt.widgets.fit import FitParam, guifit
 
-LAMBDA = 1.064e-6
+LAMBDA = 1.064e-6 #WTF !?
 
 '''Here define the fitfunctions which shall appear in the fit context menu;
    Anything which starts with an underscore does not appear in that menu. 
@@ -501,7 +501,6 @@ class Fit(FitFunctions):
                 self.comment("Return of fit optimisation function: ")
                 self.comment(str(res))
                 
- 
     def graphicalfit(self):
         #SHOW = True # Show test in GUI-based test launcher
         x=self.x()
@@ -511,7 +510,11 @@ class Fit(FitFunctions):
             #ignore the x
             for index, key in enumerate(self.fit_params):
                 self.fit_params[key] = float(params[index])
-            return self.fn(**self.getparams())
+                res = self.fn(**self.getparams())  
+                if len(x)!=len(self.x()):
+                    s = pandas.Series(res, index=self.x())
+                    res = s[x].values   
+            return res
         
         self.graphical_params=list()
         for index, key in enumerate(self.fit_params):
