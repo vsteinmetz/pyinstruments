@@ -6,6 +6,7 @@ from PyQt4 import QtCore, QtGui
 from guiqwt import plot
 from guiqwt.builder import make
 from numpy import array
+import guiqwt
 
 class CurveDisplayLeftPanel(QtGui.QWidget):
     delete_done = QtCore.pyqtSignal()
@@ -30,7 +31,9 @@ class CurveDisplayLeftPanel(QtGui.QWidget):
         self.plot_widget = plot.CurveWidget(self, 'curve graph', \
                                             show_itemlist=False)
         self.plot_widget.plot.set_antialiasing(True)
-        self.plot_widget.register_all_curve_tools()
+        
+        #self.plot_widget.register_all_curve_tools()
+        #self.plot_widget.add_tool(guiqwt.tools.AntiAliasingTool)
          #---guiqwt plot manager
         self.manager = plot.PlotManager(self)
         #---Register plot to manager
@@ -43,11 +46,19 @@ class CurveDisplayLeftPanel(QtGui.QWidget):
         self.autoscale.checked.connect(self.plot_widget.plot.do_autoscale)
         self.toolbar.addWidget(self.autoscale)
         self.manager.add_toolbar(self.toolbar, id(self.toolbar))
-        
-        
-        self.manager.register_all_curve_tools()
+    
         self.curve_item = make.curve([], [], color='b')
         self.plot_widget.plot.add_item(self.curve_item)
+        
+        self.manager.register_all_curve_tools()
+        
+        #=============================
+        # for tools such as CurveStatsTool to work 
+        # the curve needs to have been selected at least once.
+        self.plot_widget.plot.set_active_item(self.curve_item)
+        self.curve_item.unselect()
+        #=============================
+        
         self.displayed_curve = None
 
     def display_curve(self, curve):
@@ -61,6 +72,7 @@ class CurveDisplayLeftPanel(QtGui.QWidget):
             self.alter_curve_widget.display_curve(curve)
             self.curve_item.set_data(array(curvedata.index, dtype = float), 
                                     array(curvedata.values, dtype = float))
+            
             if self.autoscale:
                 self.curve_item.plot().do_autoscale()
             self.curve_item.plot().replot()
