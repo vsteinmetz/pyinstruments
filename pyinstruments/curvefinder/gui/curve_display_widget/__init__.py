@@ -1,12 +1,132 @@
 from pyinstruments.curvefinder.gui.curve_display_widget.curve_alter_widget import CurveAlterWidget
 from pyinstruments.curvefinder.gui.curve_display_widget.params_display_widget import ParamsDisplayWidget
 from pyinstruments.curvefinder.gui.curve_editor_menus import NamedCheckBox
+from pyinstruments.curvefinder import _APP
+from pyinstruments.curvestore import models
+from pyinstruments.curvefinder import displayed_curve, refresh
 
 from PyQt4 import QtCore, QtGui
 from guiqwt import plot
 from guiqwt.builder import make
 from numpy import array
 import guiqwt
+from guiqwt.config import _
+from guiqwt.interfaces import (IColormapImageItemType, IPlotManager,
+                               IVoiImageItemType, IStatsImageItemType,
+                               ICurveItemType)
+import weakref
+from StringIO import StringIO
+import pandas
+from datetime import datetime
+
+class CutSignalTool(guiqwt.tools.BaseCursorTool):
+    TITLE = _("Cut signal")
+    ICON = "xrange.png"
+    SWITCH_TO_DEFAULT_TOOL = True
+    
+    def __init__(self, manager, toolbar_id=guiqwt.tools.DefaultToolbarID):#,
+                # title=None, icon=None, tip=None):
+        super(CutSignalTool, self).__init__(manager, toolbar_id)#, title=title,
+                                             # icon=icon, tip=tip)
+        self._last_item = None
+        self.label = None
+        self.option_selected = None
+        
+    def setup_context_menu(self, menu, plot):
+        menu.addAction(self.action)
+            
+    def setup_toolbar(self, toolbar):
+        pass    
+    
+    def create_action_menu(self, manager):
+        menu = QtGui.QMenu()
+        self.action_clipboard = manager.create_action('csv in clipboard')
+        menu.addAction(self.action_clipboard)
+        self.action_file = manager.create_action('csv in file...')
+        menu.addAction(self.action_file)
+        self.action_curve = manager.create_action('new curve...')
+        menu.addAction(self.action_curve)
+        self.action_clipboard.triggered.connect(self.set_option_clipboard)
+        self.action_file.triggered.connect(self.set_option_file)
+        self.action_curve.triggered.connect(self.set_option_curve)
+        return menu
+    
+    def set_option_clipboard(self):
+        self.option_selected = 'clipboard'
+        self.activate()
+    def set_option_curve(self):
+        self.option_selected = 'curve'
+        self.activate()
+    def set_option_file(self):
+        self.option_selected = 'file'
+        self.activate()
+
+    
+    def get_last_item(self):
+        if self._last_item is not None:
+            return self._last_item()
+
+    def create_shape(self):
+        from guiqwt.shapes import XRangeSelection
+        return XRangeSelection(0, 0)
+
+    def move(self, filter, event):
+        super(CutSignalTool, self).move(filter, event)
+    
+    def get_message(self):
+        if self.option_selected == 'curve':
+            return 'make new curve with the selected portion of data ?'
+        if self.option_selected == 'clipboard':
+            return 'copy the selected portion of data to clipboard ?'
+        if self.option_selected == 'file':
+            return 'save the selected portion of data to file ?'
+    
+    def get_truncated_data(self):
+        old_one = displayed_curve()
+        #item = self.get_associated_item(self.get_active_plot())
+        data = old_one.data
+        range = self.shape.get_range()
+        return data[range[0]:range[1]]
+        
+    def end_move(self, filter, event):
+        truncated_data = self.get_truncated_data()
+        self.shape.hide()
+        super(CutSignalTool, self).end_move(filter, event)
+        plot = self.get_active_plot()
+        message_box = QtGui.QMessageBox(plot)
+        answer = message_box.question(plot, 'cut signal', self.get_message(), 'No', 'Yes')
+        
+        if not answer:
+            return
+        if self.option_selected == 'clipboard':
+            clip = _APP.clipboard()
+            csv_string = StringIO()
+            truncated_data.to_csv(csv_string)
+            clip.setText(csv_string.getvalue())
+        if self.option_selected == 'file':
+            f = QtGui.QFileDialog()
+            filename = f.getSaveFileName()
+            truncated_data.to_csv(filename)        
+        if self.option_selected == 'curve':
+            old_one = displayed_curve()
+            curve = models.CurveDB()
+            curve.set_params(**old_one.params)
+            curve.tags = old_one.tags + ["portion"]
+            curve.name = "portion_of_" +  str(old_one.id)
+            curve.date = datetime.now()
+            curve.set_data(truncated_data)
+            curve.save()
+            refresh()
+        
+    def get_associated_item(self, plot):
+        items = plot.get_selected_items(item_type=ICurveItemType)
+        if len(items) == 1:
+            self._last_item = weakref.ref(items[0])
+        return self.get_last_item()
+        
+    def update_status(self, plot):
+        item = self.get_associated_item(plot)
+        self.action.setEnabled(item is not None)
 
 class CurveDisplayLeftPanel(QtGui.QWidget):
     delete_done = QtCore.pyqtSignal()
@@ -51,7 +171,7 @@ class CurveDisplayLeftPanel(QtGui.QWidget):
         self.plot_widget.plot.add_item(self.curve_item)
         
         self.manager.register_all_curve_tools()
-        
+        self.manager.add_tool(CutSignalTool)
         #=============================
         # for tools such as CurveStatsTool to work 
         # the curve needs to have been selected at least once.
