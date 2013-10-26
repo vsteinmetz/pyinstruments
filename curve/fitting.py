@@ -21,12 +21,25 @@ class FitFunctions(object):
         length = len(self.x())
         #estimate background from first and last 10% of datapoints in the trace
         bg = (self.data[:length/20].mean()+self.data[-length/20:].mean())/2.0
+        
         magdata = abs(self.data-bg)
-        x0 = float(self.x()[magdata.argmax()])
-        magmax=magdata[x0]
-        max=self.data[x0]
-        bw = magdata.sum()/magmax*(self.x().max()-self.x().min())/length
-        fit_params = {'x1': x0, 'y0': bg, 'scale': max-bg, 'bandwidth': bw,'x2':x0}
+        argmax = magdata.argmax()
+        x1 = float(self.x()[argmax])
+        magmax=magdata[x1]
+        max=self.data[x1]
+        
+        for index, y in enumerate(magdata[x1:]):
+            if y<magmax/2:
+                break
+                print 'broke'
+        bw = 2*abs(x1 - self.data.index[argmax + index])
+        
+        ## second peak search
+        magdata[argmax - index*3:argmax + index*3] = 0
+        argmax = magdata.argmax()
+        x2 = float(self.x()[argmax])
+    
+        fit_params = {'x1': x1, 'y0': bg, 'scale': max-bg, 'bandwidth': bw,'x2':x2}
         return fit_params
 
 
@@ -346,6 +359,7 @@ class FitFunctions(object):
                 SBscale/(1+((x-x0-SBwidth)/bandwidth)**2)+\
                 SBscale/(1+((x-x0+SBwidth)/bandwidth)**2))
 
+
     def _guesslorentzSB(self):
         fit_params = self._guesslorentz()
         replacement = {'bandwidth': fit_params['bandwidth']/2.0,\
@@ -438,10 +452,12 @@ class FitFunctions(object):
 
 
 class Fit(FitFunctions):
-    def __init__(self, data, func, fixed_params = {}, manualguess_params = {}, \
-                 autoguessfunction = '' , verbosemode = True, maxiter = 100, \
-                 errfn='squareerror', autofit = True, graphicalfit=False):
+    def __init__(self, data, func, fixed_params={}, manualguess_params={},
+                 autoguessfunction='' , verbosemode=True, maxiter=100, 
+                 errfn='squareerror', autofit=True, graphicalfit=False):
                  #errfn='squareerror_dbweighted'):
+        self._x_npy = None
+        self._y_npy = None
         self.autofit = autofit
         self.autofitgraphical = graphicalfit
         self.data = data
@@ -573,10 +589,14 @@ class Fit(FitFunctions):
         self.commentstring += str(string) + "\r\n"
 
     def x(self):
-        return numpy.array(self.data.index,dtype=float)
+        if self._x_npy is None:
+            self._x_npy = numpy.array(self.data.index,dtype=float)
+        return  self._x_npy
     
     def y(self):
-        return numpy.array(self.data.values,dtype=float)
+        if self._y_npy is None:
+            self._y_npy = numpy.array(self.data.values,dtype=float)
+        return self._y_npy
     
     def fit(self):
         # by default use scipy standard function for optimization
@@ -603,8 +623,8 @@ class Fit(FitFunctions):
         self.comment("Obtained parameter values: ")
         self.comment(dict(self.getparams()))
         # evaluate the performed fit in fitdata
-        self.fitdata = pandas.Series(data = self.fn(**self.getparams()), index = self.x(), \
-                            name = 'fitfunction: '+ self.func )
+        self.fitdata = pandas.Series(data=self.fn(**self.getparams()), index=self.x(),
+                            name='fitfunction: '+ self.func )
         return res
     
     def getoversampledfitdata(self,numbersamples):

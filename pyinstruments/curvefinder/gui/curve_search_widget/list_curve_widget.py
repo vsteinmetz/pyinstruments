@@ -236,10 +236,10 @@ class ListCurveWidget(QtGui.QWidget, object):
         
         def fitcurve(curvestofit, funcname):
             for curve in curvestofit:
-                curve.fit(func = funcname, autosave=True)
+                curve.fit(func=funcname, autosave=True)
         def gfitcurve(curvestofit, funcname):
             for curve in curvestofit:
-                curve.fit(func = funcname, autosave=True, graphicalfit=True)
+                curve.fit(func=funcname, autosave=True, graphicalfit=True)
                 
         for f in fitfuncs:
             specificfit = functools.partial(fitcurve, curvestofit=curves, funcname=f)
