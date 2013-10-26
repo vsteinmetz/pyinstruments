@@ -39,7 +39,7 @@ class FitFunctions(object):
         argmax = magdata.argmax()
         x2 = float(self.x()[argmax])
     
-        fit_params = {'x1': x1, 'y0': bg, 'scale': max-bg, 'bandwidth': bw,'x2':x2}
+        fit_params = {'x1': x1, 'x2':x2, 'bandwidth': bw, 'scale': max-bg, 'y0': bg}
         return fit_params
 
 
@@ -554,13 +554,13 @@ class Fit(FitFunctions):
                             name = 'fitfunction: '+ self.func)    
         return values
  
-    # define function for fit parameter optimisation, usually simple leastsquares method
-    def squareerror(self, kwds):
+    # define function for fit parameter optimization, usually simple leastsquares method
+    def squareerror(self, args):
         # unfold the list of parameters back into the dictionary 
         for index, key in enumerate(self.fit_params):
-            self.fit_params[key] = float(kwds[index])
+            self.fit_params[key] = float(args[index])
         # calculate the square error
-        self.sqerror = float(((self.fn(**self.getparams())-self.data.values)**2).mean())
+        self.sqerror = float(((self.fn(**self.getparams())-self.data.values)**2).sum())
         return self.sqerror
 
     def squareerror_dbweighted(self, kwds):
