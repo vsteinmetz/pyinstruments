@@ -95,6 +95,8 @@ class Curve(object):
     
     @property
     def params(self):
+        if self._params is None:
+            self._params = {'curve_type':'base_curve'}
         return self._params
         
     def fit(self, func, **kwds):
@@ -111,7 +113,9 @@ class Curve(object):
             fit_curve.params["fit_quality"] = \
                     fitter.getsqerror()**0.5/fit_curve.params["fit_dataminmax"]
         fit_curve.params["comment"] = fitter.commentstring
-        fit_curve.params["curve_type"] = self.params["curve_type"]+'_fit'
+        
+        if 'curve_type' in self.params:
+            fit_curve.params["curve_type"] = self.params["curve_type"]+'_fit'
         fit_curve.params["fit_function"] = fitter.func
         if fitter.autofitgraphical:
             fit_curve.params["name"] = 'manualfit_' + func

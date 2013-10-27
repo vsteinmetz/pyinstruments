@@ -12,11 +12,19 @@ LAMBDA = 1.064e-6 #WTF !?
    Anything which starts with an underscore does not appear in that menu. 
    Default guessfunction has the same name as the fitfunction and starts with _guess'''
 class FitFunctions(object):
+    def sin(self, f, phi, scale, offset):
+        x = self.x()
+        return offset + scale*numpy.sin(2*numpy.pi*x*f + phi) 
     
-    def doublelorentz(self,x1,x2,bandwidth,scale,y0):
+    def _guesssin(self):
+        fit_params = {'f': 0.25, 'phi':90, 'scale': 1.0, 'offset': 0.0}
+        return fit_params
+    
+    def doublelorentz(self, x1, x2, bandwidth, scale, y0):
         x = self.x()
         return self.lorentz(scale=scale, x0=x1, y0=y0, bandwidth=bandwidth)+self.lorentz(scale=scale, x0=x2, y0=0, bandwidth=bandwidth)
 
+        
     def _guessdoublelorentz(self):
         length = len(self.x())
         #estimate background from first and last 10% of datapoints in the trace
@@ -361,11 +369,33 @@ class FitFunctions(object):
 
 
     def _guesslorentzSB(self):
-        fit_params = self._guesslorentz()
-        replacement = {'bandwidth': fit_params['bandwidth']/2.0,\
-                       'SBwidth': fit_params['bandwidth']*1.1, 'SBscale' : 0.3}
-        fit_params.update(replacement)
-        return fit_params
+        from curve import Curve
+        cu = Curve()
+        cu.set_data(self.data)
+        res, lor = cu.fit('lorentz')
+        magdata = lor.data.abs()
+        scale = numpy.sign(lor.params['scale'])*(magdata.max() - abs(lor.params['y0']))
+        res, lor = cu.fit('lorentz', fixed_params={'x0':lor.params['x0'], 'bandwidth':0.7*lor.params['bandwidth'], 'scale':scale})
+        diff = numpy.sign(lor.params['scale'])*(cu.data - lor.data)*self.lorentz(-1.0, lor.params['x0'], 1.0, lor.params['bandwidth'])
+        upper_half = diff[lor.params['x0']:]
+        index_up = upper_half.argmax()
+        scale_up = upper_half[index_up]
+        x_up = upper_half.index[index_up]
+        
+        lower_half = diff[:lor.params['x0']]
+        index_lo = lower_half.argmax()
+        scale_lo = lower_half[index_lo]
+        x_lo = lower_half.index[index_lo]
+        
+
+#        replacement = {'bandwidth': fit_params['bandwidth']/2.0,\
+#                       'SBwidth': fit_params['bandwidth']*1.1, 'SBscale' : 0.3}
+        return {'scale' : lor.params['scale'],
+                'x0' : lor.params['x0'],
+                'y0' : lor.params['y0'],
+                'bandwidth' : lor.params['bandwidth'],
+                'SBwidth' : (x_up - x_lo)/2,
+                'SBscale' : 1./lor.params['scale']*(scale_up + scale_lo)/2}
 
     def _guesslorentzSB_simple(self):
         x0 = float(self.x()[self.data.argmax()])
@@ -453,8 +483,8 @@ class FitFunctions(object):
 
 class Fit(FitFunctions):
     def __init__(self, data, func, fixed_params={}, manualguess_params={},
-                 autoguessfunction='' , verbosemode=True, maxiter=100, 
-                 errfn='squareerror', autofit=True, graphicalfit=False):
+                 autoguessfunction='' , verbosemode=True, maxiter=1000, 
+                 errfn='error_vector', autofit=True, graphicalfit=False):
                  #errfn='squareerror_dbweighted'):
         self._x_npy = None
         self._y_npy = None
@@ -554,13 +584,28 @@ class Fit(FitFunctions):
                             name = 'fitfunction: '+ self.func)    
         return values
  
-    # define function for fit parameter optimization, usually simple leastsquares method
-    def squareerror(self, args):
+ 
+    def error_vector(self, args):
         # unfold the list of parameters back into the dictionary 
         for index, key in enumerate(self.fit_params):
             self.fit_params[key] = float(args[index])
+        
         # calculate the square error
-        self.sqerror = float(((self.fn(**self.getparams())-self.data.values)**2).sum())
+        self.sqerror_vector = self.fn(**self.getparams())-self.data.values
+        #print "params: ", args
+        #print "sqerr: ", self.sqerror
+        return self.sqerror_vector
+    # define function for fit parameter optimization, usually simple leastsquares method
+    def squareerror_old(self, args):
+        # unfold the list of parameters back into the dictionary 
+        for index, key in enumerate(self.fit_params):
+            self.fit_params[key] = float(args[index])
+        
+        # calculate the square error
+        self.sqerror = float(((self.fn(**self.getparams())-self.data.values)**2).mean())
+        
+        #print "params: ", args
+        #print "sqerr: ", self.sqerror
         return self.sqerror
 
     def squareerror_dbweighted(self, kwds):
@@ -581,7 +626,7 @@ class Fit(FitFunctions):
     
 #get the square error for actual parameters
     def getsqerror(self):
-        return self.squareerror(self.fit_params.values())
+        return self.squareerror_old(self.fit_params.values())
     
     def comment(self, string):
         if self.verbosemode is True:
@@ -598,7 +643,24 @@ class Fit(FitFunctions):
             self._y_npy = numpy.array(self.data.values,dtype=float)
         return self._y_npy
     
+    
     def fit(self):
+        res = scipy.optimize.leastsq(func=self.fn_error,
+                                     x0=self.fit_params.values(),
+                                     xtol=1e-4,
+                                     ftol=1e-4,
+                                     gtol=1e-4)
+        self.sqerror = self.getsqerror() 
+        self.comment("Fit completed with sqerror = " + str(self.sqerror))
+        self.comment("Obtained parameter values: ")
+        self.comment(dict(self.getparams()))
+        # evaluate the performed fit in fitdata
+        self.fitdata = pandas.Series(data=self.fn(**self.getparams()), index=self.x(),
+                            name='fitfunction: '+ self.func )
+        return res
+    
+    
+    def fit_old(self):
         # by default use scipy standard function for optimization
         res = scipy.optimize.minimize(\
                             fun = self.fn_error,
@@ -618,6 +680,7 @@ class Fit(FitFunctions):
                             #more at scipy.optimize.show_options('minimize')
                             options={'maxiter': self.maxiter, 'disp': self.verbosemode, 'gtol':1e-4}) 
                             # max iterations and verbose mode
+        
         self.sqerror = self.getsqerror() 
         self.comment("Fit completed with sqerror = " + str(self.sqerror))
         self.comment("Obtained parameter values: ")
