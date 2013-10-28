@@ -115,8 +115,8 @@ class CutSignalTool(guiqwt.tools.BaseCursorTool):
             curve.name = "portion_of_" +  str(old_one.id)
             curve.date = datetime.now()
             curve.set_data(truncated_data)
-            curve.save()
-            refresh()
+            old_one.add_child(curve)
+            
         
     def get_associated_item(self, plot):
         items = plot.get_selected_items(item_type=ICurveItemType)

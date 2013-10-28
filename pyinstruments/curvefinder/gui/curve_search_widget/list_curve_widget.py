@@ -15,11 +15,27 @@ class MyItem(QtGui.QTreeWidgetItem):
     def __init__(self, curve):
         super(MyItem, self).__init__([str(curve.id), curve.name, str(curve.date)])
         self.pk = curve.pk
+        self.ghost = False
         if curve.has_childs:
             for child in curve.childs.all():
                 item_child = MyItem(child)
                 self.addChild(item_child)
-
+                
+    def update(self, curve):
+        self.ghost = False
+        self.pk = curve.pk
+        self.setText(0, str(curve.id))
+        self.setText(1, curve.name)
+        self.setText(2, str(curve.date))
+        
+        if curve.has_childs:
+            child_items = dict([(self.child(index).pk, self.child(index)) for index in range(self.childCount())])
+            for child in curve.childs.all():
+                if child.pk in child_items:
+                    child_items[child.pk].update(child)
+                else:
+                    item_child = MyItem(child)
+                    self.addChild(item_child)
 
     def __lt__(self, otherItem):
         column = self.treeWidget().sortColumn()
@@ -27,11 +43,32 @@ class MyItem(QtGui.QTreeWidgetItem):
             return int(self.text(column)) < int(otherItem.text(column))
         else:
             return super(MyItem, self).__lt__(otherItem)
+            
+ #       if curve.has_childs:
+ #           for child in curve.childs.all():
+ #               child_item = 
+ #               item_child = 
+ #               MyItem(child)
+ #               self.addChild(item_child)
+
+class MyItemOld(QtGui.QTreeWidgetItem):
+    def __init__(self, curve):
+        super(MyItem, self).__init__([str(curve.id), curve.name, str(curve.date)])
+        self.pk = curve.pk
+        if curve.has_childs:
+            for child in curve.childs.all():
+                item_child = MyItem(child)
+                self.addChild(item_child)
+
+
+
 
 class ListCurveWidget(QtGui.QWidget, object):
     current_item_changed = QtCore.pyqtSignal(object)
     def __init__(self, parent):
         super(ListCurveWidget, self).__init__(parent)
+        self.popup = QtGui.QMessageBox()
+        self.popup.setText('refreshing list, please wait.')
         self._tree_widget = self._get_tree_widget()
         self._lay = QtGui.QVBoxLayout()
         self._refresh_button = QtGui.QPushButton('refresh')
@@ -49,6 +86,7 @@ class ListCurveWidget(QtGui.QWidget, object):
         self.setLayout(self._lay)
         self.setMinimumWidth(300)
         
+        
     def _current_item_changed(self):
         if self.selected_curve:
             self.current_item_changed.emit(self.selected_curve)
@@ -57,15 +95,13 @@ class ListCurveWidget(QtGui.QWidget, object):
         """if the curve is in the list, selects it, otherwise cancels
         the current selection
         """
-        #import pdb
-        #pdb.set_trace()
         for index in range(self._tree_widget.topLevelItemCount()):
             item = self._tree_widget.topLevelItem(index)
             if item.pk == id:
                 #item.setSelected(True)
                 self._tree_widget.setCurrentItem(item)
                 return
-        self._tree_widget.clearSelection()
+#        self._tree_widget.clearSelection()
         
     @property
     def selected_curve(self):
@@ -109,7 +145,60 @@ class ListCurveWidget(QtGui.QWidget, object):
                for index in \
                range(self._tree_widget.topLevelItemCount())]
     
+    def refresh_one_id(self, id):
+        curves = self.parent().query()
+        try:
+            curve = curves.get(id=id)
+        except CurveDB.DoesNotExist:
+            return
+        if curve.parent:
+            return self.refresh_one_id(curve.parent.id)
+        item_list = self._tree_widget.findItems(str(id),
+                                               QtCore.Qt.MatchFlag(0),
+                                               column=0)
+        if item_list:
+            item_list[0].update(curve)
+        else:
+            item = MyItem(curve)
+            self._tree_widget.addTopLevelItem(item)
+    
     def refresh(self):
+        self.popup.show()
+        curves = self.parent().query()
+        curves = curves.filter(parent=None).order_by('id')
+        self._tree_widget.blockSignals(True)
+        items = []
+        for curve in curves:
+            item_list = self._tree_widget.findItems(str(curve.id),
+                                               QtCore.Qt.MatchFlag(0),
+                                               column=0)
+            if(item_list):
+                item = item_list[0]
+                item.update(curve)
+            else:
+                items.append(MyItem(curve))
+                
+        self._tree_widget.addTopLevelItems(items)
+        #down_stream_list = range(self._tree_widget.topLevelItemCount())
+        #down_stream_list.reverse()
+        
+        iterator = QtGui.QTreeWidgetItemIterator(self._tree_widget)
+        item = iterator.value()
+        root = self._tree_widget.invisibleRootItem() ##http://stackoverflow.com/questions/12134069/delete-qtreewidgetitem-in-pyqt 
+        to_remove = []
+        while(item):
+            if item.ghost:
+                to_remove.append(item)
+            else:
+                item.ghost = True
+            iterator+=1
+            item = iterator.value()
+        for item in to_remove:
+            (item.parent() or root).removeChild(item)
+        self._tree_widget.blockSignals(False)
+        self.popup.hide()    
+            
+    def refresh_old(self):
         previous_id = None
         previous_selected = self._tree_widget.currentItem()
         if previous_selected:
@@ -259,7 +348,36 @@ class ListCurveWidget(QtGui.QWidget, object):
         action_export_csv.triggered.connect(export_csv)
         exportmenu.addAction(action_export_clipboard)
         exportmenu.addAction(action_export_csv)
-
+        
+        
+        def expand_selected():
+            for item in self._tree_widget.selectedItems():
+                self._tree_widget.expandItem(item)   
+        def collapse_selected():
+            for item in self._tree_widget.selectedItems():
+                self._tree_widget.collapseItem(item)     
+        expand_menu = menu.addMenu('expand')
+        action_expand_all = QtGui.QAction('selected', self)
+        action_expand_all.triggered.connect(expand_selected)
+        expand_menu.addAction(action_expand_all)
+        
+        action_expand_all = QtGui.QAction('all', self)
+        action_expand_all.triggered.connect(self._tree_widget.expandAll)
+        expand_menu.addAction(action_expand_all)
+        
+        menu.addMenu(expand_menu)
+        
+        collapse_menu = menu.addMenu('collapse')
+        action_collapse_all = QtGui.QAction('all', self)
+        action_collapse_all.triggered.connect(self._tree_widget.collapseAll)
+        
+        action_collapse_selected = QtGui.QAction('selected', self)
+        action_collapse_selected.triggered.connect(collapse_selected)
+        collapse_menu.addAction(action_collapse_selected)
+        
+        collapse_menu.addAction(action_collapse_all)
+        menu.addMenu(collapse_menu)
+        
         menu.exec_(event.globalPos())
      
     

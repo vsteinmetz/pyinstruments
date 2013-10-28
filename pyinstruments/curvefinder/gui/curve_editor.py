@@ -63,7 +63,7 @@ class CurveEditor(QtGui.QMainWindow, object):
         
         self.popup_timer = QtCore.QTimer()
         self.popup_timer.timeout.connect(self.popup_unread_curves)
-        self.popup_timer.setSingleShot(False)
+        self.popup_timer.setSingleShot(True)
         self.popup_timer.setInterval(500) #ms
         self.popup_unread = False
         
@@ -76,13 +76,14 @@ class CurveEditor(QtGui.QMainWindow, object):
     def popup_unread_curves(self):
         unread = CurveDB.objects.filter_param('user_has_read', value=False)
         if unread:
-            self.search_widget.refresh()
+            for curve in unread:
+                self.search_widget.refresh_one_id(curve.id)
             curve = unread[0]
             self.display(curve)
             if self.plot_popups:
                 win = get_window(curve.params['window'])
                 win.plot(curve)
-                
+        self.popup_timer.start()
 
     def activate_popup_unread(self):
         self.popup_unread = True

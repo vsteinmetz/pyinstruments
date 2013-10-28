@@ -21,6 +21,9 @@ class CurveSearchDockWidget(QtGui.QDockWidget):
     def refresh(self):
         self.widget.refresh()
         
+    def refresh_one_id(self, id):
+        self.widget.refresh_one_id(id)
+        
 class CurveSearchWidget(QtGui.QWidget):
     value_changed = QtCore.pyqtSignal()
     current_item_changed = QtCore.pyqtSignal(CurveDB)
@@ -36,7 +39,7 @@ class CurveSearchWidget(QtGui.QWidget):
         self.curve_filter_widget.value_changed.connect(self.list_curve_widget.refresh)
         self.curve_filter_widget.value_changed.connect(self.value_changed)
         self.list_curve_widget.current_item_changed.connect(self.current_item_changed)
-        model_monitor.fit_done.connect(self.refresh)
+        model_monitor.child_added.connect(self.refresh_one_id)
         
     def query(self):
         return self.curve_filter_widget.query()
@@ -46,3 +49,6 @@ class CurveSearchWidget(QtGui.QWidget):
     
     def refresh(self):
         self.list_curve_widget.refresh()
+    
+    def refresh_one_id(self, id):
+        self.list_curve_widget.refresh_one_id(id)

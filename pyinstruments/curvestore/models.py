@@ -308,6 +308,8 @@ class CurveDB(models.Model, Curve):
         curve.parent = self
         self.has_childs = True        
         self.save()
+        curve.save()
+        model_monitor.child_added.emit(self.id)
 
     def fit(self, func, autoguessfunction='', autosave=False, maxiter = 10, verbosemode = False,\
                     manualguess_params = {},fixed_params = {},graphicalfit=False):
@@ -327,10 +329,10 @@ class CurveDB(models.Model, Curve):
             if "manualfit_concluded" in fit_curve_db.params:
                  if fit_curve_db.params["manualfit_concluded"]: 
                      self.add_child(fit_curve_db)
-                     fit_curve_db.save()
+                     
             else:
                 self.add_child(fit_curve_db)
-                fit_curve_db.save()
+                
         model_monitor.fit_done.emit()
         return fit_curve_db
         
@@ -458,4 +460,5 @@ class ModelMonitor(QtCore.QObject):
     tag_added = QtCore.pyqtSignal()
     tag_deletted = QtCore.pyqtSignal()
     fit_done = QtCore.pyqtSignal()
+    child_added = QtCore.pyqtSignal(int)
 model_monitor = ModelMonitor()
