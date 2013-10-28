@@ -110,7 +110,7 @@ class CurveDB(models.Model, Curve):
         return self.name
 
     tags_relation = models.ManyToManyField(Tag)
-    name = models.CharField(max_length=255, default='some_curve')
+    _name = models.CharField(max_length=255, default='some_curve')
     params_json = models.TextField(default="{}")
     #read only
     data_file = models.FileField(upload_to = '%Y/%m/%d')
@@ -122,7 +122,7 @@ class CurveDB(models.Model, Curve):
     has_childs = models.BooleanField(default=False)
     saved_in_db = models.BooleanField(default=False)
     #for problems with django-evolution use:
-    date = models.DateTimeField(default=datetime.fromtimestamp(0))
+    _date = models.DateTimeField(default=datetime.fromtimestamp(0))
     #date = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -202,10 +202,30 @@ class CurveDB(models.Model, Curve):
     
     def save_bool_param(self, col, val):
         self._save_generic_param(col, val, BooleanParam)        
-        
+    
+    @property
+    def name(self):
+        return self._name
+    
+    @name.setter
+    def name(self, val):
+        self._name = val
+        self.params['name'] = val
+        return val
+    
+    @property
+    def date(self):
+        return self._date
+    
+    @date.setter
+    def date(self, val):
+        self._date = val
+        self.params['date'] = val
+        return val
+    
     def save_params(self):
-        self.params["name"] = self.name
-        self.params["date"] = self.date
+        self._name = self.params["name"]
+        self._date = self.params["date"]
         self.params["id"] = self.pk
         if self.parent is not None:
             self.params["parent_id"] = self.parent.pk

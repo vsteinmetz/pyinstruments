@@ -136,7 +136,7 @@ class CurveCreateWidget(QtGui.QWidget, object):
     def dump_in_gui(self, curve):
         self.blockSignals(True)
         self.comment = curve.params["comment"]
-        self.name = curve.name
+        self.name = curve.params["name"]
         self.window = curve.params["window"]
         self.tags = curve.tags
         self.blockSignals(False)
