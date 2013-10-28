@@ -130,7 +130,7 @@ class ListCurveWidget(QtGui.QWidget, object):
             try:
                 curve = CurveDB.objects.get(pk = curve_item.pk)
             except CurveDB.DoesNotExist:
-                print "Didn't find curve id " + str(pk) + " in the db"
+                print "Didn't find curve id " + str(curve_item.pk) + " in the db"
             else:
                 curves.append(curve)
         return curves

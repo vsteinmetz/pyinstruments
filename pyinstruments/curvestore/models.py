@@ -440,13 +440,7 @@ def curve_db_from_curve(curve):
     if 'name' in curve.params:
         curve_db.name = curve.params['name']
     if 'date' in curve.params:
-        #        try:
-        d = curve.params["date"]
-#exception does not exist because by default params has a date entry
-#        except KeyError:
-#            date = datetime.now()
-#            self.params["date"] = self.date
-#        else:
+        d = curve.params['date']
         if isinstance(d, basestring):
             curve_db.params["date"] = datetime.strptime(d, "%y/%m/%d/%H/%M/%S/%f")
         curve_db.date = curve_db.params['date']
