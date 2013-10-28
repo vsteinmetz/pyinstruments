@@ -2,6 +2,7 @@
 This module is here to allow GUI interaction with the config file
 """
 
+import pyhardware
 from pyhardware.config.gui.pytreewidget import PyTreeWidget
 from pyhardware.config.pyinstruments_config import PyInstrumentsConfig
 import pyhardware.config.connected_instruments as con
@@ -80,9 +81,10 @@ class PyInstrumentsWindow(QtGui.QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(self)
         
         self.dev_list = PyInstrumentsConfigGui(self)
-          
-        self.setWindowIcon(\
-                        QtGui.QIcon(os.path.split(__file__)[0] +"/usb.png"))
+        
+        icon_file = os.path.split(pyhardware.__file__)[0] +"/icons/utils/iconeScope.gif"
+        self.setWindowIcon(QtGui.QIcon(icon_file))
+        self.setWindowTitle("pyhardware")
         
         QtCore.QObject.connect(self.actionRefresh, \
                                QtCore.SIGNAL('triggered()'), \

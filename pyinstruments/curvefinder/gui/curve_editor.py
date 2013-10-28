@@ -8,6 +8,7 @@ import pyinstruments.datastore.settings
 from pyinstruments.curvefinder.gui.plot_window import PlotDialog
 from curve.fitting import FitFunctions
 from pyinstruments.curvefinder.gui.plot_window import get_window
+from pyinstruments.datastore.settings import DATABASE_FILE
 
 from numpy import array
 from guiqwt import plot
@@ -69,6 +70,11 @@ class CurveEditor(QtGui.QMainWindow, object):
         self.popup_timer.setInterval(500) #ms
         self.popup_unread = False
         
+        self.setWindowTitle(DATABASE_FILE)
+        icon_file = os.path.join(os.path.split(pyinstruments.__file__)[0],
+                            'icons',
+                            'plot.png')
+        self.setWindowIcon(QtGui.QIcon(icon_file))
         self.show()
 
     @property
