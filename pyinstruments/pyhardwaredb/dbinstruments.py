@@ -40,7 +40,7 @@ def _save_defaults(self, **kwds):
 
 @monkey_patch
 def _save_curve(self, curve):
-    curve = curve_db_from_curve(curve)
+    print 'saving db curve'
     try:
         db_widget = self._dbwidget
     except AttributeError:
@@ -48,9 +48,9 @@ def _save_curve(self, curve):
     else:
         curve.params['name'] = self._dbwidget.name
         curve.params['window'] = self._dbwidget.window
-        curve.tags = self._dbwidget.tags
         curve.params['comment'] = self._dbwidget.comment
-        
+        curve = curve_db_from_curve(curve)
+        curve.tags = self._dbwidget.tags
         self._save_defaults(default_name=curve.params['name'],
                             default_window=curve.params['window'],
                             comment=curve.params['comment'],

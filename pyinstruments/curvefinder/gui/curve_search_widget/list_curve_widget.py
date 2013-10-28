@@ -178,10 +178,6 @@ class ListCurveWidget(QtGui.QWidget, object):
             else:
                 items.append(MyItem(curve))
                 
-        self._tree_widget.addTopLevelItems(items)
-        #down_stream_list = range(self._tree_widget.topLevelItemCount())
-        #down_stream_list.reverse()
-        
         iterator = QtGui.QTreeWidgetItemIterator(self._tree_widget)
         item = iterator.value()
         root = self._tree_widget.invisibleRootItem() ##http://stackoverflow.com/questions/12134069/delete-qtreewidgetitem-in-pyqt 
@@ -195,6 +191,7 @@ class ListCurveWidget(QtGui.QWidget, object):
             item = iterator.value()
         for item in to_remove:
             (item.parent() or root).removeChild(item)
+        self._tree_widget.addTopLevelItems(items)
         self._tree_widget.blockSignals(False)
         self.popup.hide()    
             
@@ -293,6 +290,7 @@ class ListCurveWidget(QtGui.QWidget, object):
                 
         def addtag(dummy,curves=curves):
             text,ok= QtGui.QInputDialog.getText(self, 'Add a tag','Tagname to add:')
+            text = str(text)
             if ok:
                 for curve in curves:
                     curve.tags.append(text)
