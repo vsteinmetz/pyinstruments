@@ -30,6 +30,7 @@ class CurveEditor(QtGui.QMainWindow, object):
         
         self.setMenuBar(self.menubar)
         self.search_widget = CurveSearchDockWidget(self)
+        
         self.addDockWidget(\
                 QtCore.Qt.DockWidgetArea(QtCore.Qt.LeftDockWidgetArea), \
                 self.search_widget)
@@ -47,6 +48,7 @@ class CurveEditor(QtGui.QMainWindow, object):
         self.search_widget.value_changed.connect(self.save_defaults)        
         self.search_widget.current_item_changed.connect(self.display)
         self.curve_display_widget.delete_done.connect(self.refresh)
+        self.search_widget.refresh_clicked.connect(self.curve_display_widget.refresh)
         
         settings = QtCore.QSettings("pyinstruments", "pyinstruments")
         default_json = str(settings.value("curve_editor_defaults").\

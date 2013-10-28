@@ -60,11 +60,10 @@ class MyItemOld(QtGui.QTreeWidgetItem):
                 item_child = MyItem(child)
                 self.addChild(item_child)
 
-
-
-
 class ListCurveWidget(QtGui.QWidget, object):
     current_item_changed = QtCore.pyqtSignal(object)
+    refresh_clicked = QtCore.pyqtSignal()
+    
     def __init__(self, parent):
         super(ListCurveWidget, self).__init__(parent)
         self.popup = QtGui.QMessageBox()
@@ -72,7 +71,8 @@ class ListCurveWidget(QtGui.QWidget, object):
         self._tree_widget = self._get_tree_widget()
         self._lay = QtGui.QVBoxLayout()
         self._refresh_button = QtGui.QPushButton('refresh')
-        self._refresh_button.pressed.connect(self.refresh)
+        self._refresh_button.clicked.connect(self.refresh)
+        self._refresh_button.clicked.connect(self.refresh_clicked)
         self._lay_refresh = QtGui.QHBoxLayout()
         self._lay_refresh.addWidget(self._refresh_button)
         self._lay.addLayout(self._lay_refresh)
@@ -82,6 +82,7 @@ class ListCurveWidget(QtGui.QWidget, object):
         self.refresh()
         self._tree_widget.itemSelectionChanged.connect(
                                           self._current_item_changed)
+        self._refresh_button.pressed.connect(self.refresh_clicked)
         self._tree_widget.setSortingEnabled(True)
         self.setLayout(self._lay)
         self.setMinimumWidth(300)
@@ -193,7 +194,7 @@ class ListCurveWidget(QtGui.QWidget, object):
             (item.parent() or root).removeChild(item)
         self._tree_widget.addTopLevelItems(items)
         self._tree_widget.blockSignals(False)
-        self.popup.hide()    
+        self.popup.hide()
             
     def refresh_old(self):
         previous_id = None
