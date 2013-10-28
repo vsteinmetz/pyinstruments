@@ -39,7 +39,6 @@ class FitFunctions(object):
         for index, y in enumerate(magdata[x1:]):
             if y<magmax/2:
                 break
-                print 'broke'
         bw = 2*abs(x1 - self.data.index[argmax + index])
         
         ## second peak search
