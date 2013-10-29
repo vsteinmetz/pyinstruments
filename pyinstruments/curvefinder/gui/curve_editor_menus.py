@@ -196,7 +196,6 @@ class MenuDB(QtGui.QMenu):
                         " of curve with id "+str(id)+" does not exist. Orphan created!"
                     else:
                         parent.add_child(c)
-                    c.save()
                 
         print "Added the following ids:"
         print added_ids

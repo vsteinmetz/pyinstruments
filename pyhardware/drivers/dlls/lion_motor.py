@@ -53,3 +53,6 @@ class SacherMotorController(object):
                                              ctypes.pointer(self.key),
                                              ctypes.pointer(self.wavelength),
                                              ctypes.pointer(self.dummy)))
+        
+    def calibrate(self, current_wavelength):
+        self.check(self.dll.MC_Calibrate())
