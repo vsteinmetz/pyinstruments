@@ -82,9 +82,9 @@ class PyInstrumentsWindow(QtGui.QMainWindow):
         
         self.dev_list = PyInstrumentsConfigGui(self)
         
-        icon_file = os.path.split(pyhardware.__file__)[0] +"/icons/utils/iconeScope.gif"
+        icon_file = os.path.split(pyhardware.__file__)[0] +"/utils/icons/iconeScope.gif"
         self.setWindowIcon(QtGui.QIcon(icon_file))
-        self.setWindowTitle("pyhardware")
+        self.setWindowTitle(pyhardware._TITLE)
         
         QtCore.QObject.connect(self.actionRefresh, \
                                QtCore.SIGNAL('triggered()'), \

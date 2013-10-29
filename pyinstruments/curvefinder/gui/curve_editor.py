@@ -70,7 +70,7 @@ class CurveEditor(QtGui.QMainWindow, object):
         self.popup_timer.setInterval(500) #ms
         self.popup_unread = False
         
-        self.setWindowTitle(DATABASE_FILE)
+        self.setWindowTitle('curvefinder: ' + DATABASE_FILE)
         icon_file = os.path.join(os.path.split(pyinstruments.__file__)[0],
                             'icons',
                             'plot.png')

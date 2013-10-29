@@ -3,6 +3,7 @@ from pyinstruments.curvestore import models
 from curve import Curve
 import curve
 from pyinstruments.datalogger.models import datalogger_backup, datalogger_recovery
+from pyinstruments.curvefinder import _APP
 
 import time
 import os
@@ -10,6 +11,7 @@ import guidata
 from PyQt4 import QtCore, QtGui
 from zipfile import ZipFile
 from django.core.exceptions import ObjectDoesNotExist
+import glob
         
 class MenuFile(QtGui.QMenu):
     def __init__(self, parent, widget):
@@ -21,11 +23,30 @@ class MenuFile(QtGui.QMenu):
 
     def _quit(self):
         guidata.qapplication().quit()
+    
         
+        
+class ProgressControl(QtGui.QProgressBar):
+    """
+    runs a function in a separate thread while displaying a progress bar
+    """
+    
+    def __init__(self):
+        super(ProgressControl, self).__init__()
+
+    def update(self, val):
+        self.setValue(val)
+        _APP.processEvents()
+        
+        
+        
+
 class MenuDB(QtGui.QMenu):
     import_done = QtCore.pyqtSignal()
     def __init__(self, parent, widget):
         super(MenuDB, self).__init__(parent)
+        self.progress_bar = ProgressControl()
+        
         self.forget_database_location = QtGui.QAction(widget)
         self.forget_database_location.setText('forget database location...')
         self.forget_database_location.triggered.connect(self._forget_db_location)
@@ -73,6 +94,7 @@ class MenuDB(QtGui.QMenu):
     def _dlbackup(self):
         datalogger_backup()
         
+    
     def _backup_all_files(self):
         dial = QtGui.QFileDialog()
         filename = str(dial.getSaveFileName(parent=self))
@@ -111,7 +133,9 @@ class MenuDB(QtGui.QMenu):
         if not dirname:
             return
         
-        def archive_dir(added_ids, dirname, files):
+        
+        def archive_dir(files_info, dirname, files):
+            [added_ids, total_files] = files_info
             allanswers = -2
             for filename in files:
                 fname = os.path.join(dirname, filename)
@@ -151,10 +175,16 @@ class MenuDB(QtGui.QMenu):
                             if answer==2:
                                 cur_db.save()
                         added_ids.append(cur_db.id)
+                        self.progress_bar.update_value((len(added_ids)*100)/total_files)
 
         added_ids = list()
-        os.path.walk(dirname, archive_dir, added_ids)
-
+        
+        total_files = len(glob.glob(dirname + '/*/*/*/*.h5'))
+        
+        self.progress_bar.show()
+        os.path.walk(dirname, archive_dir, [added_ids, total_files])
+        self.progress_bar.hide()
+        
         #loop over all added ids to confirm that everything is set properly
         for id in added_ids:
             c = models.CurveDB.objects.get(id=id)
