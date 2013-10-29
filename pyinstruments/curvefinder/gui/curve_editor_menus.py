@@ -23,16 +23,12 @@ class MenuFile(QtGui.QMenu):
 
     def _quit(self):
         guidata.qapplication().quit()
-    
-        
-        
+
+
 class ProgressControl(QtGui.QProgressBar):
     """
     runs a function in a separate thread while displaying a progress bar
     """
-    
-    def __init__(self):
-        super(ProgressControl, self).__init__()
 
     def update(self, val):
         self.setValue(val)
@@ -45,7 +41,7 @@ class MenuDB(QtGui.QMenu):
     import_done = QtCore.pyqtSignal()
     def __init__(self, parent, widget):
         super(MenuDB, self).__init__(parent)
-        self.progress_bar = ProgressControl()
+        self.progress_bar = ProgressControl(widget)
         
         self.forget_database_location = QtGui.QAction(widget)
         self.forget_database_location.setText('forget database location...')
@@ -175,7 +171,7 @@ class MenuDB(QtGui.QMenu):
                             if answer==2:
                                 cur_db.save()
                         added_ids.append(cur_db.id)
-                        self.progress_bar.update_value((len(added_ids)*100)/total_files)
+                        self.progress_bar.update((len(added_ids)*100)/total_files)
 
         added_ids = list()
         
