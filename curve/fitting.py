@@ -32,20 +32,41 @@ class FitFunctions(object):
         
         magdata = abs(self.data-bg)
         argmax = magdata.argmax()
-        x1 = float(self.x()[argmax])
-        magmax=magdata[x1]
-        max=self.data[x1]
+        _x1 = float(self.x()[argmax])
+        magmax = magdata[_x1]
+        max = self.data[_x1]
         
-        for index, y in enumerate(magdata[x1:]):
+        for index, y in enumerate(magdata[_x1:]):
             if y<magmax/2:
                 break
-        bw = 2*abs(x1 - self.data.index[argmax + index])
+        bw = 2*abs(_x1 - self.data.index[argmax + index])
+        bw_index = index
+        ## Second peak search
+        threshold_mag = magmax/2
+        start = argmax + index*3
+        found = False
+        for index, y in enumerate(magdata[start:]):
+            if y>threshold_mag:
+                found = True
+                break
+        if not found:
+            stop = argmax - index*3
+            found = False
+            for index, y in enumerate(magdata[stop:0:-1]):
+                if y>threshold_mag:
+                    found = True
+                    index = index - 3*bw_index
+                    break
+                    
+        next_peak_index_close = start + index
+        next_peak_index = next_peak_index_close + magdata[next_peak_index_close:next_peak_index_close+3*bw_index].argmax()
+        _x2 = float(self.x()[next_peak_index])
+        #argmax = magdata.argmax()
+        #x2 = float(self.x()[argmax])
+        x1 = numpy.min([_x1, _x2])
+        x2 = numpy.max([_x1, _x2])
+        bw = abs(bw)
         
-        ## second peak search
-        magdata[argmax - index*3:argmax + index*3] = 0
-        argmax = magdata.argmax()
-        x2 = float(self.x()[argmax])
-    
         fit_params = {'x1': x1, 'x2':x2, 'bandwidth': bw, 'scale': max-bg, 'y0': bg}
         return fit_params
 

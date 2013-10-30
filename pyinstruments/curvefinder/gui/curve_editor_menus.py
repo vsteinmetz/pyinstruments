@@ -34,9 +34,6 @@ class ProgressControl(QtGui.QProgressBar):
         self.setValue(val)
         _APP.processEvents()
         
-        
-        
-
 class MenuDB(QtGui.QMenu):
     import_done = QtCore.pyqtSignal()
     def __init__(self, parent, widget):
