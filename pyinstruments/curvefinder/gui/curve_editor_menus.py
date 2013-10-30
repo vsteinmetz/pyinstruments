@@ -41,7 +41,7 @@ class MenuDB(QtGui.QMenu):
     import_done = QtCore.pyqtSignal()
     def __init__(self, parent, widget):
         super(MenuDB, self).__init__(parent)
-        self.progress_bar = ProgressControl(widget)
+        self.progress_bar = ProgressControl()
         
         self.forget_database_location = QtGui.QAction(widget)
         self.forget_database_location.setText('forget database location...')
