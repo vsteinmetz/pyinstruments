@@ -41,24 +41,28 @@ class FitFunctions(object):
                 break
         bw = 2*abs(_x1 - self.data.index[argmax + index])
         bw_index = index
+        
+        
         ## Second peak search
-        threshold_mag = magmax/2
-        start = argmax + index*3
+        threshold_mag = magmax*0.7
+        N_BW_AWAY = 10
+        start = argmax + bw_index*N_BW_AWAY
         found = False
         for index, y in enumerate(magdata[start:]):
             if y>threshold_mag:
                 found = True
+                index = start + index
                 break
         if not found:
-            stop = argmax - index*3
+            stop = argmax - bw_index*N_BW_AWAY
             found = False
             for index, y in enumerate(magdata[stop:0:-1]):
                 if y>threshold_mag:
                     found = True
-                    index = index - 3*bw_index
+                    index = stop - index - 3*bw_index
                     break
                     
-        next_peak_index_close = start + index
+        next_peak_index_close = index
         next_peak_index = next_peak_index_close + magdata[next_peak_index_close:next_peak_index_close+3*bw_index].argmax()
         _x2 = float(self.x()[next_peak_index])
         #argmax = magdata.argmax()

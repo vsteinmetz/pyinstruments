@@ -168,7 +168,7 @@ class MenuDB(QtGui.QMenu):
                             if answer==2:
                                 cur_db.save()
                         added_ids.append(cur_db.id)
-                        self.progress_bar.update((len(added_ids)*100)/total_files)
+                        #self.progress_bar.update((len(added_ids)*100)/total_files)
 
         added_ids = list()
         
