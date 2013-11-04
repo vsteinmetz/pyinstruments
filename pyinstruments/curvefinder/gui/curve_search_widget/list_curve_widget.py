@@ -266,6 +266,7 @@ class ListCurveWidget(QtGui.QWidget, object):
             self.refresh()
         
         def plot(dummy, curves=curves):
+            curves.reverse()
             for curve in curves:
                 win = get_window(curve.params["window"])
                 win.plot(curve)
