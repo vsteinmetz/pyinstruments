@@ -110,6 +110,7 @@ class CurveDB(models.Model, Curve):
         return self.name
 
     tags_relation = models.ManyToManyField(Tag)
+    name=models.CharField(max_length=255, default='some_curve')
     _name = models.CharField(max_length=255, default='some_curve')
     params_json = models.TextField(default="{}")
     #read only
@@ -123,6 +124,7 @@ class CurveDB(models.Model, Curve):
     saved_in_db = models.BooleanField(default=False)
     #for problems with django-evolution use:
     _date = models.DateTimeField(default=datetime.fromtimestamp(0))
+    date = models.DateTimeField(default=datetime.fromtimestamp(0))
     #date = models.DateTimeField(auto_now_add=True)
     
     class Meta:
