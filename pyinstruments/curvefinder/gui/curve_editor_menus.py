@@ -58,7 +58,12 @@ class MenuDB(QtGui.QMenu):
         
         self.import_h5_files = QtGui.QAction(widget)
         self.import_h5_files.setText('import h5 files...')
-        self.import_h5_files.triggered.connect(self._import_h5_files)
+        self.import_h5_files.triggered.connect(self._import_h5_files_fromexternal)
+        self.addAction(self.import_h5_files)
+
+        self.import_h5_files = QtGui.QAction(widget)
+        self.import_h5_files.setText('import h5 files (already in place)...')
+        self.import_h5_files.triggered.connect(self._import_h5_files_frominternal)
         self.addAction(self.import_h5_files)
 
         self.import_oldformat_h5_files = QtGui.QAction(widget)
@@ -107,75 +112,60 @@ class MenuDB(QtGui.QMenu):
     def _update_all_files(self):
         allcurves = models.CurveDB.objects.all()
         for cur in allcurves:
-            cur.data
+            #cur.data
             cur.params
             file = cur.get_full_filename()
             directo = os.path.dirname(file)
             if not os.path.exists(directo):
                 os.makedirs(directo)
-            Curve.save(cur, file)
-        
+            Curve.save(cur, file, with_data=False)
+            #del cur._data
+            #gc.collect()
+
         print "All "+str(len(allcurves))+" curve files are now up to date! "
+    
+    def _import_h5_files_fromexternal(self):
+        self._import_h5_files(inplace=True)
+
+    def _import_h5_files_frominternal(self):
+        self._import_h5_files(inplace=False)
          
-    def _import_h5_files(self):
+    def _import_h5_files(self, inplace=True):
         """
         Import all .h5 files from a directory and subdirectories.
         """
         dial = QtGui.QFileDialog()
         dirname = str(dial.getExistingDirectory(parent=self))
         if not dirname:
-            return
-        
-        
+            return        
+        idpolitics=None
         def archive_dir(files_info, dirname, files):
-            [added_ids, total_files] = files_info
+            [added_ids, total_files,inplace,idpolitics] = files_info
             allanswers = -2
             for filename in files:
                 fname = os.path.join(dirname, filename)
                 if os.path.isfile(fname):
                     if fname.endswith('.h5'):
-                        cur = curve.load(fname)
-                        cur_db = models.curve_db_from_curve(cur)
-                        id = int(cur.params['id'])
-                        try:
-                            old_one = models.CurveDB.objects.get(id=id)
-                        except ObjectDoesNotExist:
-                            cur_db.id = cur.params['id']
-                            cur_db.save()
-                        else:
-                            message = "A curve with the id " + str(id) + \
-                            " already exists in your database." + "\n What should we do with curve " + \
-                            cur.params["name"] + " ?"
-                            if allanswers <= -1:
-                                message_box = QtGui.QMessageBox(self)
-                                answer = message_box.question(self, 'existing id', message, 'forget about it', 'overwrite ' + old_one.params['name'], "use new id")
-                                if allanswers == -2:
-                                    secmessage_box = QtGui.QMessageBox(self)
-                                    secanswer = secmessage_box.question(self, 'repeat', "Remember choice for future id conflicts?", 'Yes', 'No','Ask again')
-                                    if secanswer == 0:
-                                        allanswers = answer
-                                    elif secanswer == 1:
-                                        allanswers = -1
-                                    elif secanswer == 2:
-                                        allanswers = -2
-                            else:
-                                answer = allanswers
+                        try: 
+                            cur_db = models.curve_db_from_file(fname,inplace=inplace,overwrite=idpolitics)
+                        except models.IdError as e:
+                            message = "A curve with the id already exists in your database.\n What should we do with curve ?"
+                            message_box = QtGui.QMessageBox(self)
+                            answer = message_box.question(self, 'existing id', message, 'forget about it', 'overwrite ', "use new id")
                             if answer==0:
                                 continue
-                            if answer==1:
-                                cur_db.id = cur.params['id']
-                                cur_db.save()
-                            if answer==2:
-                                cur_db.save()
+                            elif answer==1:
+                                cur_db = models.curve_db_from_file(fname,inplace=inplace,overwrite=True)
+                            else:
+                                cur_db = models.curve_db_from_file(fname,inplace=inplace,overwrite=False)
+                        cur_db.save()
                         added_ids.append(cur_db.id)
                         #self.progress_bar.update((len(added_ids)*100)/total_files)
-
         added_ids = list()
-        
         total_files = len(glob.glob(dirname + '/*/*/*/*.h5'))
-        
+      
         self.progress_bar.show()
-        os.path.walk(dirname, archive_dir, [added_ids, total_files])
+        os.path.walk(dirname, archive_dir, [added_ids, total_files, inplace, idpolitics])
         self.progress_bar.hide()
         
         #loop over all added ids to confirm that everything is set properly

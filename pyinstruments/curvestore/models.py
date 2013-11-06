@@ -1,6 +1,7 @@
 import pyinstruments.datastore
 from pyinstruments.datastore.settings import MEDIA_ROOT
 from curve import Curve
+from curve import load as load_curve
 
 from PyQt4 import QtCore, QtGui
 from django.db import models
@@ -10,6 +11,7 @@ import json
 from django.core.files.storage import default_storage
 from django.template.defaultfilters import slugify
 import numpy
+from django.core.exceptions import ObjectDoesNotExist
 
 
 
@@ -281,7 +283,6 @@ class CurveDB(models.Model, Curve):
         Saves the curve in the database. If the curve is data_read_only 
         The actual datafile will be saved only on the first call of save().
         """
-        
         self.set_default_params()
             
         if not self.data_file:
@@ -469,7 +470,43 @@ def curve_db_from_curve(curve):
     if 'tags_flatten' in curve.params:
         curve_db.tags = curve.params['tags_flatten'].rstrip(";").split(";")[1:]
     return curve_db
-    
+
+class IdError(ValueError):
+    pass
+def curve_db_from_file(filename,inplace=False,overwrite=None):
+    """overwrite = None: raise Exception if id conflict
+       overvrite = True: overwrite id if conflict
+       overvrite = False: use new id"""
+    curve = load_curve(filename,with_data=inplace)
+    curve_db = CurveDB()
+    curve_db.data_file = os.path.relpath(filename, MEDIA_ROOT)
+    id = int(curve.params['id'])
+    try:
+        old_one = CurveDB.objects.get(id=id)
+    except ObjectDoesNotExist:
+        curve_db.id = id
+    else:
+        if overwrite is None:
+            raise IdError("Id "+str(id)+" already exists!")
+        elif overwrite:
+            old_one.delete()
+            curve_db.id = id
+            
+    curve_db.set_params(**curve.params)
+    curve_db.set_data(curve.data)
+    if 'name' in curve.params:
+        curve_db.name = curve.params['name']
+    if 'date' in curve.params:
+        d = curve.params['date']
+        if isinstance(d, basestring):
+            curve_db.params["date"] = datetime.strptime(d, "%y/%m/%d/%H/%M/%S/%f")
+        curve_db.date = curve_db.params['date']
+    else:
+        curve_db.date = datetime.now()
+    if 'tags_flatten' in curve.params:
+        curve_db.tags = curve.params['tags_flatten'].rstrip(";").split(";")[1:]
+    return curve_db
+
 class ModelMonitor(QtCore.QObject):
     tag_added = QtCore.pyqtSignal()
     tag_deletted = QtCore.pyqtSignal()
