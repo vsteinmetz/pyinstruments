@@ -10,6 +10,7 @@ import guidata
 from PyQt4 import QtCore, QtGui
 from zipfile import ZipFile
 from django.core.exceptions import ObjectDoesNotExist
+import gc
         
 class MenuFile(QtGui.QMenu):
     def __init__(self, parent, widget):
@@ -44,7 +45,12 @@ class MenuDB(QtGui.QMenu):
         
         self.import_h5_files = QtGui.QAction(widget)
         self.import_h5_files.setText('import h5 files...')
-        self.import_h5_files.triggered.connect(self._import_h5_files)
+        self.import_h5_files.triggered.connect(self._import_h5_files_fromexternal)
+        self.addAction(self.import_h5_files)
+
+        self.import_h5_files = QtGui.QAction(widget)
+        self.import_h5_files.setText('import h5 files (already in place)...')
+        self.import_h5_files.triggered.connect(self._import_h5_files_frominternal)
         self.addAction(self.import_h5_files)
 
         self.import_oldformat_h5_files = QtGui.QAction(widget)
@@ -88,21 +94,31 @@ class MenuDB(QtGui.QMenu):
             if not os.path.exists(directo):
                 os.makedirs(directo)
             Curve.save(curve, os.path.join(filename, curve.data_file.name))
+            del cur._data
+            gc.collect()
 
     def _update_all_files(self):
         allcurves = models.CurveDB.objects.all()
         for cur in allcurves:
-            cur.data
+            #cur.data
             cur.params
             file = cur.get_full_filename()
             directo = os.path.dirname(file)
             if not os.path.exists(directo):
                 os.makedirs(directo)
-            Curve.save(cur, file)
-        
+            Curve.save(cur, file, with_data=False)
+            #del cur._data
+            #gc.collect()
+
         print "All "+str(len(allcurves))+" curve files are now up to date! "
+    
+    def _import_h5_files_fromexternal(self):
+        _import_h5_files(self, with_data=True)
+
+    def _import_h5_files_frominternal(self):
+        _import_h5_files(self, with_data=False)
          
-    def _import_h5_files(self):
+    def _import_h5_files(self, with_data=True):
         """
         Import all .h5 files from a directory and subdirectories.
         """
@@ -117,7 +133,7 @@ class MenuDB(QtGui.QMenu):
                 fname = os.path.join(dirname, filename)
                 if os.path.isfile(fname):
                     if fname.endswith('.h5'):
-                        cur = curve.load(fname)
+                        cur = curve.load(fname, with_data=with_data)
                         cur_db = models.curve_db_from_curve(cur)
                         id = int(cur.params['id'])
                         try:
@@ -149,7 +165,7 @@ class MenuDB(QtGui.QMenu):
                                 cur_db.id = cur.params['id']
                                 cur_db.save()
                             if answer==2:
-                                cur_db.save()
+                                cur_db.save(with_data=with_data)
                         added_ids.append(cur_db.id)
 
         added_ids = list()

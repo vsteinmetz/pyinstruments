@@ -50,14 +50,18 @@ class Curve(object):
     
     plot.__doc__ = pandas.Series.plot.__doc__
     
-    def save(self, filename):
-        if self._data is None:
+    def save(self, filename, with_data=True):
+        if not os.path.exists(filename) and not with_data:
+            print "Tried to save a new file without data. Overriding false with_data argument! "
+            with_data=True
+        if self._data is None and with_data:
             raise ValueError("could not save curve, no data was set")
         if self._params is None:
             raise ValueError("could not save curve, no params were set")
         
-        with pandas.get_store(filename) as store:
-            store["data"] = self._data
+        if with_data:
+            with pandas.get_store(filename) as store:
+                store["data"] = self._data
         
         with h5py.File(filename) as the_file:
             try:
@@ -140,9 +144,10 @@ def convert_from_numpy(val):
         return str(val)
     return val
 
-def load(filename):
+def load(filename, with_data=True):
     """loads the curve at filename"""
-    with pandas.get_store(filename, "r") as store:
+    if with_data:
+        with pandas.get_store(filename, "r") as store:
             data = store["data"]
     kwds = dict()
     with h5py.File(filename) as the_file:
