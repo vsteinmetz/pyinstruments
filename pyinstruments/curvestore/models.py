@@ -128,7 +128,7 @@ class CurveDB(models.Model, Curve):
     #date = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        get_latest_by = "date"
+        get_latest_by = "_date"
     
     @property
     def tags(self):
