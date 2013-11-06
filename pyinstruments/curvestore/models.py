@@ -94,9 +94,9 @@ def default(obj):
         return obj.strftime("%y/%m/%d/%H/%M/%S/%f")
 
 def date_to_date(dic):
-     if 'date' in dic:
-         dic['date'] = datetime.strptime(dic['date'], "%y/%m/%d/%H/%M/%S/%f")
-     return dic
+    if 'date' in dic:
+        dic['date'] = datetime.strptime(dic['date'], "%y/%m/%d/%H/%M/%S/%f")
+    return dic
  
 class CurveDB(models.Model, Curve):
     """
@@ -126,7 +126,7 @@ class CurveDB(models.Model, Curve):
     #date = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        get_latest_by = "date"
+        get_latest_by = "_date"
     
     @property
     def tags(self):
