@@ -327,7 +327,7 @@ class FitFunctions(object):
     def lorentz_log(self, scale, x0, y0, bandwidth):
         """logarithmic lorentz, typ. SA traces"""
         x = self.x()
-        return 10*log10(scale/(1+((x-x0)/bandwidth)*((x-x0)/bandwidth)))+y0
+        return 10*math.log10(scale/(1+((x-x0)/bandwidth)*((x-x0)/bandwidth)))+y0
 
     def _guesslorentz_log(self):
         length = len(self.x())
@@ -358,7 +358,7 @@ class FitFunctions(object):
         bw = magdata.sum()/magmax*(self.x().max()-self.x().min())/length
         fit_params = dict(bandwidth=bw,scale_re=real(max),scale_im=imag(max),
                           x0=x0,y0_re=real(bg),y0_im=imag(bg))
-        return 
+        return fit_params
 
     '''lorentz with symmetric sidebands, typ. absorption/transmission dips of cavities'''
     def lorentzSB(self, scale, x0, y0, bandwidth, SBwidth, SBscale):
