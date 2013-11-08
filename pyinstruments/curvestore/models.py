@@ -350,7 +350,6 @@ class CurveDB(models.Model, Curve):
             if "manualfit_concluded" in fit_curve_db.params:
                  if fit_curve_db.params["manualfit_concluded"]: 
                      self.add_child(fit_curve_db)
-                     
             else:
                 self.add_child(fit_curve_db)
                 

@@ -259,15 +259,15 @@ def datalogger_recovery(filename='default'):
                 data = store[sensorname]
                 for (i,v) in data.iteritems():
                     mp=MeasurementPoint(sensor=sens,\
-                                        value = value, \
-                                        time = mtime)
+                                        value = v, \
+                                        time = i)
                     written+=1
     else:
         with pandas.get_store(filename, "r") as store:
             for sensorname in metadata:
                 sd = SensingDevice(name=sensorname, description=metadata[sensorname])
                 data = store[sensorname]
-                for (i,v) in data.iteritems():
+                for (i,v) in data.iteritems(): 
                     if sd.create_point(v, i):
                         written+=1
     print "Datalogger import finished. Wrote "+str(written)+" MeasurementPoints. "    

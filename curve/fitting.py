@@ -210,8 +210,14 @@ class FitFunctions(object):
             for i in low.index:
                 lowsum+=self.data[i]
                 lows+=1
-        y0=(lowsum/lows)
-        scale=(highsum/highs)-y0
+        if not lows == 0:
+            y0=(lowsum/lows)
+        else:
+            y0 = -70
+        if not highs == 0:
+            scale=(highsum/highs)-y0
+        else:
+            scale=30.0
         firstlows = self.data[0.505*ringtime+delta:(0.505)*ringtime+delta+sweeptime/length*math.ceil(length/ringspersweeptime/2/1000)]
         tempfit = Fit(data = firstlows, func = 'linear', \
                       autoguessfunction = '', \
@@ -248,7 +254,10 @@ class FitFunctions(object):
             for i in low.index:
                 lowsum+=self.data[i]
                 lows+=1
-        y0=(lowsum/lows)
+        if not lows == 0:
+            y0=(lowsum/lows)
+        else:
+            y0 = -70
         scale=math.log10(highsum/highs)-y0
         firstlows = self.data[0.5*ringtime+delta:(0.5)*ringtime+delta+sweeptime/length*math.ceil(length/ringspersweeptime/2/1000)]
         tempfit = Fit(data = firstlows, func = 'linear', \
