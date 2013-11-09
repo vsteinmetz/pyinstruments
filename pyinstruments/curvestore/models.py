@@ -241,6 +241,8 @@ class CurveDB(models.Model, Curve):
             if isinstance(val, (bool, numpy.bool_)):
                 self.save_bool_param(par, val)
                 continue
+            if isinstance(val, (numpy.integer, numpy.float)):
+                val = float(val)
             if isinstance(val, (int, float, long)):
                 self.save_num_param(par, val)
                 continue
@@ -295,6 +297,10 @@ class CurveDB(models.Model, Curve):
                 os.makedirs(dirname) 
             full_path = default_storage.get_available_name(full_path)
             self.data_file = os.path.relpath(full_path, MEDIA_ROOT)
+        
+        models.Model.save(self) #this way, the id is correct
+        self.save_params() #this saves the curve with the correct id
+        
         if not self.params["data_read_only"]:
             Curve.save(self, self.get_full_filename())
         else:
@@ -306,9 +312,7 @@ class CurveDB(models.Model, Curve):
             self.saved_in_db=True
         
         self.save_tags()
-
-        models.Model.save(self)
-        self.save_params()
+        
         
     def delete(self):
         try:
@@ -476,9 +480,10 @@ def curve_db_from_file(filename,inplace=False,overwrite=None):
     """overwrite = None: raise Exception if id conflict
        overvrite = True: overwrite id if conflict
        overvrite = False: use new id"""
-    curve = load_curve(filename,with_data=inplace)
+    curve = load_curve(filename, with_data=not inplace)
     curve_db = CurveDB()
-    curve_db.data_file = os.path.relpath(filename, MEDIA_ROOT)
+    if inplace:
+        curve_db.data_file = os.path.relpath(filename, MEDIA_ROOT)
     id = int(curve.params['id'])
     try:
         old_one = CurveDB.objects.get(id=id)
@@ -486,7 +491,7 @@ def curve_db_from_file(filename,inplace=False,overwrite=None):
         curve_db.id = id
     else:
         if overwrite is None:
-            raise IdError("Id "+str(id)+" already exists!")
+            raise IdError("Id " + str(id) + " already exists (attributed to " + old_one.params["name"] + ")! Don't know what to do with new curve \"" + curve.params["name"] + "\"")
         elif overwrite:
             old_one.delete()
             curve_db.id = id

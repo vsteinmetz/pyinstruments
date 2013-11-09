@@ -1,4 +1,5 @@
 import pyinstruments.datastore.settings
+from pyinstruments.datastore.settings import MEDIA_ROOT
 from pyinstruments.curvestore import models
 from curve import Curve
 import curve
@@ -125,19 +126,31 @@ class MenuDB(QtGui.QMenu):
         print "All "+str(len(allcurves))+" curve files are now up to date! "
     
     def _import_h5_files_fromexternal(self):
-        self._import_h5_files(inplace=True)
+        self._import_h5_files(inplace=False)
 
     def _import_h5_files_frominternal(self):
-        self._import_h5_files(inplace=False)
+        self._import_h5_files(inplace=True)
          
     def _import_h5_files(self, inplace=True):
         """
         Import all .h5 files from a directory and subdirectories.
         """
+        
         dial = QtGui.QFileDialog()
-        dirname = str(dial.getExistingDirectory(parent=self))
-        if not dirname:
-            return        
+        askagain = True
+        while askagain:
+            dirname = str(dial.getExistingDirectory(parent=self))
+            if not dirname:
+                return
+            if inplace:    
+                askagain = os.path.commonprefix([os.path.abspath(dirname),
+                                                 os.path.abspath(MEDIA_ROOT)]) \
+                                            !=os.path.abspath(MEDIA_ROOT)
+                if askagain:
+                    mes = QtGui.QMessageBox()
+                    mes.information(QtGui.QWidget(), 'wrong directory', 'please, choose a directory in ' + MEDIA_ROOT)
+            else:
+                askagain = False
         idpolitics=None
         def archive_dir(files_info, dirname, files):
             [added_ids, total_files,inplace,idpolitics] = files_info
@@ -149,7 +162,7 @@ class MenuDB(QtGui.QMenu):
                         try: 
                             cur_db = models.curve_db_from_file(fname,inplace=inplace,overwrite=idpolitics)
                         except models.IdError as e:
-                            message = "A curve with the id already exists in your database.\n What should we do with curve ?"
+                            message = str(e)
                             message_box = QtGui.QMessageBox(self)
                             answer = message_box.question(self, 'existing id', message, 'forget about it', 'overwrite ', "use new id")
                             if answer==0:
