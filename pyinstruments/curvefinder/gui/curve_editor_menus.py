@@ -1,6 +1,7 @@
 import pyinstruments.datastore.settings
 from pyinstruments.datastore.settings import MEDIA_ROOT
 from pyinstruments.curvestore import models
+from pyinstruments.curvestore.import_export import import_h5_files, update_all_files, forget_db_location, reset_db
 from curve import Curve
 import curve
 from pyinstruments.datalogger.models import datalogger_backup, datalogger_recovery
@@ -43,7 +44,7 @@ class MenuDB(QtGui.QMenu):
         
         self.forget_database_location = QtGui.QAction(widget)
         self.forget_database_location.setText('forget database location...')
-        self.forget_database_location.triggered.connect(self._forget_db_location)
+        self.forget_database_location.triggered.connect(self.do_forget_db_location)
         self.addAction(self.forget_database_location)
         
         self.open_django_admin = QtGui.QAction(widget)
@@ -57,14 +58,19 @@ class MenuDB(QtGui.QMenu):
                                         self._backup_all_files)
         self.addAction(self.backup_all_files)
         
+        self.reset_database = QtGui.QAction(widget)
+        self.reset_database.setText('reset curvestore database...')
+        self.reset_database.triggered.connect(self.do_reset_curvestore_db)
+        self.addAction(self.reset_database)
+        
         self.import_h5_files = QtGui.QAction(widget)
         self.import_h5_files.setText('import h5 files...')
-        self.import_h5_files.triggered.connect(self._import_h5_files_fromexternal)
+        self.import_h5_files.triggered.connect(self.import_h5_files_fromexternal)
         self.addAction(self.import_h5_files)
 
         self.import_h5_files = QtGui.QAction(widget)
         self.import_h5_files.setText('import h5 files (already in place)...')
-        self.import_h5_files.triggered.connect(self._import_h5_files_frominternal)
+        self.import_h5_files.triggered.connect(self.import_h5_files_frominternal)
         self.addAction(self.import_h5_files)
 
         self.import_oldformat_h5_files = QtGui.QAction(widget)
@@ -74,7 +80,7 @@ class MenuDB(QtGui.QMenu):
 
         self.update_all_files = QtGui.QAction(widget)
         self.update_all_files.setText('update all files...')
-        self.update_all_files.triggered.connect(self._update_all_files)
+        self.update_all_files.triggered.connect(self.do_update_all_files)
         self.addAction(self.update_all_files)
 
         self.dlbackup = QtGui.QAction(widget)
@@ -110,96 +116,18 @@ class MenuDB(QtGui.QMenu):
                 os.makedirs(directo)
             Curve.save(curve, os.path.join(filename, curve.data_file.name))
 
-    def _update_all_files(self):
-        allcurves = models.CurveDB.objects.all()
-        for cur in allcurves:
-            #cur.data
-            cur.params
-            file = cur.get_full_filename()
-            directo = os.path.dirname(file)
-            if not os.path.exists(directo):
-                os.makedirs(directo)
-            Curve.save(cur, file, with_data=False)
-            #del cur._data
-            #gc.collect()
+    def do_update_all_files(self):
+        update_all_files()
+            
+    def import_h5_files_fromexternal(self):
+        import_h5_files(inplace=False)
 
-        print "All "+str(len(allcurves))+" curve files are now up to date! "
+    def import_h5_files_frominternal(self):
+        import_h5_files(inplace=True)
+     
+    def do_reset_curvestore_db(self):
+        reset_db()    
     
-    def _import_h5_files_fromexternal(self):
-        self._import_h5_files(inplace=False)
-
-    def _import_h5_files_frominternal(self):
-        self._import_h5_files(inplace=True)
-         
-    def _import_h5_files(self, inplace=True):
-        """
-        Import all .h5 files from a directory and subdirectories.
-        """
-        
-        dial = QtGui.QFileDialog()
-        askagain = True
-        while askagain:
-            dirname = str(dial.getExistingDirectory(parent=self))
-            if not dirname:
-                return
-            if inplace:    
-                askagain = os.path.commonprefix([os.path.abspath(dirname),
-                                                 os.path.abspath(MEDIA_ROOT)]) \
-                                            !=os.path.abspath(MEDIA_ROOT)
-                if askagain:
-                    mes = QtGui.QMessageBox()
-                    mes.information(QtGui.QWidget(), 'wrong directory', 'please, choose a directory in ' + MEDIA_ROOT)
-            else:
-                askagain = False
-        idpolitics=None
-        def archive_dir(files_info, dirname, files):
-            [added_ids, total_files,inplace,idpolitics] = files_info
-            allanswers = -2
-            for filename in files:
-                fname = os.path.join(dirname, filename)
-                if os.path.isfile(fname):
-                    if fname.endswith('.h5'):
-                        try: 
-                            cur_db = models.curve_db_from_file(fname,inplace=inplace,overwrite=idpolitics)
-                        except models.IdError as e:
-                            message = str(e)
-                            message_box = QtGui.QMessageBox(self)
-                            answer = message_box.question(self, 'existing id', message, 'forget about it', 'overwrite ', "use new id")
-                            if answer==0:
-                                continue
-                            elif answer==1:
-                                cur_db = models.curve_db_from_file(fname,inplace=inplace,overwrite=True)
-                            else:
-                                cur_db = models.curve_db_from_file(fname,inplace=inplace,overwrite=False)
-                        cur_db.save()
-                        added_ids.append(cur_db.id)
-                        #self.progress_bar.update((len(added_ids)*100)/total_files)
-        added_ids = list()
-        total_files = len(glob.glob(dirname + '/*/*/*/*.h5'))
-      
-        self.progress_bar.show()
-        os.path.walk(dirname, archive_dir, [added_ids, total_files, inplace, idpolitics])
-        self.progress_bar.hide()
-        
-        #loop over all added ids to confirm that everything is set properly
-        for id in added_ids:
-            c = models.CurveDB.objects.get(id=id)
-            #if 'date' in c.params:
-            #    c.date = c.params['date']
-            if 'parent_id' in c.params:
-                if not c.params['parent_id']==0:
-                    parent = None
-                    try:
-                        parent = models.CurveDB.objects.get(pk=c.params['parent_id'])
-                    except ObjectDoesNotExist:
-                        print "Parent id "+str(c.params['parent_id'])+\
-                        " of curve with id "+str(id)+" does not exist. Orphan created!"
-                    else:
-                        parent.add_child(c)
-                
-        print "Added the following ids:"
-        print added_ids
-        self.import_done.emit()
 
     def _import_oldformat_h5_files(self):
         """
@@ -287,14 +215,8 @@ class MenuDB(QtGui.QMenu):
         desktop_services = QtGui.QDesktopServices()
         desktop_services.openUrl(QtCore.QUrl('http://localhost:8000/admin'))
         
-    def  _forget_db_location(self):
-        settings = QtCore.QSettings('pyinstruments', 'pyinstruments')
-        settings.setValue('database_file', "")
-        dial = QtGui.QMessageBox.information(self,
-                                             'change-database',
-                                             'change will take effect at the next startup')
-
-
+    def do_forget_db_location(self):
+        forget_db_location()
     
 class CurveEditorMenuBar(QtGui.QMenuBar):
     import_done = QtCore.pyqtSignal() 
