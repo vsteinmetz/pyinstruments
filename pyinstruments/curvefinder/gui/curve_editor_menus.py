@@ -1,7 +1,7 @@
 import pyinstruments.datastore.settings
 from pyinstruments.datastore.settings import MEDIA_ROOT
 from pyinstruments.curvestore import models
-from pyinstruments.curvestore.import_export import import_h5_files, update_all_files, forget_db_location, reset_db
+from pyinstruments.curvestore.import_export import import_h5_files, update_all_files, forget_db_location, reset_db, clear_db, sync_db
 from curve import Curve
 import curve
 from pyinstruments.datalogger.models import datalogger_backup, datalogger_recovery
@@ -29,6 +29,17 @@ class MenuFile(QtGui.QMenu):
 class MenuDanger(QtGui.QMenu):
     def __init__(self, parent, widget):
         super(MenuDanger, self).__init__(parent)
+        
+        self.clear_database = QtGui.QAction(widget)
+        self.clear_database.setText('clear curvestore database...')
+        self.clear_database.triggered.connect(clear_db)
+        self.addAction(self.clear_database)
+        
+        self.sync_database = QtGui.QAction(widget)
+        self.sync_database.setText('sync database')
+        self.sync_database.triggered.connect(sync_db)
+        self.addAction(self.sync_database)        
+                
         
         self.reset_database = QtGui.QAction(widget)
         self.reset_database.setText('reset curvestore database...')
@@ -60,7 +71,7 @@ class MenuDanger(QtGui.QMenu):
         
     def _dlbackup(self):
         datalogger_backup()
-        
+    
     def do_update_all_files(self):
         update_all_files()
         

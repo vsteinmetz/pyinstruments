@@ -79,7 +79,7 @@ class ListCurveWidget(QtGui.QWidget, object):
         
         self._lay.setContentsMargins(0, 0, 0, 0)
         self._lay.addWidget(self._tree_widget)
-        self.refresh()
+#        self.refresh()
         self._tree_widget.itemSelectionChanged.connect(
                                           self._current_item_changed)
         self._refresh_button.pressed.connect(self.refresh_clicked)

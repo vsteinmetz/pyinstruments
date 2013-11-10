@@ -137,8 +137,8 @@ def import_h5_files(inplace=False):
         print "Added the following ids:"
         print added_ids
         #self.import_done.emit()
-        
-def reset_db():
+
+def clear_db():
     res = QtGui.QMessageBox().question(QtGui.QWidget(),
                                            "are you sure",
                                            "It's strongly advised to backup the file " \
@@ -150,8 +150,20 @@ def reset_db():
         manage_file = os.path.dirname(__file__) + '/../manage.py'
         sql_command = subprocess.check_output(["python", manage_file, 'sqlclear', 'curvestore'])
         subprocess.call(['sqlite3', DATABASE_FILE, sql_command])
-        subprocess.call(["python", manage_file, 'syncdb'])
+    return res
+      
+def sync_db():
+    manage_file = os.path.dirname(__file__) + '/../manage.py'
+    subprocess.call(["python", manage_file, 'syncdb'])
+
+def reset_db():
+    if clear_db():
+        sync_db()
+    
+    
         
+        
+
 def forget_db_location():
     settings = QtCore.QSettings('pyinstruments', 'pyinstruments')
     settings.setValue('database_file', "")

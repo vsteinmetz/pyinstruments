@@ -22,7 +22,7 @@ import functools
 
 
 class CurveEditor(QtGui.QMainWindow, object):
-        
+    refresh_requested = QtCore.pyqtSignal()
     def __init__(self):
         super(CurveEditor, self).__init__()
         
@@ -51,6 +51,8 @@ class CurveEditor(QtGui.QMainWindow, object):
         self.curve_display_widget.delete_done.connect(self.refresh)
         self.search_widget.refresh_clicked.connect(self.curve_display_widget.refresh)
         
+        self.refresh_requested.connect(self.search_widget.refresh)
+        
         settings = QtCore.QSettings("pyinstruments", "pyinstruments")
         default_json = str(settings.value("curve_editor_defaults").\
                                                             toString())
@@ -75,6 +77,8 @@ class CurveEditor(QtGui.QMainWindow, object):
                             'icons',
                             'plot.png')
         self.setWindowIcon(QtGui.QIcon(icon_file))
+        
+        self.refresh()
         self.show()
 
     @property
@@ -122,7 +126,8 @@ class CurveEditor(QtGui.QMainWindow, object):
         #settings.setValue("curve_editor_defaults", defaults_json)
     
     def refresh(self):
-        self.search_widget.refresh()
+        self.refresh_requested.emit()
+        #self.search_widget.refresh()
     
     def getsearch_widget(self):
         """
