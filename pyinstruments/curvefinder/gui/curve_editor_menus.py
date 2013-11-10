@@ -26,21 +26,56 @@ class MenuFile(QtGui.QMenu):
     def _quit(self):
         guidata.qapplication().quit()
 
+class MenuDanger(QtGui.QMenu):
+    def __init__(self, parent, widget):
+        super(MenuDanger, self).__init__(parent)
+        
+        self.reset_database = QtGui.QAction(widget)
+        self.reset_database.setText('reset curvestore database...')
+        self.reset_database.triggered.connect(self.do_reset_curvestore_db)
+        self.addAction(self.reset_database)
 
-class ProgressControl(QtGui.QProgressBar):
-    """
-    runs a function in a separate thread while displaying a progress bar
-    """
+        self.import_h5_files = QtGui.QAction(widget)
+        self.import_h5_files.setText('import h5 files (already in place)...')
+        self.import_h5_files.triggered.connect(self.import_h5_files_frominternal)
+        self.addAction(self.import_h5_files)
 
-    def update(self, val):
-        self.setValue(val)
-        _APP.processEvents()
+        self.update_all_files = QtGui.QAction(widget)
+        self.update_all_files.setText('update all files...')
+        self.update_all_files.triggered.connect(self.do_update_all_files)
+        self.addAction(self.update_all_files)
+        
+        self.dlbackup = QtGui.QAction(widget)
+        self.dlbackup.setText('backup datalogger...')
+        self.dlbackup.triggered.connect(self._dlbackup)
+        self.addAction(self.dlbackup)
+
+        self.dlrecover = QtGui.QAction(widget)
+        self.dlrecover.setText('recover datalogger information from backup...')
+        self.dlrecover.triggered.connect(self._dlrecover)
+        self.addAction(self.dlrecover)
+    
+    def _dlrecover(self):
+        datalogger_recovery()
+        
+    def _dlbackup(self):
+        datalogger_backup()
+        
+    def do_update_all_files(self):
+        update_all_files()
+        
+    def import_h5_files_frominternal(self):
+        import_h5_files(inplace=True)
+     
+    def do_reset_curvestore_db(self):
+        reset_db()    
+        
+    
         
 class MenuDB(QtGui.QMenu):
     import_done = QtCore.pyqtSignal()
     def __init__(self, parent, widget):
         super(MenuDB, self).__init__(parent)
-        self.progress_bar = ProgressControl()
         
         self.forget_database_location = QtGui.QAction(widget)
         self.forget_database_location.setText('forget database location...')
@@ -58,46 +93,16 @@ class MenuDB(QtGui.QMenu):
                                         self._backup_all_files)
         self.addAction(self.backup_all_files)
         
-        self.reset_database = QtGui.QAction(widget)
-        self.reset_database.setText('reset curvestore database...')
-        self.reset_database.triggered.connect(self.do_reset_curvestore_db)
-        self.addAction(self.reset_database)
         
         self.import_h5_files = QtGui.QAction(widget)
         self.import_h5_files.setText('import h5 files...')
         self.import_h5_files.triggered.connect(self.import_h5_files_fromexternal)
         self.addAction(self.import_h5_files)
 
-        self.import_h5_files = QtGui.QAction(widget)
-        self.import_h5_files.setText('import h5 files (already in place)...')
-        self.import_h5_files.triggered.connect(self.import_h5_files_frominternal)
-        self.addAction(self.import_h5_files)
-
         self.import_oldformat_h5_files = QtGui.QAction(widget)
         self.import_oldformat_h5_files.setText('import h5 files in old format (no full data recovery)...')
         self.import_oldformat_h5_files.triggered.connect(self._import_oldformat_h5_files)
         self.addAction(self.import_oldformat_h5_files)
-
-        self.update_all_files = QtGui.QAction(widget)
-        self.update_all_files.setText('update all files...')
-        self.update_all_files.triggered.connect(self.do_update_all_files)
-        self.addAction(self.update_all_files)
-
-        self.dlbackup = QtGui.QAction(widget)
-        self.dlbackup.setText('backup datalogger...')
-        self.dlbackup.triggered.connect(self._dlbackup)
-        self.addAction(self.dlbackup)
-
-        self.dlrecover = QtGui.QAction(widget)
-        self.dlrecover.setText('recover datalogger information from backup...')
-        self.dlrecover.triggered.connect(self._dlrecover)
-        self.addAction(self.dlrecover)
-    
-    def _dlrecover(self):
-        datalogger_recovery()
-        
-    def _dlbackup(self):
-        datalogger_backup()
         
     
     def _backup_all_files(self):
@@ -116,17 +121,12 @@ class MenuDB(QtGui.QMenu):
                 os.makedirs(directo)
             Curve.save(curve, os.path.join(filename, curve.data_file.name))
 
-    def do_update_all_files(self):
-        update_all_files()
+
             
     def import_h5_files_fromexternal(self):
         import_h5_files(inplace=False)
 
-    def import_h5_files_frominternal(self):
-        import_h5_files(inplace=True)
-     
-    def do_reset_curvestore_db(self):
-        reset_db()    
+
     
 
     def _import_oldformat_h5_files(self):
@@ -231,9 +231,14 @@ class CurveEditorMenuBar(QtGui.QMenuBar):
         self.menu_db.import_done.connect(self.import_done)
         self.menu_db_action.setMenu(self.menu_db)
         
+        self.menu_danger_action = QtGui.QAction('danger', parent)
+        self.menu_danger = MenuDanger(self, parent)
+        #self.menu_danger.import_done.connect(self.import_done)
+        self.menu_danger_action.setMenu(self.menu_danger)
+        
         self.addAction(self.menu_file_action)
         self.addAction(self.menu_db_action)
-        
+        self.addAction(self.menu_danger_action)
 
 class CurveEditorToolBar(QtGui.QToolBar, object):
     popup_unread_activated = QtCore.pyqtSignal(\

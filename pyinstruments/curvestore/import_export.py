@@ -36,6 +36,26 @@ def update_all_files():
 
         print "All "+str(len(allcurves))+" curve files are now up to date! "
 
+class CustomMessageBox(QtGui.QMessageBox):
+    def __init__(self, message):
+        super(CustomMessageBox, self).__init__()
+        self.setText(message)
+        self.addButton('drop new curve', 1)
+        self.addButton('overwrite old curve', 2)
+        self.addButton('use new id', 3)
+        self.addButton('abort import now', 4)
+        self.checkbox = QtGui.QCheckBox()
+        #self.form = QtGui.QFormLayout()
+        self.label = QtGui.QLabel('Apply the same choice for future id conflict')
+        #self.form.addRow(self.checkbox, self.label)
+        self.layout().addWidget(self.checkbox)
+        self.layout().addWidget(self.label)
+    
+    def ask(self):
+        res = self.exec_()
+        dic = {1:'overwrite', 2:'new_id',0:'drop', 3:'abort'}
+        return (self.checkbox.checkState()==2, dic[res])
+
 def import_h5_files(inplace=False):
         """
         Import all .h5 files from a directory and subdirectories.
@@ -60,7 +80,7 @@ def import_h5_files(inplace=False):
     
         def archive_dir(files_info, dirname, files):
             [added_ids, total_files,inplace,idpolitics] = files_info
-            allanswers = -2
+            answer=None
             for filename in files:
                 print "imported " + str(len(added_ids)) + '/' + str(total_files)
                 fname = os.path.join(dirname, filename)
@@ -69,15 +89,25 @@ def import_h5_files(inplace=False):
                         try: 
                             cur_db = models.curve_db_from_file(fname,inplace=inplace,overwrite=idpolitics)
                         except models.IdError as e:
-                            message = str(e)
-                            message_box = QtGui.QMessageBox()
-                            answer = message_box.question(QtGui.QWidget(), 'existing id', message, 'forget about it', 'overwrite ', "use new id")
-                            if answer==0:
+                            if not answer:
+                                message = str(e)
+                                #message_box = QtGui.QMessageBox()
+                                message_box = CustomMessageBox(message)
+                                (applies_to_all, answer) = message_box.ask()
+                                this_answer = answer
+                                if not applies_to_all:
+                                    answer = None
+#                           answer = message_box.question(QtGui.QWidget(), 'existing id', message, 'forget about it', 'overwrite ', "use new id")
+                            if this_answer=="drop":
                                 continue
-                            elif answer==1:
+                            if this_answer=="overwrite":
                                 cur_db = models.curve_db_from_file(fname,inplace=inplace,overwrite=True)
-                            else:
+                            if this_answer=="new_id":
                                 cur_db = models.curve_db_from_file(fname,inplace=inplace,overwrite=False)
+                            if this_answer=="abort":
+                                return
+
+                                
                         cur_db.save()
                         added_ids.append(cur_db.id)
                         #self.progress_bar.update((len(added_ids)*100)/total_files)
