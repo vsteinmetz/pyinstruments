@@ -286,7 +286,7 @@ class ListCurveWidget(QtGui.QWidget, object):
                 
                 
         def export_csv(dummy, curves=curves):
-            filename = str(QtGui.QFileDialog().getSaveFileName())
+            filename = str(QtGui.QFileDialog.getSaveFileName())
             with open(filename,'w') as f:
                 create_csv(curves, f)
                 

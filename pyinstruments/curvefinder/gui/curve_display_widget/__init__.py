@@ -104,8 +104,7 @@ class CutSignalTool(guiqwt.tools.BaseCursorTool):
             truncated_data.to_csv(csv_string)
             clip.setText(csv_string.getvalue())
         if self.option_selected == 'file':
-            f = QtGui.QFileDialog()
-            filename = f.getSaveFileName()
+            filename = QtGui.QFileDialog.getSaveFileName()
             truncated_data.to_csv(filename)        
         if self.option_selected == 'curve':
             old_one = displayed_curve()

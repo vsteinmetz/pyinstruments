@@ -117,8 +117,7 @@ class MenuDB(QtGui.QMenu):
         
     
     def _backup_all_files(self):
-        dial = QtGui.QFileDialog()
-        filename = str(dial.getSaveFileName(parent=self))
+        filename = str(QtGui.QFileDialog.getSaveFileName(parent=self))
         if not filename:
             return
         #with ZipFile(filename, 'w') as zpf:
@@ -144,8 +143,7 @@ class MenuDB(QtGui.QMenu):
         """
         Import all .h5 files from a directory and subdirectories.
         """
-        dial = QtGui.QFileDialog()
-        dirname = str(dial.getExistingDirectory(parent=self))
+        dirname = str(QtGui.QFileDialog.getExistingDirectory(parent=self))
         if not dirname:
             return
         
@@ -168,11 +166,9 @@ class MenuDB(QtGui.QMenu):
                             " already exists in your database." + "\n What should we do with curve " + \
                             cur.params["name"] + " ?"
                             if allanswers <= -1:
-                                message_box = QtGui.QMessageBox(self)
-                                answer = message_box.question(self, 'existing id', message, 'forget about it', 'overwrite ' + old_one.params['name'], "use new id")
+                                answer = QtGui.QMessageBox.question(self, 'existing id', message, 'forget about it', 'overwrite ' + old_one.params['name'], "use new id")
                                 if allanswers == -2:
-                                    secmessage_box = QtGui.QMessageBox(self)
-                                    secanswer = secmessage_box.question(self, 'repeat', "Remember choice for future id conflicts?", 'Yes', 'No','Ask again')
+                                    secanswer = QtGui.QMessageBox.question(self, 'repeat', "Remember choice for future id conflicts?", 'Yes', 'No','Ask again')
                                     if secanswer == 0:
                                         allanswers = answer
                                     elif secanswer == 1:

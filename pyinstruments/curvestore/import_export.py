@@ -8,7 +8,7 @@ import os.path
 import glob
 
 def update_all_files():
-        res = QtGui.QMessageBox().question(QtGui.QWidget(),
+        res = QtGui.QMessageBox.question(QtGui.QWidget(),
                                            "are you sure",
                                            "It's strongly advised to backup the directory " \
                                            + MEDIA_ROOT \
@@ -61,10 +61,9 @@ def import_h5_files(inplace=False):
         Import all .h5 files from a directory and subdirectories.
         """
         
-        dial = QtGui.QFileDialog()
         askagain = True
         while askagain:
-            dirname = str(dial.getExistingDirectory())
+            dirname = str(QtGui.QFileDialog.getExistingDirectory())
             if not dirname:
                 return
             if inplace:    
@@ -72,8 +71,7 @@ def import_h5_files(inplace=False):
                                                  os.path.abspath(MEDIA_ROOT)]) \
                                             !=os.path.abspath(MEDIA_ROOT)
                 if askagain:
-                    mes = QtGui.QMessageBox()
-                    mes.information(QtGui.QWidget(), 'wrong directory', 'please, choose a directory in ' + MEDIA_ROOT)
+                    QtGui.QMessageBox.information(QtGui.QWidget(), 'wrong directory', 'please, choose a directory in ' + MEDIA_ROOT)
             else:
                 askagain = False
         idpolitics=None
@@ -139,7 +137,7 @@ def import_h5_files(inplace=False):
         #self.import_done.emit()
 
 def clear_db():
-    res = QtGui.QMessageBox().question(QtGui.QWidget(),
+    res = QtGui.QMessageBox.question(QtGui.QWidget(),
                                            "are you sure",
                                            "It's strongly advised to backup the file " \
                                            + DATABASE_FILE \
@@ -167,7 +165,7 @@ def reset_db():
 def forget_db_location():
     settings = QtCore.QSettings('pyinstruments', 'pyinstruments')
     settings.setValue('database_file', "")
-    dial = QtGui.QMessageBox.information(self,
+    QtGui.QMessageBox.information(QtGui.QWidget(),
                                              'change-database',
                                              'change will take effect at the next startup')
 
