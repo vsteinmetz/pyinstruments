@@ -1,7 +1,7 @@
 import pyinstruments.datastore.settings
 from pyinstruments.datastore.settings import MEDIA_ROOT
 from pyinstruments.curvestore import models
-from pyinstruments.curvestore.import_export import import_h5_files, update_all_files, forget_db_location, reset_db, clear_db, sync_db
+from pyinstruments.curvestore.import_export import import_h5_files, update_all_files, forget_db_location, reset_db, clear_db, sync_db, cleanup_directory
 from curve import Curve
 import curve
 from pyinstruments.datalogger.models import datalogger_backup, datalogger_recovery
@@ -30,6 +30,16 @@ class MenuDanger(QtGui.QMenu):
     def __init__(self, parent, widget):
         super(MenuDanger, self).__init__(parent)
         
+        self.update_all_files = QtGui.QAction(widget)
+        self.update_all_files.setText('update all files...')
+        self.update_all_files.triggered.connect(self.do_update_all_files)
+        self.addAction(self.update_all_files)
+        
+        self.cleanup_dir = QtGui.QAction(widget)
+        self.cleanup_dir.setText('cleanup directory')
+        self.cleanup_dir.triggered.connect(cleanup_directory)
+        self.addAction(self.cleanup_dir) 
+        
         self.clear_database = QtGui.QAction(widget)
         self.clear_database.setText('clear curvestore database...')
         self.clear_database.triggered.connect(clear_db)
@@ -39,7 +49,6 @@ class MenuDanger(QtGui.QMenu):
         self.sync_database.setText('sync database')
         self.sync_database.triggered.connect(sync_db)
         self.addAction(self.sync_database)        
-                
         
         self.reset_database = QtGui.QAction(widget)
         self.reset_database.setText('reset curvestore database...')
@@ -50,11 +59,6 @@ class MenuDanger(QtGui.QMenu):
         self.import_h5_files.setText('import h5 files (already in place)...')
         self.import_h5_files.triggered.connect(self.import_h5_files_frominternal)
         self.addAction(self.import_h5_files)
-
-        self.update_all_files = QtGui.QAction(widget)
-        self.update_all_files.setText('update all files...')
-        self.update_all_files.triggered.connect(self.do_update_all_files)
-        self.addAction(self.update_all_files)
         
         self.dlbackup = QtGui.QAction(widget)
         self.dlbackup.setText('backup datalogger...')

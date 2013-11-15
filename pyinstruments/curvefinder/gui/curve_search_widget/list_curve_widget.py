@@ -72,9 +72,26 @@ class ListCurveWidget(QtGui.QWidget, object):
         self._lay = QtGui.QVBoxLayout()
         self._refresh_button = QtGui.QPushButton('refresh')
         self._refresh_button.clicked.connect(self.refresh)
+        
         self._refresh_button.clicked.connect(self.refresh_clicked)
         self._lay_refresh = QtGui.QHBoxLayout()
         self._lay_refresh.addWidget(self._refresh_button)
+        
+        self._show_only_checkbox = QtGui.QCheckBox()
+        self._show_only_checkbox.setCheckState(2)
+        self._show_only_checkbox.stateChanged.connect(self.show_only_changed)
+        self._lay_refresh.addWidget(self._show_only_checkbox)
+        
+        self._show_only_label = QtGui.QLabel('show first')
+        self._lay_refresh.addWidget(self._show_only_label)
+        
+        self._show_only_spinbox = QtGui.QSpinBox()
+        self._show_only_spinbox.setValue(25)
+        self._lay_refresh.addWidget(self._show_only_spinbox)
+        
+        self._show_only_total = QtGui.QLabel('/')
+        self._lay_refresh.addWidget(self._show_only_total)
+        
         self._lay.addLayout(self._lay_refresh)
         
         self._lay.setContentsMargins(0, 0, 0, 0)
@@ -86,8 +103,27 @@ class ListCurveWidget(QtGui.QWidget, object):
         self._tree_widget.setSortingEnabled(True)
         self.setLayout(self._lay)
         self.setMinimumWidth(300)
+
+    def set_total_label(self, val):
+        self._show_only_total.setText('/' + str(val))
+
+    @property
+    def is_show_only(self):
+        return self._show_only_checkbox.checkState()==2
+
+    @is_show_only.setter
+    def is_show_only(self, value):
+        d = {2:True, 0:False}
+        self._show_only_checkbox.setCheckState(d[value])
         
+    def show_only_changed(self, check_state):
+        widgets = [self._show_only_spinbox,
+                   self._show_only_label,
+                   self._show_only_total]
+        for widget in widgets:
+            widget.setEnabled(check_state==2)
         
+    
     def _current_item_changed(self):
         if self.selected_curve:
             self.current_item_changed.emit(self.selected_curve)
@@ -163,13 +199,36 @@ class ListCurveWidget(QtGui.QWidget, object):
             item = MyItem(curve)
             self._tree_widget.addTopLevelItem(item)
     
+    def sort_field(self):
+        d = {0:'id', 1:'_name', 2:'_date'}
+        return d[self._tree_widget.sortColumn()]
+    
+    def sort_order(self):
+        return self._tree_widget.header().sortIndicatorOrder()
+    
+    @property
+    def num_display(self):
+        return self._show_only_spinbox.value()
+    
     def refresh(self):
         self.popup.show()
         curves = self.parent().query()
-        curves = curves.filter(parent=None).order_by('id')
+        
+        if self.sort_order():# doesn't work when first doing order_by and then reverse!!! 
+            curves = curves.filter(parent=None).order_by(self.sort_field()).reverse()
+        else:
+            curves = curves.filter(parent=None).order_by(self.sort_field())
+        
         self._tree_widget.blockSignals(True)
         items = []
-        for curve in curves:
+        total = curves.count()
+        self.set_total_label(total)
+        if self.is_show_only:
+            sl = slice(0, self.num_display)
+        else:
+            sl = slice(0, total)
+        
+        for curve in curves[sl]:
             item_list = self._tree_widget.findItems(str(curve.id),
                                                QtCore.Qt.MatchFlag(0),
                                                column=0)
@@ -190,9 +249,13 @@ class ListCurveWidget(QtGui.QWidget, object):
                 item.ghost = True
             iterator+=1
             item = iterator.value()
+            
         for item in to_remove:
             (item.parent() or root).removeChild(item)
+        #
         self._tree_widget.addTopLevelItems(items)
+        for item in items:
+            item.ghost = True
         self._tree_widget.blockSignals(False)
         self.popup.hide()
             

@@ -3,9 +3,11 @@ from pyinstruments.curvestore import models
 from curve import Curve
 import subprocess
 
+from django.db import reset_queries
+from django.core.exceptions import ObjectDoesNotExist
 from PyQt4 import QtCore, QtGui
 import os.path
-import glob
+import os
 
 def update_all_files():
         res = QtGui.QMessageBox.question(QtGui.QWidget(),
@@ -61,6 +63,7 @@ def import_h5_files(inplace=False):
         Import all .h5 files from a directory and subdirectories.
         """
         
+        threshold_garbage = 100
         askagain = True
         while askagain:
             dirname = str(QtGui.QFileDialog.getExistingDirectory())
@@ -76,12 +79,31 @@ def import_h5_files(inplace=False):
                 askagain = False
         idpolitics=None
     
-        def archive_dir(files_info, dirname, files):
-            [added_ids, total_files,inplace,idpolitics] = files_info
-            answer=None
+    
+    
+        
+    
+   #     def archive_dir(files_info, dirname, files):
+
+                        #self.progress_bar.update((len(added_ids)*100)/total_files)
+        added_childs = list()
+        
+        total_files = 0
+        for root, dirs, files in os.walk(dirname):
+            total_files+=len(files)
+
+        total_added = 0
+        answer=None
+        index = 0
+        for root, dirs, files in os.walk(dirname):
             for filename in files:
-                print "imported " + str(len(added_ids)) + '/' + str(total_files)
-                fname = os.path.join(dirname, filename)
+                index+=1
+                if index>threshold_garbage:
+                    print 'freeing up memory'
+                    reset_queries()
+                    index = 0
+                    
+                fname = os.path.join(root, filename)
                 if os.path.isfile(fname):
                     if fname.endswith('.h5'):
                         try: 
@@ -105,20 +127,32 @@ def import_h5_files(inplace=False):
                             if this_answer=="abort":
                                 return
 
-                                
                         cur_db.save()
-                        added_ids.append(cur_db.id)
-                        #self.progress_bar.update((len(added_ids)*100)/total_files)
-        added_ids = list()
-        total_files = len(glob.glob(dirname + '/*/*/*/*.h5'))
+                        total_added += 1
+                        if 'parent_id' in cur_db.params:
+                            if cur_db.params['parent_id']!=0:
+                                added_childs.append(cur_db.id)
+                        print "imported " + str(total_added) + '/' + str(total_files)
+      
       
         #self.progress_bar.show()
-        os.path.walk(dirname, archive_dir, [added_ids, total_files, inplace, idpolitics])
+      #  os.path.walk(dirname, archive_dir, [added_ids, total_files, inplace, idpolitics])
         #self.progress_bar.hide()
-        
         #loop over all added ids to confirm that everything is set properly
-        for id in added_ids:
+
+        from pyinstruments.curvestore.models import model_monitor
+        model_monitor.blockSignals(True)
+        index = 0
+        print 'I will now add a child-parent relationship to ' + str(len(added_childs)) + ' curves'
+        total_childs_added = 0
+        tot = len(added_childs)
+        for id in added_childs:
             c = models.CurveDB.objects.get(id=id)
+            index+=1
+            if index>threshold_garbage:
+                print 'freeing up memory'
+                reset_queries()
+                index = 0
             #if 'date' in c.params:
             #    c.date = c.params['date']
             if 'parent_id' in c.params:
@@ -131,9 +165,11 @@ def import_h5_files(inplace=False):
                         " of curve with id "+str(id)+" does not exist. Orphan created!"
                     else:
                         parent.add_child(c)
-                
-        print "Added the following ids:"
-        print added_ids
+                    total_childs_added += 1
+                    print str(total_childs_added) + '/' + str(tot) + ' childs appended'
+        model_monitor.blockSignals(False)        
+        #print "Added the following ids:"
+        #print total_added
         #self.import_done.emit()
 
 def clear_db():
@@ -159,9 +195,47 @@ def reset_db():
         sync_db()
     
     
-        
-        
-
+def cleanup_directory():
+    db_files = []
+    dir_files = []
+    to_remove = []
+    
+    for curve in models.CurveDB.objects.all():
+        db_files.append(os.path.abspath(os.path.join(MEDIA_ROOT, curve.data_file.name)))
+    print 'found ' + str(len(db_files)) + ' curves in the db...'
+    
+    for root, dirs, files in os.walk(MEDIA_ROOT):
+        for f in files:
+            if f.endswith('.h5'):
+                dir_files.append(os.path.abspath(os.path.join(root, f)))
+    
+    print 'found ' + str(len(dir_files)) + ' h5 files in the directory...'
+       
+    dir_files.sort()
+    db_files.sort() 
+    index_db = 0
+    index_dir = 0
+    tot = len(db_files)
+    while(index_db<tot):
+        db = db_files[index_db]
+        dir = dir_files[index_dir]
+        if db==dir:
+            index_db+=1
+            index_dir+=1
+        else:
+            to_remove.append(dir)
+            index_dir+=1
+       
+    print to_remove
+    
+    
+    if QtGui.QMessageBox.question(QtGui.QWidget(),
+                                  'Are you sure?',
+                                'Found ' + str(len(to_remove)) + ' h5 files in the directory ' + MEDIA_ROOT + ' without entry in the database. Are you sure you want to delete them ?',
+                               'Cancel',
+                               'OK'):
+        for f in to_remove:
+            os.remove(f)
 def forget_db_location():
     settings = QtCore.QSettings('pyinstruments', 'pyinstruments')
     settings.setValue('database_file', "")
