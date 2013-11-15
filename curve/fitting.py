@@ -32,21 +32,46 @@ class FitFunctions(object):
         
         magdata = abs(self.data-bg)
         argmax = magdata.argmax()
-        x1 = float(self.x()[argmax])
-        magmax=magdata[x1]
-        max=self.data[x1]
+        _x1 = float(self.x()[argmax])
+        magmax = magdata[_x1]
+        max_ = self.data[_x1]
         
-        for index, y in enumerate(magdata[x1:]):
+        for index, y in enumerate(magdata[_x1:]):
             if y<magmax/2:
                 break
-        bw = 2*abs(x1 - self.data.index[argmax + index])
+        bw = 2*abs(_x1 - self.data.index[argmax + index])
+        bw_index = index
         
-        ## second peak search
-        magdata[argmax - index*3:argmax + index*3] = 0
-        argmax = magdata.argmax()
-        x2 = float(self.x()[argmax])
-    
-        fit_params = {'x1': x1, 'x2':x2, 'bandwidth': bw, 'scale': max-bg, 'y0': bg}
+        
+        ## Second peak search
+        threshold_mag = magmax*0.7
+        N_BW_AWAY = 10
+        start = argmax + bw_index*N_BW_AWAY
+        found = False
+        for index, y in enumerate(magdata[start:]):
+            if y>threshold_mag:
+                found = True
+                index = start + index
+                break
+        
+        if not found:
+            stop = argmax - bw_index*N_BW_AWAY
+            found = False
+            for index, y in enumerate(magdata[stop:0:-1]):
+                if y>threshold_mag:
+                    found = True
+                    index = max(0, stop - index - 3*bw_index)
+                    break
+        next_peak_index_close = index
+        next_peak_index = next_peak_index_close + magdata[next_peak_index_close:next_peak_index_close+3*bw_index].argmax()
+        _x2 = float(self.x()[next_peak_index])
+        #argmax = magdata.argmax()
+        #x2 = float(self.x()[argmax])
+        x1 = min(_x1, _x2)
+        x2 = max(_x1, _x2)
+        bw = abs(bw)
+        
+        fit_params = {'x1': x1, 'x2':x2, 'bandwidth': bw, 'scale': max_-bg, 'y0': bg}
         return fit_params
 
 
@@ -185,8 +210,14 @@ class FitFunctions(object):
             for i in low.index:
                 lowsum+=self.data[i]
                 lows+=1
-        y0=(lowsum/lows)
-        scale=(highsum/highs)-y0
+        if not lows == 0:
+            y0=(lowsum/lows)
+        else:
+            y0 = -70
+        if not highs == 0:
+            scale=(highsum/highs)-y0
+        else:
+            scale=30.0
         firstlows = self.data[0.505*ringtime+delta:(0.505)*ringtime+delta+sweeptime/length*math.ceil(length/ringspersweeptime/2/1000)]
         tempfit = Fit(data = firstlows, func = 'linear', \
                       autoguessfunction = '', \
@@ -223,7 +254,10 @@ class FitFunctions(object):
             for i in low.index:
                 lowsum+=self.data[i]
                 lows+=1
-        y0=(lowsum/lows)
+        if not lows == 0:
+            y0=(lowsum/lows)
+        else:
+            y0 = -70
         scale=math.log10(highsum/highs)-y0
         firstlows = self.data[0.5*ringtime+delta:(0.5)*ringtime+delta+sweeptime/length*math.ceil(length/ringspersweeptime/2/1000)]
         tempfit = Fit(data = firstlows, func = 'linear', \

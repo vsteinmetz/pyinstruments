@@ -1,0 +1,12 @@
+Bugs to Fix:
+
+
+Delete does not remove all params of the curve
+
+Messagebox for import files does not have a checkbox "apply to all"
+
+Acquisition of more than 2GB of data (more than the RAM offers) will cause a crash
+
+PreferredChild field should be added to access quicker the best fit of a curve for example
+
+Enable to import/export branches defined hierarchically by tags

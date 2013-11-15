@@ -104,8 +104,7 @@ class CutSignalTool(guiqwt.tools.BaseCursorTool):
             truncated_data.to_csv(csv_string)
             clip.setText(csv_string.getvalue())
         if self.option_selected == 'file':
-            f = QtGui.QFileDialog()
-            filename = f.getSaveFileName()
+            filename = QtGui.QFileDialog.getSaveFileName()
             truncated_data.to_csv(filename)        
         if self.option_selected == 'curve':
             old_one = displayed_curve()
@@ -134,7 +133,7 @@ class CurveDisplayLeftPanel(QtGui.QWidget):
     
     def __init__(self, parent=None):
         super(CurveDisplayLeftPanel, self).__init__(parent)     
-        self.displayed_curve = None
+        self.displayed_curve_id = None
         self.setup_plot_widget()
         self.lay = QtGui.QVBoxLayout()
         
@@ -146,7 +145,11 @@ class CurveDisplayLeftPanel(QtGui.QWidget):
         self.lay.addWidget(self.alter_curve_widget)
         self.setLayout(self.lay)
         
-        
+    @property
+    def displayed_curve(self):
+        if self.displayed_curve_id:
+            return models.CurveDB.objects.get(id=self.displayed_curve_id)
+    
     def setup_plot_widget(self):
         self.plot_widget = plot.CurveWidget(self, 'curve graph', \
                                             show_itemlist=False)
@@ -178,11 +181,9 @@ class CurveDisplayLeftPanel(QtGui.QWidget):
         self.plot_widget.plot.set_active_item(self.curve_item)
         self.curve_item.unselect()
         #=============================
-        
-        self.displayed_curve = None
 
     def display_curve(self, curve):
-        self.displayed_curve = curve
+        self.displayed_curve_id = curve.id
         if curve:
             curvedata = curve.get_plottable_data()
             #downsample large files for quick preview
@@ -202,6 +203,10 @@ class CurveDisplayLeftPanel(QtGui.QWidget):
                 curve.save()
             self.alter_curve_widget.save_button.hide()
             
+    def refresh(self):
+        if self.displayed_curve:
+            self.display_curve(self.displayed_curve)
+    
     def save_curve(self, curve):
         self.alter_curve_widget.save_curve(curve) 
             
@@ -215,9 +220,20 @@ class CurveDisplayWidget(QtGui.QSplitter):
         self.addWidget(self.display_params)
         self.left_panel.save_pressed.connect(self.refresh_params)
         self.left_panel.delete_done.connect(self.delete_done)
+        self.displayed_curve_id = None
+    
+    @property
+    def displayed_curve(self):
+        if self.displayed_curve_id:
+            return models.CurveDB.objects.get(id=self.displayed_curve_id)
+    
+    def refresh(self):
+        self.left_panel.refresh()
+        self.refresh_params()
     
     def refresh_params(self):
-        self.display_params.display_curve(self.displayed_curve)
+        if self.displayed_curve:
+            self.display_params.display_curve(self.displayed_curve)
     
     def save(self):
         curve = self.displayed_curve
@@ -227,7 +243,7 @@ class CurveDisplayWidget(QtGui.QSplitter):
         self.left_panel.save_curve(curve)
     
     def display_curve(self, curve):
-        self.displayed_curve = curve
+        self.displayed_curve_id = curve.id
         self.left_panel.display_curve(curve)
         if curve:
             self.display_params.display_curve(curve)

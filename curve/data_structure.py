@@ -73,11 +73,12 @@ class Curve(object):
                     value = value.strftime("%y/%m/%d/%H/%M/%S/%f")
                 try:
                     params[key]
-                except KeyError:  
+                except KeyError:
                     params.create_dataset(key, data=value)
                 else:
                     del params[key]
                     params.create_dataset(key, data=value)
+                    
                     
                     
     
@@ -159,7 +160,8 @@ def load(filename, with_data=True):
             for key, value in meta.iteritems():
                 kwds[key] = convert_from_numpy(value.value)
     curve = Curve()
-    curve.set_data(data)
+    if with_data:
+        curve.set_data(data)
     curve.set_params(**kwds)
     return curve
 

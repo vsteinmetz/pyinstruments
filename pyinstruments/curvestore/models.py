@@ -1,6 +1,7 @@
 import pyinstruments.datastore
 from pyinstruments.datastore.settings import MEDIA_ROOT
 from curve import Curve
+from curve import load as load_curve
 
 from PyQt4 import QtCore, QtGui
 from django.db import models
@@ -10,6 +11,7 @@ import json
 from django.core.files.storage import default_storage
 from django.template.defaultfilters import slugify
 import numpy
+from django.core.exceptions import ObjectDoesNotExist
 
 
 
@@ -110,7 +112,7 @@ class CurveDB(models.Model, Curve):
         return self.name
 
     tags_relation = models.ManyToManyField(Tag)
-    name = models.CharField(max_length=255, default='some_curve')
+    _name = models.CharField(max_length=255, default='some_curve')
     params_json = models.TextField(default="{}")
     #read only
     data_file = models.FileField(upload_to = '%Y/%m/%d')
@@ -122,7 +124,7 @@ class CurveDB(models.Model, Curve):
     has_childs = models.BooleanField(default=False)
     saved_in_db = models.BooleanField(default=False)
     #for problems with django-evolution use:
-    date = models.DateTimeField(default=datetime.fromtimestamp(0))
+    _date = models.DateTimeField(default=datetime.fromtimestamp(0))
     #date = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -202,10 +204,30 @@ class CurveDB(models.Model, Curve):
     
     def save_bool_param(self, col, val):
         self._save_generic_param(col, val, BooleanParam)        
-        
+    
+    @property
+    def name(self):
+        return self._name
+    
+    @name.setter
+    def name(self, val):
+        self._name = val
+        self.params['name'] = val
+        return val
+    
+    @property
+    def date(self):
+        return self._date
+    
+    @date.setter
+    def date(self, val):
+        self._date = val
+        self.params['date'] = val
+        return val
+    
     def save_params(self):
-        self.params["name"] = self.name
-        self.params["date"] = self.date
+        self._name = self.params["name"]
+        self._date = self.params["date"]
         self.params["id"] = self.pk
         if self.parent is not None:
             self.params["parent_id"] = self.parent.pk
@@ -219,6 +241,8 @@ class CurveDB(models.Model, Curve):
             if isinstance(val, (bool, numpy.bool_)):
                 self.save_bool_param(par, val)
                 continue
+            if isinstance(val, (numpy.integer, numpy.float)):
+                val = float(val)
             if isinstance(val, (int, float, long)):
                 self.save_num_param(par, val)
                 continue
@@ -261,7 +285,6 @@ class CurveDB(models.Model, Curve):
         Saves the curve in the database. If the curve is data_read_only 
         The actual datafile will be saved only on the first call of save().
         """
-        
         self.set_default_params()
             
         if not self.data_file:
@@ -274,6 +297,10 @@ class CurveDB(models.Model, Curve):
                 os.makedirs(dirname) 
             full_path = default_storage.get_available_name(full_path)
             self.data_file = os.path.relpath(full_path, MEDIA_ROOT)
+        
+        models.Model.save(self) #this way, the id is correct
+        self.save_params() #this saves the curve with the correct id
+        
         if not self.params["data_read_only"]:
             Curve.save(self, self.get_full_filename())
         else:
@@ -285,9 +312,7 @@ class CurveDB(models.Model, Curve):
             self.saved_in_db=True
         
         self.save_tags()
-
-        models.Model.save(self)
-        self.save_params()
+        
         
     def delete(self):
         try:
@@ -329,7 +354,6 @@ class CurveDB(models.Model, Curve):
             if "manualfit_concluded" in fit_curve_db.params:
                  if fit_curve_db.params["manualfit_concluded"]: 
                      self.add_child(fit_curve_db)
-                     
             else:
                 self.add_child(fit_curve_db)
                 
@@ -449,7 +473,44 @@ def curve_db_from_curve(curve):
     if 'tags_flatten' in curve.params:
         curve_db.tags = curve.params['tags_flatten'].rstrip(";").split(";")[1:]
     return curve_db
-    
+
+class IdError(ValueError):
+    pass
+def curve_db_from_file(filename,inplace=False,overwrite=None):
+    """overwrite = None: raise Exception if id conflict
+       overvrite = True: overwrite id if conflict
+       overvrite = False: use new id"""
+    curve = load_curve(filename, with_data=not inplace)
+    curve_db = CurveDB()
+    if inplace:
+        curve_db.data_file = os.path.relpath(filename, MEDIA_ROOT)
+    id = int(curve.params['id'])
+    try:
+        old_one = CurveDB.objects.get(id=id)
+    except ObjectDoesNotExist:
+        curve_db.id = id
+    else:
+        if overwrite is None:
+            raise IdError("Id " + str(id) + " already exists (attributed to " + old_one.params["name"] + ")! Don't know what to do with new curve \"" + curve.params["name"] + "\"")
+        elif overwrite:
+            old_one.delete()
+            curve_db.id = id
+            
+    curve_db.set_params(**curve.params)
+    curve_db.set_data(curve.data)
+    if 'name' in curve.params:
+        curve_db.name = curve.params['name']
+    if 'date' in curve.params:
+        d = curve.params['date']
+        if isinstance(d, basestring):
+            curve_db.params["date"] = datetime.strptime(d, "%y/%m/%d/%H/%M/%S/%f")
+        curve_db.date = curve_db.params['date']
+    else:
+        curve_db.date = datetime.now()
+    if 'tags_flatten' in curve.params:
+        curve_db.tags = curve.params['tags_flatten'].rstrip(";").split(";")[1:]
+    return curve_db
+
 class ModelMonitor(QtCore.QObject):
     tag_added = QtCore.pyqtSignal()
     tag_deletted = QtCore.pyqtSignal()

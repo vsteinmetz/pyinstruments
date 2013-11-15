@@ -62,8 +62,8 @@ class DialogOpenDatabase(QtGui.QDialog):
         super(DialogOpenDatabase, self).__init__(parent)
         self.lay = QtGui.QVBoxLayout()
         
-        self.file_dialog = QtGui.QFileDialog(self)
-        self.file_dialog.setFileMode(QtGui.QFileDialog.AnyFile)
+        #self.file_dialog = QtGui.QFileDialog(self)
+        #self.file_dialog.setFileMode(QtGui.QFileDialog.AnyFile)
         self.label = QtGui.QLabel('database file')
         self.db_location_edit = QtGui.QLineEdit()
         self.db_browse_button = QtGui.QPushButton('browse')

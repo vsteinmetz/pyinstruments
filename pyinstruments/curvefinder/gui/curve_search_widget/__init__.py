@@ -7,6 +7,7 @@ from PyQt4 import QtCore, QtGui
 class CurveSearchDockWidget(QtGui.QDockWidget):
     value_changed = QtCore.pyqtSignal()
     current_item_changed = QtCore.pyqtSignal(CurveDB)
+    refresh_clicked = QtCore.pyqtSignal()
     
     def __init__(self, parent=None):
         super(CurveSearchDockWidget, self).__init__(parent)
@@ -14,6 +15,7 @@ class CurveSearchDockWidget(QtGui.QDockWidget):
         self.setWidget(self.widget)
         self.widget.value_changed.connect(self.value_changed)
         self.widget.current_item_changed.connect(self.current_item_changed)
+        self.widget.refresh_clicked.connect(self.refresh_clicked)
         
     def select_by_id(self, id):
         self.widget.select_by_id(id)
@@ -27,7 +29,8 @@ class CurveSearchDockWidget(QtGui.QDockWidget):
 class CurveSearchWidget(QtGui.QWidget):
     value_changed = QtCore.pyqtSignal()
     current_item_changed = QtCore.pyqtSignal(CurveDB)
-    
+    refresh_clicked = QtCore.pyqtSignal()
+
     def __init__(self, parent=None):
         super(CurveSearchWidget, self).__init__(parent)
         self.curve_filter_widget = MultiFilterWidget()
@@ -39,6 +42,7 @@ class CurveSearchWidget(QtGui.QWidget):
         self.curve_filter_widget.value_changed.connect(self.list_curve_widget.refresh)
         self.curve_filter_widget.value_changed.connect(self.value_changed)
         self.list_curve_widget.current_item_changed.connect(self.current_item_changed)
+        self.list_curve_widget.refresh_clicked.connect(self.refresh_clicked)
         model_monitor.child_added.connect(self.refresh_one_id)
         
     def query(self):
