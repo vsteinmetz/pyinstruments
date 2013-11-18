@@ -1,20 +1,43 @@
 """module to interface the DPO3014 scope (using VISA interface)"""
 
 from pyhardware.drivers.visa import VisaDriver
+from pyhardware.utils.guiwrappersutils import GuiWrapper
 from pyhardware.utils.gui_fetch_utils import FetcherMixin
 from curve import Curve
+from pyivi.ivicom.iviscope import ShortCutScope
+
 
 from pandas import Series
 import pandas
 import visa
 import numpy
 
-class DPO3014(VisaDriver, FetcherMixin):
+class DPO3014(VisaDriver,  GuiWrapper, FetcherMixin):
     _supported_models = ["DPO3014"]
-    
+    _fields = ShortCutScope._fields + ['channel_idx'] + ["sample_modes", "acquisition_types", "ch_couplings"]
     def __init__(self,*args,**keys):
-        super(DPO3014,self).__init__(*args,**keys)
+        super(DPO3014, self).__init__(*args,**keys)
+        GuiWrapper.__init__(self)
         self.channel_idx = 1
+    
+    
+    def _setupUi(self, widget):
+        """sets up the graphical user interface"""
+        
+        widget._setup_vertical_layout()
+        widget._setup_horizontal_layout()
+        widget._setup_vertical_layout()
+        for field in self._fields:
+            if field=='channel_idx':
+                widget._exit_layout()
+                widget._setup_vertical_layout()
+            choices = None
+            if hasattr(self, field + 's'):
+                choices = self.__getattribute__(field + 's')
+            widget._setup_gui_element(field, choices)
+        widget._exit_layout()
+        widget._exit_layout()
+        self._setup_fetch_buttons(widget)
     
     def recall(self, filename='1'):
         self.write("RECAll:SETUp "+str(filename))
@@ -167,8 +190,14 @@ class DPO3014(VisaDriver, FetcherMixin):
         curve.set_data(pandas.Series(x_y[1], index = x_y[0]))
         curve.set_params(**meta)
         return curve
-
- 
+    
+#add_fields(DPO3014, ShortCutScope._fields)
+#add_fields(DPO3014, ['channel_idx'])
+#add_fields(DPO3014, ShortCutScope._ch_fields)
+#add_fields(DPO3014, ["sample_modes",
+#                        "acquisition_types",
+#                        "ch_couplings"], add_ref=False)
+    
 if __name__ == "__main__":
     ea = DPO3014(sys.argv[1])
     

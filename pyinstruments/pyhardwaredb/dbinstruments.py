@@ -16,7 +16,7 @@ def monkey_patch(func):
 def _get_initial_defaults(self):
     return {"default_name":'curve_%s'%self.__class__.__name__, \
      "default_window":'%s'%self.__class__.__name__, \
-     "tags":["all"], \
+     "tags":[], \
      "comment":""}
 
 @monkey_patch          
