@@ -14,7 +14,16 @@ import numpy
 from django.core.exceptions import ObjectDoesNotExist
 
 
-
+def top_level_tags():
+    tag_names = set()
+    ch = Tag.objects.all()
+    for tag in ch:
+        tag_names = tag_names.union([tag.name.split('/')[0]])
+    tags = []
+    for tag_name in tag_names:
+        tag, created = Tag.objects.get_or_create(name=tag_name)
+        tags.append(tag)
+    return tags
 
 class Tag(models.Model):
     """
@@ -23,9 +32,61 @@ class Tag(models.Model):
     """
     
     name = models.CharField(max_length=200)
+
+    @property
+    def shortname(self):
+        return self.name.split('/')[-1]
+        
+    def set_shortname(self, val):
+        childs = self.childs()
+        self.name = '/'.join(self.name.split('/')[:-1]) + '/' + val
+        self.save()
+        for child in childs:
+            child.move(self.name)
+    
+    def add_child(self, name):
+        child, create = Tag.objects.get_or_create(name=self.name + '/' + name)
+      
+    def remove(self):
+        """
+        removes tag and all childs
+        """  
+        childs = self.childs()
+        self.delete()
+        for child in childs:
+            child.remove()
+    
+    def move(self, new_parent):
+        childs = self.childs()
+        if new_parent=="":
+            self.name = self.shortname
+        else:
+            self.name = new_parent + '/' + self.shortname
+        self.save()
+        for child in childs:
+            child.move(self.name)
+    
+    def childs(self):
+        childs_start = self.name + '/'
+        len_strip = len(childs_start)
+        ch = Tag.objects.filter(name__startswith=childs_start)
+        child_str = set()
+        for t in ch:
+            stripped = t.name[len_strip:]
+            child = stripped.split('/')[0]
+            child_str = child_str.union([child])
+        tags = []
+        for child in child_str:
+            fullchildname = self.name + '/' + child
+            tag, created = Tag.objects.get_or_create(name=fullchildname)
+            tags.append(tag)
+        return tags
+        
     def __unicode__(self):
         return self.name
 
+
+            
 ##http://zmsmith.com/2010/04/using-custom-django-querysets/
 class MyQuerySet(models.query.QuerySet):
     def filter_param(self, parname, **kwds):
@@ -48,8 +109,8 @@ class MyQuerySet(models.query.QuerySet):
         """
         Return only those curve that have the tag tagname
         """
-        
-        return self.filter_param('tags_flatten', value__contains=";"+tagname+";")
+        #return self.filter_param('tags_flatten', value__contains=";"+tagname+";")
+        return self.filter(tags_relation__name=tagname)
 
 class CurveManager(models.Manager):
     """
@@ -58,7 +119,6 @@ class CurveManager(models.Manager):
     
     def get_query_set(self):
         return MyQuerySet(self.model)
-    
     #def __getattr__(self, name):
     #    return getattr(self.get_query_set(), name)
     def filter_param(self, parname, **kwds):
@@ -163,6 +223,7 @@ class CurveDB(models.Model, Curve):
 
     def load_params(self):
         dic_param = json.loads(self.params_json, object_hook=date_to_date)
+        dic_param['tags_flatten'] = self.do_flatten_tags()
         self.set_params(**dic_param)
         self.set_default_params()
         return dic_param
@@ -225,10 +286,21 @@ class CurveDB(models.Model, Curve):
         self.params['date'] = val
         return val
     
+    def do_flatten_tags(self):
+        return ';' + \
+            ';'.join(self.tags) + \
+            ';'
+    
     def save_params(self):
         self._name = self.params["name"]
         self._date = self.params["date"]
+        if not self.pk:
+            models.Model.save(self)
         self.params["id"] = self.pk
+        
+        self.params["tags_flatten"] = self.do_flatten_tags()
+        
+        
         if self.parent is not None:
             self.params["parent_id"] = self.parent.pk
         elif not "parent_id" in self.params:
@@ -252,7 +324,7 @@ class CurveDB(models.Model, Curve):
             raise ValueError('could not find the type of parameter ' + str(val))
         
         self.params_json = json.dumps(self.params, default=default)
-        models.Model.save(self)
+        #models.Model.save(self)
 
     def get_full_filename(self):
         return os.path.join(MEDIA_ROOT, \
@@ -264,9 +336,7 @@ class CurveDB(models.Model, Curve):
             if new:
                 model_monitor.tag_added.emit()
             self.tags_relation.add(tag)
-        self.params["tags_flatten"] = ';' + \
-                    ';'.join(self.tags) + \
-                    ';'
+
     
     def set_default_params(self):
         """
@@ -285,8 +355,8 @@ class CurveDB(models.Model, Curve):
         Saves the curve in the database. If the curve is data_read_only 
         The actual datafile will be saved only on the first call of save().
         """
+        
         self.set_default_params()
-            
         if not self.data_file:
             self.data_file = os.path.join( \
                     self.params["date"].strftime('%Y/%m/%d'), \
@@ -298,22 +368,21 @@ class CurveDB(models.Model, Curve):
             full_path = default_storage.get_available_name(full_path)
             self.data_file = os.path.relpath(full_path, MEDIA_ROOT)
         
-        models.Model.save(self) #this way, the id is correct
+        #models.Model.save(self) #this way, the id is correct
         self.save_params() #this saves the curve with the correct id
-        
         if not self.params["data_read_only"]:
             Curve.save(self, self.get_full_filename())
         else:
             if not os.path.exists(self.get_full_filename()):
                 Curve.save(self, self.get_full_filename())
-        
-        if self.saved_in_db==False:
-            models.Model.save(self)
-            self.saved_in_db=True
-        
         self.save_tags()
         
-        
+        #if self.saved_in_db==False:
+        #    self.saved_in_db=True
+        #    models.Model.save(self)
+        models.Model.save(self)
+     
+     
     def delete(self):
         try:
             os.remove(self.get_full_filename())

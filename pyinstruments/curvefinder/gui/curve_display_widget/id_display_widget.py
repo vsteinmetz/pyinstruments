@@ -1,6 +1,5 @@
 from PyQt4 import QtCore, QtGui
 
-
 class IdDisplayWidget(QtGui.QWidget):
     save_pressed = QtCore.pyqtSignal()
     delete_done = QtCore.pyqtSignal()

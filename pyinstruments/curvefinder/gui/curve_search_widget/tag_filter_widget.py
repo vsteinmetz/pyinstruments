@@ -1,8 +1,12 @@
 from pyinstruments.curvestore.models import Tag, model_monitor
-
 from PyQt4 import QtGui, QtCore
+from pyinstruments.curvestore.curve_create_widget import CurveTagWidget
 
-class CurveTagWidget(QtGui.QWidget, object):
+class CurveTagWidgetDummy(QtGui.QWidget, object):
+    """
+    If everything works well for some time, this class should be removed as it is alread implemented in curvestore.curve_derate_widget
+    """
+    
     def __init__(self, parent = None):
         super(CurveTagWidget, self).__init__(parent)
         self._setup_ui()
@@ -211,6 +215,9 @@ class CurveTagWidget(QtGui.QWidget, object):
                 model_monitor.tag_deletted.emit()
                 self.refresh()
         
+        
+            
+        
         menu = QtGui.QMenu(self)
         action_add_tag = QtGui.QAction("add tag...", self)
         action_add_tag.triggered.connect(add_tag)
@@ -223,5 +230,79 @@ class CurveTagWidget(QtGui.QWidget, object):
         action_refresh_list = QtGui.QAction("refresh list", self)
         action_refresh_list.triggered.connect(self.refresh)
         menu.addAction(action_refresh_list)
+        
+        
+
+        
+        self._exec_menu_at_right_place(menu, point)
+        
+        
+class ManageTags(CurveTagWidgetDummy):
+    def _contextMenu(self, point):
+        """
+        Context Menu (right click on the treeWidget)
+        """
+        
+        item = self.tree_widget.itemAt(point)
+        name_clicked = self._get_tag_from_item(item)
+        
+        
+        def add_tag():
+            dialog = QtGui.QInputDialog()
+            dialog.setTextValue(name_clicked)
+            if name_clicked != "":
+                proposition = name_clicked + '/'
+            else:
+                proposition = name_clicked
+            (tag, confirm) = dialog.getText(QtGui.QWidget(), \
+                                     "new tag", \
+                                     "enter tag name", \
+                                     0, \
+                                     proposition)
+            tag = str(tag)
+            if tag.endswith("/"):
+                raise ValueError("""tag should not end with /""")
+            if confirm and tag != "":
+                try:
+                    Tag.objects.get(name = tag)
+                except Tag.DoesNotExist:
+                    Tag.objects.create(name = tag)
+                    self.add_item(tag)
+                    self.select(tag)
+                    model_monitor.tag_added.emit()
+                else:
+                    box = QtGui.QMessageBox()
+                    box.setText("tag " + tag + " allready exists")
+                    box.exec_()
+
+        def remove_tag(dummy, name=name_clicked):
+            dial = QtGui.QMessageBox()
+            dial.setText("Delete tag '" + name + "': are you sure ?")
+            dial.setInformativeText("Tag will be removed from all referenced curves...")
+            dial.setStandardButtons(QtGui.QMessageBox.Cancel|QtGui.QMessageBox.Ok)
+            dial.setDefaultButton(QtGui.QMessageBox.Ok);
+            if dial.exec_():
+                tag = Tag.objects.get(name=name)
+                tag.delete()
+                model_monitor.tag_deletted.emit()
+                self.refresh()
+        
+        menu = QtGui.QMenu(self)
+        action_add_tag = QtGui.QAction("add tag...", self)
+        action_add_tag.triggered.connect(add_tag)
+        menu.addAction(action_add_tag)
+        
+        action_remove_tag = QtGui.QAction("remove tag", self)
+        action_remove_tag.triggered.connect(remove_tag)
+        menu.addAction(action_remove_tag)
+        
+        action_refresh_list = QtGui.QAction("refresh list", self)
+        action_refresh_list.triggered.connect(self.refresh)
+        menu.addAction(action_refresh_list)
+        
+        
+        action_move_tag = QtGui.QAction("move tag", self)
+        action_move_tag.triggered.connect(remove_tag)
+        menu.addAction(action_move_tag)
         
         self._exec_menu_at_right_place(menu, point)

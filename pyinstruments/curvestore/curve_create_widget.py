@@ -154,15 +154,67 @@ class CurveCreateWidget(QtGui.QWidget, object):
         self.save_button.hide()
         
 
+
+## for drag and drop support see
+## http://stackoverflow.com/questions/4163740/qtreeview-with-drag-and-drop-support-in-pyqt
+class TreeModel(QtCore.QAbstractItemModel):
+    def __init__(self):
+        QtCore.QAbstractItemModel.__init__(self)
+        self.nodes = ['node0', 'node1', 'node2']
+
+    def index(self, row, column, parent):
+        return self.createIndex(row, column, self.nodes[row])
+
+    def parent(self, index):
+        return QtCore.QModelIndex()
+
+    def rowCount(self, index):
+        if index.internalPointer() in self.nodes:
+            return 0
+        return len(self.nodes)
+
+    def columnCount(self, index):
+        return 1
+
+    def data(self, index, role):
+        if role == 0: 
+            return index.internalPointer()
+        else:
+            return None
+
+    def supportedDropActions(self): 
+        return QtCore.Qt.CopyAction | QtCore.Qt.MoveAction
+
+    def flags(self, index):
+        if not index.isValid():
+            return QtCore.Qt.ItemIsEnabled
+        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | \
+               QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsDropEnabled        
+
+    def mimeTypes(self):
+        return ['text/xml']
+
+    def mimeData(self, indexes):
+        mimedata = QtCore.QMimeData()
+        mimedata.setData('text/xml', 'mimeData')
+        return mimedata
+
+    def dropMimeData(self, data, action, row, column, parent):
+        print 'dropMimeData %s %s %s %s' % (data.data('text/xml'), action, row, parent) 
+        return True
+
+
     
 class CurveTagWidget(QtGui.QWidget, object):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super(CurveTagWidget, self).__init__(parent)
         self._setup_ui()
         self.tree_widget.itemSelectionChanged.connect(self._update_tag_list)
         self._update_tag_list()
         model_monitor.tag_added.connect(self.refresh)
         model_monitor.tag_deletted.connect(self.refresh)
+        self.tree_widget.setDragEnabled(True)
+        #self.tree_widget.setDragDropMode(4)
         
     value_changed = QtCore.pyqtSignal(name="value_changed")
     
@@ -363,11 +415,33 @@ class CurveTagWidget(QtGui.QWidget, object):
                 tag.delete()
                 model_monitor.tag_deletted.emit()
                 self.refresh()
+                
+                
+        def rename(dummy, name=name_clicked):
+            dialog = QtGui.QInputDialog()
+            dialog.setTextValue(name_clicked)
+            proposition = name_clicked
+            (tag, confirm) = dialog.getText(QtGui.QWidget(), \
+                                     "rename tag", \
+                                     "enter tag name", \
+                                     0, \
+                                     proposition)
+            if confirm:
+                new_name = str(tag)
+                tag = Tag.objects.get(name=name)
+                tag.name = new_name
+                tag.save()
+                self.refresh()
+        
         
         menu = QtGui.QMenu(self)
         action_add_tag = QtGui.QAction("add tag...", self)
         action_add_tag.triggered.connect(add_tag)
         menu.addAction(action_add_tag)
+
+        action_rename_tag = QtGui.QAction("rename tag", self)
+        action_rename_tag.triggered.connect(rename)
+        menu.addAction(action_rename_tag)
         
         action_remove_tag = QtGui.QAction("remove tag", self)
         action_remove_tag.triggered.connect(remove_tag)
