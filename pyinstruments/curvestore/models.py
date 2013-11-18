@@ -39,7 +39,11 @@ class Tag(models.Model):
         
     def set_shortname(self, val):
         childs = self.childs()
-        self.name = '/'.join(self.name.split('/')[:-1]) + '/' + val
+        path = self.name.split('/')[:-1]
+        if path:
+            self.name = '/'.join(path) + '/' + val
+        else:
+            self.name = val
         self.save()
         for child in childs:
             child.move(self.name)
