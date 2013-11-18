@@ -3,7 +3,8 @@ from pyinstruments.curvefinder.gui.curve_search_widget.value_widgets import Date
                                                            FloatWidget, \
                                                            CharWidget
 from pyinstruments.curvestore import models
-from pyinstruments.curvefinder.gui.curve_search_widget.tag_filter_widget import CurveTagWidget
+#from pyinstruments.curvefinder.gui.curve_search_widget.tag_filter_widget import CurveTagWidget
+from pyinstruments.curvestore.tag_widget import CurveTagWidget
 
 from PyQt4 import QtGui, QtCore
 from datetime import timedelta
@@ -45,7 +46,7 @@ class MultiFilterWidget(QtGui.QWidget):
         for filter in self.filters:
             qs = filter.filter(qs)
         if self.tag_widget.active:
-            for tag in self.tag_widget.tags:
+            for tag in self.tag_widget.get_tags():
                 qs = qs.filter_tag(tag)
         return qs
 
@@ -62,7 +63,7 @@ class MultiFilterWidget(QtGui.QWidget):
         self.filters.remove(guifilter)
         self.value_changed.emit()
 
-class FilterTagWidget(QtGui.QWidget):
+class FilterTagWidget(QtGui.QWidget, object):
     value_changed = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
@@ -95,9 +96,9 @@ class FilterTagWidget(QtGui.QWidget):
         self.button_filter_by_tag.show()
         self.value_changed.emit()
         
-    @property
-    def tags(self):
-        return self.tag_widget.tags
+    
+    def get_tags(self):
+        return self.tag_widget.get_tags()
         
 class WidgetValue(QtGui.QStackedWidget, object):
     """

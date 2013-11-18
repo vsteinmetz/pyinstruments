@@ -116,7 +116,7 @@ class TagModel(QAbstractItemModel):
         super(TagModel, self).__init__(parent) 
 
         self.treeView = parent 
-        self.headers = ['Item'] 
+        self.headers = ['Tags'] 
 
         self.columns = 1
         
@@ -275,6 +275,8 @@ class TagModel(QAbstractItemModel):
     
 
 class TagTreeView(QTreeView):
+    value_changed = QtCore.pyqtSignal()
+    refresh_requested = QtCore.pyqtSignal()
     def __init__(self, parent=None): 
         super(TagTreeView, self).__init__(parent) 
 
@@ -290,9 +292,32 @@ class TagTreeView(QTreeView):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._contextMenu)
         
+        self.refresh_requested.connect(self.refresh)
 
         self.connect(self.model(), SIGNAL("dataChanged(QModelIndex,QModelIndex)"), self.change) 
         self.expandAll() 
+        self.refresh_requested.emit()
+
+
+    def get_tags(self):
+        return self.get_selected_tags()
+    
+
+    def set_tags(self, tags):
+        return self._set_tags(tags)
+        
+    def _set_tags(self, tags):
+        self.tree_widget.clearSelection()
+        for tag in tags:
+            self.select(tag)
+            
+    def get_selected_tags(self):    
+        tags = [self.model().nodeFromIndex(index).fullname \
+                for index in self.selectedIndexes()]
+        return tags
+
+    def selectionChanged(self, i1, i2):
+        self.value_changed.emit()
 
     def change(self, topLeftIndex, bottomRightIndex): 
         self.update(topLeftIndex) 
@@ -409,3 +434,45 @@ class TagTreeView(QTreeView):
         menu.addAction(action_refresh_list)
         
         self._exec_menu_at_right_place(menu, point)
+
+
+
+class CurveTagWidget(QtGui.QWidget):
+    value_changed = QtCore.pyqtSignal()
+    def __init__(self, parent=None):
+        super(CurveTagWidget, self).__init__(parent)
+        self.tree = TagTreeView()
+        self.tree.value_changed.connect(self._update_tag_list)
+        
+        self.tag_list = QtGui.QTextEdit()
+        
+        width = self.tag_list.sizeHint().width()
+        self.tag_list.setMaximumHeight(30)
+        self.tag_list.setEnabled(False)
+        
+        
+        self.lay = QtGui.QVBoxLayout()
+        self.lay.addWidget(self.tree)
+        self.lay.addWidget(self.tag_list)
+    
+        self.setLayout(self.lay)
+        self.lay.setSpacing(0)
+        
+        
+    def _update_tag_list(self, *args, **kwds):
+        string = ""
+        for tag in self.tree.get_selected_tags():
+            string += """'""" + tag + """' ;"""
+        self.tag_list.setText(string)
+        self.value_changed.emit()
+    
+    def _set_tags(self, tags):
+        self.tree.clearSelection()
+        for tag in tags:
+            self.select(tag)
+
+    def get_tags(self):
+        return self.tree.get_selected_tags()
+    
+    def set_tags(self, tags):
+        return self.tree.set_tags(tags)
