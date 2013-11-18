@@ -1,5 +1,6 @@
 from PyQt4 import QtGui, QtCore
 from pyinstruments.curvestore.models import Tag, model_monitor
+from pyinstruments.curvestore.tag_widget import CurveTagWidget
 
 class ToolTiper(object):
     def __init__(self,parent_widget):
@@ -71,11 +72,11 @@ class CurveCreateWidget(QtGui.QWidget, object):
     
     @property
     def tags(self):
-        return self.curve_tag_widget.tags
+        return self.curve_tag_widget.get_tags()
     
     @tags.setter
     def tags(self, tags):
-        self.curve_tag_widget.tags = tags
+        self.curve_tag_widget.set_tags(tags)
         return tags
     
     @property
@@ -154,9 +155,9 @@ class CurveCreateWidget(QtGui.QWidget, object):
         self.save_button.hide()
         
     
-class CurveTagWidget(QtGui.QWidget, object):
+class CurveTagWidgetDummy(QtGui.QWidget, object):
     def __init__(self, parent=None):
-        super(CurveTagWidget, self).__init__(parent)
+        super(CurveTagWidgetDummy, self).__init__(parent)
         self._setup_ui()
         self.tree_widget.itemSelectionChanged.connect(self._update_tag_list)
         self._update_tag_list()

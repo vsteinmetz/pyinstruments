@@ -112,13 +112,14 @@ class PyMimeData(QMimeData):
 
 
 class TagModel(QAbstractItemModel):
-    def __init__(self, parent=None): 
+    def __init__(self, root=ROOT, parent=None): 
         super(TagModel, self).__init__(parent) 
 
         self.treeView = parent 
         self.headers = ['Tags'] 
 
         self.columns = 1
+        self.root = root
         
 
     def supportedDropActions(self): 
@@ -178,8 +179,7 @@ class TagModel(QAbstractItemModel):
         return self.insertRows(row, 1, parent) 
 
 
-    def insertRows(self, row, count, parent): 
-        print 'insertRows'
+    def insertRows(self, row, count, parent):
         self.beginInsertRows(parent, row, (row + (count - 1))) 
         self.endInsertRows() 
         return True 
@@ -266,21 +266,34 @@ class TagModel(QAbstractItemModel):
 
 
     def nodeFromIndex(self, index): 
-        return index.internalPointer() if index.isValid() else ROOT
+        return index.internalPointer() if index.isValid() else self.root
 
     def refresh(self):
         self.beginRemoveRows(QtCore.QModelIndex(), 0, self.rowCount(QtCore.QModelIndex())) 
-        ROOT.build_children_from_model()
+        self.root.build_children_from_model()
         self.endRemoveRows()
     
+    def child_from_name(self, index, name):
+        for count in range(self.rowCount(index)):
+            idx = self.index(count, 0, index)
+            node = self.nodeFromIndex(idx)
+            if node.name == name:
+                return idx
+                
+    def index_from_fullname(self, fullname):
+        tag_elements = fullname.split('/')
+        idx = QtCore.QModelIndex()
+        for name in tag_elements:
+            idx = self.child_from_name(idx, name)
+        return idx
 
 class TagTreeView(QTreeView):
     value_changed = QtCore.pyqtSignal()
     refresh_requested = QtCore.pyqtSignal()
     def __init__(self, parent=None): 
         super(TagTreeView, self).__init__(parent) 
-
-        self.myModel = TagModel() 
+        self.setMinimumWidth(300)
+        self.myModel = TAG_MODEL
         self.setModel(self.myModel) 
 
         self.dragEnabled() 
@@ -291,12 +304,14 @@ class TagTreeView(QTreeView):
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._contextMenu)
-        
+        #self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.refresh_requested.connect(self.refresh)
 
         self.connect(self.model(), SIGNAL("dataChanged(QModelIndex,QModelIndex)"), self.change) 
-        self.expandAll() 
+        
         self.refresh_requested.emit()
+        self.expandAll()
+    
 
 
     def get_tags(self):
@@ -307,7 +322,7 @@ class TagTreeView(QTreeView):
         return self._set_tags(tags)
         
     def _set_tags(self, tags):
-        self.tree_widget.clearSelection()
+        self.clearSelection()
         for tag in tags:
             self.select(tag)
             
@@ -316,7 +331,13 @@ class TagTreeView(QTreeView):
                 for index in self.selectedIndexes()]
         return tags
 
+    def select(self, tag):
+        index = self.model().index_from_fullname(tag)
+        self.selectionModel().select(index, QtGui.QItemSelectionModel.Select)
+        self.repaint()
+
     def selectionChanged(self, i1, i2):
+        super(TagTreeView, self).selectionChanged(i1, i2)
         self.value_changed.emit()
 
     def change(self, topLeftIndex, bottomRightIndex): 
@@ -466,13 +487,18 @@ class CurveTagWidget(QtGui.QWidget):
         self.tag_list.setText(string)
         self.value_changed.emit()
     
+
+        
+    
     def _set_tags(self, tags):
         self.tree.clearSelection()
         for tag in tags:
             self.select(tag)
-
+            
     def get_tags(self):
         return self.tree.get_selected_tags()
     
     def set_tags(self, tags):
         return self.tree.set_tags(tags)
+    
+TAG_MODEL = TagModel(ROOT)

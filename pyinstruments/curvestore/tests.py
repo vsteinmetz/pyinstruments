@@ -221,6 +221,7 @@ class TestTagModel(TestCase):
         self.assertTrue(top_level_tags()[1].childs()[0].shortname == 'tag4')
                 
 
+
 from pyinstruments.curvestore.tags import HierarchicalTag, ROOT
 from pyinstruments.curvestore.tag_widget import oldest_ancestors
 
@@ -258,6 +259,8 @@ class TestHierarchicalTag(TestCase):
         self.assertTrue(len(oldest_ancestors((ch2, ch3, ch4)))==2)        
         self.assertTrue(ch4 in oldest_ancestors((ch2, ch3, ch4)))  
         self.assertTrue(ch2 in oldest_ancestors((ch2, ch3, ch4)))     
+      
+
         
 class TestHierarchicalTagFromModelTag(TestCase):
     def test_child(self):
