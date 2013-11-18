@@ -29,6 +29,7 @@ class HierarchicalTag(object):
 
     def move(self, new_parent):
         self.model_tag().move(new_parent.fullname)
+        self.parent.children.remove(self)
         self.setParent(new_parent)
 
     def __repr__(self):

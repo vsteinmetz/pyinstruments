@@ -157,20 +157,31 @@ class TagModel(QAbstractItemModel):
             return True 
         
         dragNodes = mimedata.instance()
-        dragNodes = oldest_ancestors(dragNodes) 
+        dragNodes = oldest_ancestors(dragNodes)
         parentNode = self.nodeFromIndex(parentIndex) 
+        where = parentNode.name
+        if where=="":
+            where = "root"
+            
         if not QtGui.QMessageBox.question(QtGui.QWidget(),
                                    'Confirm move',
                                    "Do you want to move:\n" + \
                                    ','.join([dn.name for dn in dragNodes]) + \
-                                   "\nbelow: " + parentNode.name + '?!',
+                                   "\nbelow: " + where + '?!',
                                     'Cancel', 'OK'):
             return
         for dragNode in dragNodes:
             # make an copy of the node being moved 
-            newNode = deepcopy(dragNode) 
-            newNode.move(parentNode)
+            old_index = self.index_from_fullname(dragNode.fullname)
+            self.beginRemoveRows(old_index.parent(), old_index.row(), row + 1)
+            
+            node = self.nodeFromIndex(parentIndex)
+            #newNode = deepcopy(dragNode) 
+            dragNode.move(parentNode)#newNode.move(parentNode)
+            self.endRemoveRows()
             self.insertRow(len(parentNode)-1, parentIndex)
+            
+            
         self.emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), parentIndex, parentIndex) 
         return True 
 
@@ -185,11 +196,11 @@ class TagModel(QAbstractItemModel):
         return True 
 
 
-    def removeRow(self, row, parentIndex):
-        return self.removeRows(row, 1, parentIndex) 
+    def remove_row(self, row, parentIndex):
+        return self.remove_rows(row, 1, parentIndex) 
 
 
-    def removeRows(self, row, count, parentIndex):
+    def remove_rows(self, row, count, parentIndex):
         #import pdb
         #pdb.set_trace()
         #print 'row:', row, ' count:', count, 'parentIndex: ', parentIndex, 'node:', self.nodeFromIndex(parentIndex) 
@@ -264,8 +275,7 @@ class TagModel(QAbstractItemModel):
         assert row != - 1 
         return self.createIndex(row, 0, parent) 
 
-
-    def nodeFromIndex(self, index): 
+    def nodeFromIndex(self, index):
         return index.internalPointer() if index.isValid() else self.root
 
     def refresh(self):
@@ -417,7 +427,7 @@ class TagTreeView(QTreeView):
             dial.setDefaultButton(QtGui.QMessageBox.Ok);
             if dial.exec_():
                 tag = node_clicked.model_tag()
-                self.model().removeRow(index.row(), index.parent())
+                self.model().remove_row(index.row(), index.parent())
                 tag.remove()
                 
                 
