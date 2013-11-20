@@ -3,6 +3,7 @@ from pyinstruments.datastore.settings import MEDIA_ROOT
 from curve import Curve
 from curve import load as load_curve
 
+from django.db import transaction
 from PyQt4 import QtCore, QtGui
 from django.db import models
 import os
@@ -353,7 +354,8 @@ class CurveDB(models.Model, Curve):
                 if not col.name in self.params:
                     self.params[col.name] = col.default
         
-    
+
+    @transaction.commit_on_success
     def save(self):
         """
         Saves the curve in the database. If the curve is data_read_only 
@@ -386,7 +388,7 @@ class CurveDB(models.Model, Curve):
         #    models.Model.save(self)
         models.Model.save(self)
      
-     
+    @transaction.commit_on_success
     def delete(self):
         try:
             os.remove(self.get_full_filename())
