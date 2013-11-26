@@ -1,1 +1,1 @@
-from vsa_mod import on_screen,data,app,Vsa
+from vsa_mod import Vsa
