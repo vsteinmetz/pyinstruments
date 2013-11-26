@@ -21,7 +21,16 @@ class Vsa(FetcherMixin):
             self.app = ApplicationFactory.Create(True,None,None,-1) 
             # creating new one
         self.app.IsVisible = True
-
+        self._active_label = 'A'
+    
+    @property
+    def active_label(self):
+        return self._active_label
+    
+    @active_label.setter
+    def active_label(self, val):
+        self._active_label = val
+    
     def wait_done(self, meas_number=0):
         while(not self.meas_done(meas_number)):
             pass
@@ -83,6 +92,9 @@ class Vsa(FetcherMixin):
         curve.set_params(**self.params_from_meas(meas))
         curve.set_params(trace_label=label) 
         return curve
+        
+    def _get_curve(self):
+        return self.get_trace(self.active_label)
         
     def params_from_meas(self, meas):
         dic = dict()
