@@ -1,5 +1,6 @@
 from curve import Curve
 from pyhardware.utils.gui_fetch_utils import FetcherMixin
+from pyhardware.utils.guiwrappersutils import GuiWrapper
 
 from pandas import Series
 import clr
@@ -12,7 +13,8 @@ import Agilent.SA.Vsa as Vsa
 from Agilent.SA.Vsa import ApplicationFactory,TraceDataSelect
 
 
-class Vsa(FetcherMixin):
+class Vsa(GuiWrapper, FetcherMixin):
+    _fields = ["active_label"]
     def __init__(self):
         print "trying to connect to an existing vsa instance"
         self.app = ApplicationFactory.Create()
@@ -20,8 +22,25 @@ class Vsa(FetcherMixin):
             print "no vsa running, launching one"
             self.app = ApplicationFactory.Create(True,None,None,-1) 
             # creating new one
+        GuiWrapper.__init__(self)
         self.app.IsVisible = True
         self._active_label = 'A'
+    
+    def _setupUi(self, widget):
+        """sets up the graphical user interface"""
+        
+        widget._setup_vertical_layout()
+        widget._setup_horizontal_layout()
+        widget._setup_vertical_layout()
+        for field in self._fields:
+            if field == 'trace_idx':
+                widget._exit_layout()
+                widget._setup_vertical_layout()
+            choices = None
+            widget._setup_gui_element(field, choices)
+        widget._exit_layout()
+        widget._exit_layout()
+        self._setup_fetch_buttons(widget)
     
     @property
     def active_label(self):

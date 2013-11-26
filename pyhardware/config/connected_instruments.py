@@ -3,6 +3,7 @@ This module helps discover the instruments connected and their models
 """
 
 from pyhardware.config.pyinstruments_config import PyInstrumentsConfig
+from visa import VisaIOError
 
 def get_model_name(address):
     """Physically queries the instrument model at the given address"""
@@ -29,7 +30,7 @@ def get_model_name(address):
     return model
 
 
-EXISTING_ADRESSES = None
+EXISTING_ADRESSES = []
 
 def existing_addresses(recheck = True):
     """
@@ -37,9 +38,12 @@ def existing_addresses(recheck = True):
     """
     
     global EXISTING_ADRESSES
-    if recheck or EXISTING_ADRESSES == None:
-        import visa
-        EXISTING_ADRESSES = visa.get_instruments_list()
+    if recheck or EXISTING_ADRESSES==[]:
+        try:
+            import visa
+            EXISTING_ADRESSES = visa.get_instruments_list()
+        except VisaIOError:
+            print "visa seems to have a problem on this computer..."
     return EXISTING_ADRESSES
     
 def get_surrounding_instruments():
