@@ -1,0 +1,1473 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Agilent89601Setup version="16.1.254.0" schemaVersion="15.0.208.0" xmlns="http://schemas.agilent.com/89601/setup">
+  <Application>
+    <Measurements count="2" selected="conta">
+      <Measurement name="corr" wasRunning="True">
+        <State>
+          <Boolean key="AcpAcRrcEnabled" value="false" />
+          <Boolean key="AcpAcRrcEnabled.Trace10" value="false" />
+          <Boolean key="AcpAcRrcEnabled.Trace2" value="false" />
+          <Boolean key="AcpAcRrcEnabled.Trace3" value="false" />
+          <Boolean key="AcpAcRrcEnabled.Trace4" value="false" />
+          <Boolean key="AcpAcRrcEnabled.Trace5" value="false" />
+          <Boolean key="AcpAcRrcEnabled.Trace6" value="false" />
+          <Boolean key="AcpAcRrcEnabled.Trace7" value="false" />
+          <Boolean key="AcpAcRrcEnabled.Trace8" value="false" />
+          <Boolean key="AcpAcRrcEnabled.Trace9" value="false" />
+          <DoubleArray key="AcpAlpha" value="0.35 0.35 0.35 0.35 0.35" />
+          <DoubleArray key="AcpAlpha.Trace10" value="0.35 0.35 0.35 0.35 0.35" />
+          <DoubleArray key="AcpAlpha.Trace2" value="0.35 0.35 0.35 0.35 0.35" />
+          <DoubleArray key="AcpAlpha.Trace3" value="0.35 0.35 0.35 0.35 0.35" />
+          <DoubleArray key="AcpAlpha.Trace4" value="0.35 0.35 0.35 0.35 0.35" />
+          <DoubleArray key="AcpAlpha.Trace5" value="0.35 0.35 0.35 0.35 0.35" />
+          <DoubleArray key="AcpAlpha.Trace6" value="0.35 0.35 0.35 0.35 0.35" />
+          <DoubleArray key="AcpAlpha.Trace7" value="0.35 0.35 0.35 0.35 0.35" />
+          <DoubleArray key="AcpAlpha.Trace8" value="0.35 0.35 0.35 0.35 0.35" />
+          <DoubleArray key="AcpAlpha.Trace9" value="0.35 0.35 0.35 0.35 0.35" />
+          <DoubleArray key="AcpBw" value="0 0 0 0 0" />
+          <DoubleArray key="AcpBw.Trace10" value="0 0 0 0 0" />
+          <DoubleArray key="AcpBw.Trace2" value="0 0 0 0 0" />
+          <DoubleArray key="AcpBw.Trace3" value="0 0 0 0 0" />
+          <DoubleArray key="AcpBw.Trace4" value="0 0 0 0 0" />
+          <DoubleArray key="AcpBw.Trace5" value="0 0 0 0 0" />
+          <DoubleArray key="AcpBw.Trace6" value="0 0 0 0 0" />
+          <DoubleArray key="AcpBw.Trace7" value="0 0 0 0 0" />
+          <DoubleArray key="AcpBw.Trace8" value="0 0 0 0 0" />
+          <DoubleArray key="AcpBw.Trace9" value="0 0 0 0 0" />
+          <DoubleArray key="AcpOffset" value="0 0 0 0 0" />
+          <DoubleArray key="AcpOffset.Trace10" value="0 0 0 0 0" />
+          <DoubleArray key="AcpOffset.Trace2" value="0 0 0 0 0" />
+          <DoubleArray key="AcpOffset.Trace3" value="0 0 0 0 0" />
+          <DoubleArray key="AcpOffset.Trace4" value="0 0 0 0 0" />
+          <DoubleArray key="AcpOffset.Trace5" value="0 0 0 0 0" />
+          <DoubleArray key="AcpOffset.Trace6" value="0 0 0 0 0" />
+          <DoubleArray key="AcpOffset.Trace7" value="0 0 0 0 0" />
+          <DoubleArray key="AcpOffset.Trace8" value="0 0 0 0 0" />
+          <DoubleArray key="AcpOffset.Trace9" value="0 0 0 0 0" />
+          <BooleanArray key="AcpOn" value="false false false false false" />
+          <BooleanArray key="AcpOn.Trace10" value="false false false false false" />
+          <BooleanArray key="AcpOn.Trace2" value="false false false false false" />
+          <BooleanArray key="AcpOn.Trace3" value="false false false false false" />
+          <BooleanArray key="AcpOn.Trace4" value="false false false false false" />
+          <BooleanArray key="AcpOn.Trace5" value="false false false false false" />
+          <BooleanArray key="AcpOn.Trace6" value="false false false false false" />
+          <BooleanArray key="AcpOn.Trace7" value="false false false false false" />
+          <BooleanArray key="AcpOn.Trace8" value="false false false false false" />
+          <BooleanArray key="AcpOn.Trace9" value="false false false false false" />
+          <Double key="AcpRefAlpha" value="0.35" />
+          <Double key="AcpRefAlpha.Trace10" value="0.35" />
+          <Double key="AcpRefAlpha.Trace2" value="0.35" />
+          <Double key="AcpRefAlpha.Trace3" value="0.35" />
+          <Double key="AcpRefAlpha.Trace4" value="0.35" />
+          <Double key="AcpRefAlpha.Trace5" value="0.35" />
+          <Double key="AcpRefAlpha.Trace6" value="0.35" />
+          <Double key="AcpRefAlpha.Trace7" value="0.35" />
+          <Double key="AcpRefAlpha.Trace8" value="0.35" />
+          <Double key="AcpRefAlpha.Trace9" value="0.35" />
+          <Double key="AcpRefBw" value="1000000" />
+          <Double key="AcpRefBw.Trace10" value="1000000" />
+          <Double key="AcpRefBw.Trace2" value="1000000" />
+          <Double key="AcpRefBw.Trace3" value="1000000" />
+          <Double key="AcpRefBw.Trace4" value="1000000" />
+          <Double key="AcpRefBw.Trace5" value="1000000" />
+          <Double key="AcpRefBw.Trace6" value="1000000" />
+          <Double key="AcpRefBw.Trace7" value="1000000" />
+          <Double key="AcpRefBw.Trace8" value="1000000" />
+          <Double key="AcpRefBw.Trace9" value="1000000" />
+          <Double key="AcpRefOffsetFreq" value="0" />
+          <Double key="AcpRefOffsetFreq.Trace10" value="0" />
+          <Double key="AcpRefOffsetFreq.Trace2" value="0" />
+          <Double key="AcpRefOffsetFreq.Trace3" value="0" />
+          <Double key="AcpRefOffsetFreq.Trace4" value="0" />
+          <Double key="AcpRefOffsetFreq.Trace5" value="0" />
+          <Double key="AcpRefOffsetFreq.Trace6" value="0" />
+          <Double key="AcpRefOffsetFreq.Trace7" value="0" />
+          <Double key="AcpRefOffsetFreq.Trace8" value="0" />
+          <Double key="AcpRefOffsetFreq.Trace9" value="0" />
+          <Boolean key="AcpRrcEnabled" value="false" />
+          <Boolean key="AcpRrcEnabled.Trace10" value="false" />
+          <Boolean key="AcpRrcEnabled.Trace2" value="false" />
+          <Boolean key="AcpRrcEnabled.Trace3" value="false" />
+          <Boolean key="AcpRrcEnabled.Trace4" value="false" />
+          <Boolean key="AcpRrcEnabled.Trace5" value="false" />
+          <Boolean key="AcpRrcEnabled.Trace6" value="false" />
+          <Boolean key="AcpRrcEnabled.Trace7" value="false" />
+          <Boolean key="AcpRrcEnabled.Trace8" value="false" />
+          <Boolean key="AcpRrcEnabled.Trace9" value="false" />
+          <Boolean key="AcpVisible" value="false" />
+          <Boolean key="AcpVisible.Trace10" value="false" />
+          <Boolean key="AcpVisible.Trace2" value="false" />
+          <Boolean key="AcpVisible.Trace3" value="false" />
+          <Boolean key="AcpVisible.Trace4" value="false" />
+          <Boolean key="AcpVisible.Trace5" value="false" />
+          <Boolean key="AcpVisible.Trace6" value="false" />
+          <Boolean key="AcpVisible.Trace7" value="false" />
+          <Boolean key="AcpVisible.Trace8" value="false" />
+          <Boolean key="AcpVisible.Trace9" value="false" />
+          <Boolean key="AllowQuestionableSetups" value="false" />
+          <Boolean key="AutoFreqPoints" value="true" />
+          <Boolean key="AutoRange" value="false" />
+          <Int32 key="AutoRangeChan" value="1" />
+          <Boolean key="AverageFast" value="false" />
+          <Boolean key="AverageRestart" value="false" />
+          <Int16 key="AverageType" value="1" />
+          <Int32 key="AverageUpdate" value="10" />
+          <Boolean key="AverageUpdateIsCnt" value="false" />
+          <Boolean key="CalDisableTuner" value="false" />
+          <Int16 key="ConfigDemod" value="0" />
+          <Boolean key="ContinuousSweep" value="true" />
+          <Boolean key="CoupleIQChannels" value="true" />
+          <Boolean key="EqualizeInvert" value="false" />
+          <Boolean key="EqualizeInvert.InCh2" value="false" />
+          <Boolean key="EqualizeOn" value="false" />
+          <Boolean key="EqualizeOn.InCh2" value="false" />
+          <Int32 key="EqualizeReg" value="1" />
+          <Int32 key="EqualizeReg.InCh2" value="1" />
+          <Double key="ExtBW" value="40000000" />
+          <Double key="ExtBW.InCh2" value="40000000" />
+          <Double key="ExtCenterFreq" value="1000000000" />
+          <Double key="ExtCenterFreq.InCh2" value="1000000000" />
+          <Double key="ExtIF" value="70000000" />
+          <Double key="ExtIF.InCh2" value="70000000" />
+          <Boolean key="ExtMirror" value="false" />
+          <Boolean key="ExtMirror.InCh2" value="false" />
+          <Double key="GateDelay" value="0" />
+          <Double key="GateDelay.InCh2" value="0" />
+          <Boolean key="GateEnable" value="false" />
+          <Double key="GateLength" value="0.001328125" />
+          <String key="GateWindow" value="FLATTOP" />
+          <Boolean key="GateWindowSameAsMain" value="true" />
+          <Double key="InpDigCenter" value="0" />
+          <Double key="InpDigCenter.InCh2" value="0" />
+          <Double key="InpDigCenter.InCh3" value="0" />
+          <Double key="InpDigCenter.InCh4" value="0" />
+          <Double key="InpDigCenter.InCh5" value="0" />
+          <Double key="InpDigCenter.InCh6" value="0" />
+          <Double key="InpDigCenter.InCh7" value="0" />
+          <Double key="InpDigCenter.InCh8" value="0" />
+          <String key="InpDigDataBus" value="" />
+          <String key="InpDigDataBus.Idx2" value="" />
+          <String key="InpDigDataBus.InCh2" value="" />
+          <String key="InpDigDataBus.InCh2.Idx2" value="" />
+          <String key="InpDigDataBus.InCh3" value="" />
+          <String key="InpDigDataBus.InCh3.Idx2" value="" />
+          <String key="InpDigDataBus.InCh4" value="" />
+          <String key="InpDigDataBus.InCh4.Idx2" value="" />
+          <String key="InpDigDataBus.InCh5" value="" />
+          <String key="InpDigDataBus.InCh5.Idx2" value="" />
+          <String key="InpDigDataBus.InCh6" value="" />
+          <String key="InpDigDataBus.InCh6.Idx2" value="" />
+          <String key="InpDigDataBus.InCh7" value="" />
+          <String key="InpDigDataBus.InCh7.Idx2" value="" />
+          <String key="InpDigDataBus.InCh8" value="" />
+          <String key="InpDigDataBus.InCh8.Idx2" value="" />
+          <String key="InpDigDataModule" value="" />
+          <String key="InpDigDataModule.InCh2" value="" />
+          <String key="InpDigDataModule.InCh3" value="" />
+          <String key="InpDigDataModule.InCh4" value="" />
+          <String key="InpDigDataModule.InCh5" value="" />
+          <String key="InpDigDataModule.InCh6" value="" />
+          <String key="InpDigDataModule.InCh7" value="" />
+          <String key="InpDigDataModule.InCh8" value="" />
+          <Int16 key="InpDigDataPart" value="1" />
+          <Int16 key="InpDigDataPart.InCh2" value="1" />
+          <Int16 key="InpDigDataPart.InCh3" value="1" />
+          <Int16 key="InpDigDataPart.InCh4" value="1" />
+          <Int16 key="InpDigDataPart.InCh5" value="1" />
+          <Int16 key="InpDigDataPart.InCh6" value="1" />
+          <Int16 key="InpDigDataPart.InCh7" value="1" />
+          <Int16 key="InpDigDataPart.InCh8" value="1" />
+          <Double key="InpDigDataScale" value="1" />
+          <Double key="InpDigDataScale.Idx2" value="1" />
+          <Double key="InpDigDataScale.InCh2" value="1" />
+          <Double key="InpDigDataScale.InCh2.Idx2" value="1" />
+          <Double key="InpDigDataScale.InCh3" value="1" />
+          <Double key="InpDigDataScale.InCh3.Idx2" value="1" />
+          <Double key="InpDigDataScale.InCh4" value="1" />
+          <Double key="InpDigDataScale.InCh4.Idx2" value="1" />
+          <Double key="InpDigDataScale.InCh5" value="1" />
+          <Double key="InpDigDataScale.InCh5.Idx2" value="1" />
+          <Double key="InpDigDataScale.InCh6" value="1" />
+          <Double key="InpDigDataScale.InCh6.Idx2" value="1" />
+          <Double key="InpDigDataScale.InCh7" value="1" />
+          <Double key="InpDigDataScale.InCh7.Idx2" value="1" />
+          <Double key="InpDigDataScale.InCh8" value="1" />
+          <Double key="InpDigDataScale.InCh8.Idx2" value="1" />
+          <Int16 key="InpDigDataSign" value="0" />
+          <Int16 key="InpDigDataSign.InCh2" value="0" />
+          <Int16 key="InpDigDataSign.InCh3" value="0" />
+          <Int16 key="InpDigDataSign.InCh4" value="0" />
+          <Int16 key="InpDigDataSign.InCh5" value="0" />
+          <Int16 key="InpDigDataSign.InCh6" value="0" />
+          <Int16 key="InpDigDataSign.InCh7" value="0" />
+          <Int16 key="InpDigDataSign.InCh8" value="0" />
+          <Double key="InpDigSampleRate" value="1" />
+          <Double key="InpDigSampleRate.InCh2" value="1" />
+          <Double key="InpDigSampleRate.InCh3" value="1" />
+          <Double key="InpDigSampleRate.InCh4" value="1" />
+          <Double key="InpDigSampleRate.InCh5" value="1" />
+          <Double key="InpDigSampleRate.InCh6" value="1" />
+          <Double key="InpDigSampleRate.InCh7" value="1" />
+          <Double key="InpDigSampleRate.InCh8" value="1" />
+          <Double key="InpExmBias" value="0" />
+          <Double key="InpExmBias.InCh2" value="0" />
+          <Boolean key="InpExmBiasEnabled" value="false" />
+          <Boolean key="InpExmBiasEnabled.InCh2" value="false" />
+          <Double key="InpExmCableIFLoss" value="0" />
+          <Double key="InpExmCableIFLoss.InCh2" value="0" />
+          <Int32 key="InpExmHarmonic.Sb1" value="1" />
+          <Int32 key="InpExmHarmonic.Sb1.InCh2" value="1" />
+          <Boolean key="InpExmLODoublerOn.Sb1" value="false" />
+          <Boolean key="InpExmLODoublerOn.Sb1.InCh2" value="false" />
+          <Int16 key="InpExmMixerSelection" value="0" />
+          <Int16 key="InpExmMixerSelection.InCh2" value="0" />
+          <Int32 key="InpExmSubbandCount" value="1" />
+          <Int32 key="InpExmSubbandCount.InCh2" value="1" />
+          <Int32 key="InpExmSubbandCount.InCh3" value="0" />
+          <Int32 key="InputBlockSize" value="524288" />
+          <Double key="InputCenter" value="1400000" />
+          <Double key="InputCenter.InCh2" value="1400000" />
+          <Boolean key="InputCenterStepAuto" value="true" />
+          <Int32 key="InputChanConfigMode" value="0" />
+          <Int32Array key="InputChanLogicalTypes" value="1 1" />
+          <Int32Array key="InputChannelCombining" value="2 0 1 0 0 1 1" />
+          <StringArray key="InputChannelList">
+            <Item value="1:2" />
+            <Item value="1:3" />
+          </StringArray>
+          <Int32 key="InputConnector" value="0" />
+          <Int32 key="InputConnector.InCh2" value="0" />
+          <Int16 key="InputConnector.InCh3" value="0" />
+          <Int16 key="InputConnector.InCh4" value="0" />
+          <Int16 key="InputConnector.InCh5" value="0" />
+          <Int16 key="InputConnector.InCh6" value="0" />
+          <Int16 key="InputConnector.InCh7" value="0" />
+          <Int16 key="InputConnector.InCh8" value="0" />
+          <Int32 key="InputCouple" value="1" />
+          <Int32 key="InputCouple.InCh2" value="1" />
+          <Int16 key="InputCouple.InCh3" value="0" />
+          <Int16 key="InputCouple.InCh4" value="0" />
+          <Int16 key="InputCouple.InCh5" value="0" />
+          <Int16 key="InputCouple.InCh6" value="0" />
+          <Int16 key="InputCouple.InCh7" value="0" />
+          <Int16 key="InputCouple.InCh8" value="0" />
+          <Double key="InputImpedance" value="50" />
+          <Double key="InputImpedance.InCh2" value="50" />
+          <Double key="InputImpedance.InCh3" value="50" />
+          <Double key="InputImpedance.InCh4" value="50" />
+          <Double key="InputImpedance.InCh5" value="50" />
+          <Double key="InputImpedance.InCh6" value="50" />
+          <Double key="InputImpedance.InCh7" value="50" />
+          <Double key="InputImpedance.InCh8" value="50" />
+          <Double key="InputMixerLevel" value="0" />
+          <Double key="InputMixerLevel.InCh2" value="0" />
+          <Double key="InputMixerLevel.InCh3" value="1" />
+          <Double key="InputMixerLevel.InCh4" value="1" />
+          <Double key="InputMixerLevel.InCh5" value="1" />
+          <Double key="InputMixerLevel.InCh6" value="1" />
+          <Double key="InputMixerLevel.InCh7" value="1" />
+          <Double key="InputMixerLevel.InCh8" value="1" />
+          <Boolean key="InputOverloadReject" value="false" />
+          <Double key="InputRange" value="0.5" />
+          <Double key="InputRange.InCh2" value="0.5" />
+          <Double key="InputRange.InCh3" value="1" />
+          <Double key="InputRange.InCh4" value="1" />
+          <Double key="InputRange.InCh5" value="1" />
+          <Double key="InputRange.InCh6" value="1" />
+          <Double key="InputRange.InCh7" value="1" />
+          <Double key="InputRange.InCh8" value="1" />
+          <Double key="InputRefImped" value="50" />
+          <Double key="InputRefImped.InCh2" value="50" />
+          <Double key="InputRefImped.InCh3" value="50" />
+          <Double key="InputRefImped.InCh4" value="50" />
+          <Double key="InputRefImped.InCh5" value="50" />
+          <Double key="InputRefImped.InCh6" value="50" />
+          <Double key="InputRefImped.InCh7" value="50" />
+          <Double key="InputRefImped.InCh8" value="50" />
+          <Boolean key="InputRefImpedanceIsConnector" value="true" />
+          <Boolean key="InputRefImpedanceIsConnector.InCh2" value="true" />
+          <Boolean key="InputRefImpedanceIsConnector.InCh3" value="true" />
+          <Boolean key="InputRefImpedanceIsConnector.InCh4" value="true" />
+          <Boolean key="InputRefImpedanceIsConnector.InCh5" value="true" />
+          <Boolean key="InputRefImpedanceIsConnector.InCh6" value="true" />
+          <Boolean key="InputRefImpedanceIsConnector.InCh7" value="true" />
+          <Boolean key="InputRefImpedanceIsConnector.InCh8" value="true" />
+          <Double key="InputSpan" value="2000000" />
+          <Boolean key="InputZoom" value="true" />
+          <Boolean key="InputZoom.InCh2" value="true" />
+          <Boolean key="IsShareEnabled" value="true" />
+          <String key="LimName" value="" />
+          <String key="LimName.Trace10" value="" />
+          <String key="LimName.Trace2" value="" />
+          <String key="LimName.Trace3" value="" />
+          <String key="LimName.Trace4" value="" />
+          <String key="LimName.Trace5" value="" />
+          <String key="LimName.Trace6" value="" />
+          <String key="LimName.Trace7" value="" />
+          <String key="LimName.Trace8" value="" />
+          <String key="LimName.Trace9" value="" />
+          <Boolean key="LimVisible" value="true" />
+          <Boolean key="LimVisible.Trace10" value="true" />
+          <Boolean key="LimVisible.Trace2" value="true" />
+          <Boolean key="LimVisible.Trace3" value="true" />
+          <Boolean key="LimVisible.Trace4" value="true" />
+          <Boolean key="LimVisible.Trace5" value="true" />
+          <Boolean key="LimVisible.Trace6" value="true" />
+          <Boolean key="LimVisible.Trace7" value="true" />
+          <Boolean key="LimVisible.Trace8" value="true" />
+          <Boolean key="LimVisible.Trace9" value="true" />
+          <Double key="MeasCenter" value="1400000" />
+          <Double key="MeasCenter.InCh2" value="1400000" />
+          <Int32Array key="MeasChanMap" value="0 1" />
+          <Boolean key="MirrorSpectrum" value="false" />
+          <Int32 key="NumberOfAverages" value="10000" />
+          <Double key="ObwPercent" value="0.99" />
+          <Double key="ObwPercent.Trace10" value="0.99" />
+          <Double key="ObwPercent.Trace2" value="0.99" />
+          <Double key="ObwPercent.Trace3" value="0.99" />
+          <Double key="ObwPercent.Trace4" value="0.99" />
+          <Double key="ObwPercent.Trace5" value="0.99" />
+          <Double key="ObwPercent.Trace6" value="0.99" />
+          <Double key="ObwPercent.Trace7" value="0.99" />
+          <Double key="ObwPercent.Trace8" value="0.99" />
+          <Double key="ObwPercent.Trace9" value="0.99" />
+          <Boolean key="ObwVisible" value="false" />
+          <Boolean key="ObwVisible.Trace10" value="false" />
+          <Boolean key="ObwVisible.Trace2" value="false" />
+          <Boolean key="ObwVisible.Trace3" value="false" />
+          <Boolean key="ObwVisible.Trace4" value="false" />
+          <Boolean key="ObwVisible.Trace5" value="false" />
+          <Boolean key="ObwVisible.Trace6" value="false" />
+          <Boolean key="ObwVisible.Trace7" value="false" />
+          <Boolean key="ObwVisible.Trace8" value="false" />
+          <Boolean key="ObwVisible.Trace9" value="false" />
+          <Double key="OverlapAverageMaxPercentage" value="0" />
+          <Double key="OverlapMaxPercentage" value="90" />
+          <Boolean key="PlayLoop" value="true" />
+          <Boolean key="PlaybackOn" value="false" />
+          <Int16 key="RbwType" value="2" />
+          <Boolean key="RealTimeForce" value="false" />
+          <Int32 key="RecTrigChannel" value="1" />
+          <Double key="RecTrigDelay" value="0" />
+          <Double key="RecTrigDelay.InCh2" value="0" />
+          <Double key="RecTrigDelay.InCh3" value="0" />
+          <Double key="RecTrigDelay.InCh4" value="0" />
+          <Double key="RecTrigDelay.InCh5" value="0" />
+          <Double key="RecTrigDelay.InCh6" value="0" />
+          <Double key="RecTrigDelay.InCh7" value="0" />
+          <Double key="RecTrigDelay.InCh8" value="0" />
+          <Double key="RecTrigHoldoff" value="0" />
+          <Int32 key="RecTrigHoldoffType" value="1" />
+          <Double key="RecTrigLevel" value="0" />
+          <Double key="RecTrigMagLevel" value="0.01" />
+          <Int32 key="RecTrigSlope" value="1" />
+          <Int32 key="RecTrigType" value="0" />
+          <Boolean key="RecordMaxSize" value="false" />
+          <Boolean key="RecordOn" value="false" />
+          <Boolean key="RecordSettle" value="true" />
+          <Double key="RecordSize" value="50" />
+          <String key="RecordSizeUnit" value="records" />
+          <Double key="ResBW" value="30" />
+          <Boolean key="ResBWArb" value="false" />
+          <Boolean key="SigTrk" value="false" />
+          <Int16 key="SigTrkChan" value="1" />
+          <Double key="TimeMainLength" value="0.127312109375" />
+          <Boolean key="TimeResolutionAuto" value="false" />
+          <Int32 key="TriggerChannel" value="1" />
+          <Double key="TriggerDelay" value="0" />
+          <Double key="TriggerDelay.InCh2" value="0" />
+          <Double key="TriggerDelay.InCh3" value="0" />
+          <Double key="TriggerDelay.InCh4" value="0" />
+          <Double key="TriggerDelay.InCh5" value="0" />
+          <Double key="TriggerDelay.InCh6" value="0" />
+          <Double key="TriggerDelay.InCh7" value="0" />
+          <Double key="TriggerDelay.InCh8" value="0" />
+          <Double key="TriggerExtLevel" value="2" />
+          <Double key="TriggerHoldoff" value="0" />
+          <Int32 key="TriggerHoldoffType" value="0" />
+          <Double key="TriggerLevel" value="0" />
+          <Double key="TriggerMagLevel" value="0.01" />
+          <Double key="TriggerPeriodicPeriod" value="0.00025" />
+          <Double key="TriggerPeriodicSyncOffset" value="0" />
+          <Double key="TriggerPeriodicSyncOffset.InCh2" value="0" />
+          <Double key="TriggerPeriodicSyncOffset.InCh3" value="0" />
+          <Double key="TriggerPeriodicSyncOffset.InCh4" value="0" />
+          <Double key="TriggerPeriodicSyncOffset.InCh5" value="0" />
+          <Double key="TriggerPeriodicSyncOffset.InCh6" value="0" />
+          <Double key="TriggerPeriodicSyncOffset.InCh7" value="0" />
+          <Double key="TriggerPeriodicSyncOffset.InCh8" value="0" />
+          <Int32 key="TriggerPeriodicSyncSrc" value="0" />
+          <Int32 key="TriggerSlope" value="1" />
+          <Int32 key="TriggerType" value="0" />
+          <Boolean key="TunersSlaved" value="true" />
+          <Boolean key="UserCalConstsOn" value="false" />
+          <Boolean key="UserCalConstsOn.InCh2" value="false" />
+          <Double key="UserDcOffset" value="0" />
+          <Double key="UserDcOffset.InCh2" value="0" />
+          <Double key="UserDelay" value="0" />
+          <Double key="UserDelay.InCh2" value="0" />
+          <Double key="UserGain" value="1" />
+          <Double key="UserGain.InCh2" value="1" />
+          <String key="UserIfCalFile" value="" />
+          <String key="UserIfCalFile.InCh2" value="" />
+          <Boolean key="UserIfCalOn" value="false" />
+          <Boolean key="UserIfCalOn.InCh2" value="false" />
+          <Boolean key="UserRestart" value="true" />
+          <String key="UserRfCalFile" value="" />
+          <String key="UserRfCalFile.InCh2" value="" />
+          <Boolean key="UserRfCalOn" value="false" />
+          <Boolean key="UserRfCalOn.InCh2" value="false" />
+          <Boolean key="UsingExtConv" value="false" />
+          <Boolean key="UsingExtConv.InCh2" value="false" />
+          <Int32 key="VsaCurIFType" value="2" />
+          <Double key="VsaMaxIfBw" value="25000000" />
+          <String key="WindowType" value="FLATTOP" />
+        </State>
+        <AnalyzerConfiguration type="Analyzer" version="16.1.254.0" schemaVersion="15.0.17.0">
+          <Name>Averell</Name>
+          <ExtRefFreq>10000000</ExtRefFreq>
+          <EnableRefLock>false</EnableRefLock>
+          <ExtRefMaster>
+            <InstrumentType>Adc</InstrumentType>
+            <Address>TCPIP0::Averell::inst0::INSTR</Address>
+          </ExtRefMaster>
+          <AutoCalOn>false</AutoCalOn>
+          <Groups>
+            <Group>
+              <Name>Agilent X-Series Signal Analyzer</Name>
+              <GroupInfoGuid>a9e21d7d-822a-4276-b9e0-aa6215a41c73</GroupInfoGuid>
+              <GroupInfoType>Unknown</GroupInfoType>
+              <Instruments>
+                <Instrument>
+                  <Id>
+                    <InstrumentType>Adc</InstrumentType>
+                    <Address>TCPIP0::Averell::inst0::INSTR</Address>
+                  </Id>
+                  <Model>N9020A</Model>
+                  <SerialNumber>MY52090175</SerialNumber>
+                  <DriverRevision>19.15.0.0</DriverRevision>
+                  <FirmwareRevision>17.72.12.0 (A.10.52)</FirmwareRevision>
+                  <Manufacturer>Agilent Technologies</Manufacturer>
+                </Instrument>
+              </Instruments>
+            </Group>
+          </Groups>
+        </AnalyzerConfiguration>
+        <Input>
+          <Extensions>
+            <State>
+              <Int16 key="ADCDither" value="0" />
+              <Int16 key="ADCDither.InCh2" value="0" />
+              <Int16 key="ADCDitherBaseband" value="0" />
+              <Int16 key="ADCDitherBaseband.InCh2" value="0" />
+              <Int16 key="CaptureBitPacking" value="0" />
+              <Int16 key="CaptureBitPacking.InCh2" value="0" />
+              <Int16 key="ExtRefLockBW" value="0" />
+              <Int16 key="ExtRefLockBW.InCh2" value="0" />
+              <Int16 key="ExtTriggerLoc" value="1" />
+              <Int16 key="ExtTriggerLoc.InCh2" value="0" />
+              <Int16 key="IFType" value="0" />
+              <Int16 key="IFType.InCh2" value="0" />
+              <Int32 key="InstrUserCorrections" value="0" />
+              <Int32 key="InstrUserCorrections.InCh2" value="0" />
+              <Int16 key="PhaseNoiseOptDualLoop" value="0" />
+              <Int16 key="PhaseNoiseOptDualLoop.InCh2" value="0" />
+              <Int16 key="uWPathControl" value="0" />
+              <Int16 key="uWPathControl.InCh2" value="0" />
+            </State>
+          </Extensions>
+        </Input>
+      </Measurement>
+      <MeasurementX name="conta" extensionType="Agilent.SA.Vsa.AnalogDemod.MeasurementExtension" wasRunning="True">
+        <State>
+          <Boolean key="AllowQuestionableSetups" value="false" />
+          <Boolean key="AnDemodAM" value="true" />
+          <Boolean key="AnDemodAM.InCh2" value="true" />
+          <Int16 key="AnDemodAMUnits" value="0" />
+          <Int16 key="AnDemodAMUnits.InCh2" value="0" />
+          <Boolean key="AnDemodAutoFreq" value="false" />
+          <Boolean key="AnDemodAutoFreq.InCh2" value="false" />
+          <Boolean key="AnDemodAutoPhase" value="false" />
+          <Boolean key="AnDemodAutoPhase.InCh2" value="false" />
+          <Boolean key="AnDemodFM" value="false" />
+          <Boolean key="AnDemodFM.InCh2" value="false" />
+          <Boolean key="AnDemodPM" value="false" />
+          <Boolean key="AnDemodPM.InCh2" value="false" />
+          <Boolean key="AutoFreqPoints" value="true" />
+          <Boolean key="AutoRange" value="false" />
+          <Int32 key="AutoRangeChan" value="1" />
+          <Boolean key="AverageFast" value="false" />
+          <Boolean key="AverageRestart" value="true" />
+          <Int16 key="AverageType" value="2" />
+          <Int32 key="AverageUpdate" value="10" />
+          <Boolean key="AverageUpdateIsCnt" value="false" />
+          <Boolean key="CalDisableTuner" value="false" />
+          <Int16 key="ConfigDemod" value="1" />
+          <Boolean key="ContinuousSweep" value="true" />
+          <Boolean key="CoupleIQChannels" value="true" />
+          <Boolean key="DemodApskCustRingEnabled" value="false" />
+          <Boolean key="DemodApskCustRingEnabled.Ring2" value="false" />
+          <Boolean key="DemodApskCustRingEnabled.Ring3" value="false" />
+          <Boolean key="DemodApskCustRingEnabled.Ring4" value="false" />
+          <Boolean key="DemodApskCustRingEnabled.Ring5" value="false" />
+          <Boolean key="DemodApskCustRingEnabled.Ring6" value="false" />
+          <Boolean key="DemodApskCustRingEnabled.Ring7" value="false" />
+          <Boolean key="DemodApskCustRingEnabled.Ring8" value="false" />
+          <Double key="DemodApskCustRingMag" value="0" />
+          <Double key="DemodApskCustRingMag.Ring2" value="0" />
+          <Double key="DemodApskCustRingMag.Ring3" value="0" />
+          <Double key="DemodApskCustRingMag.Ring4" value="0" />
+          <Double key="DemodApskCustRingMag.Ring5" value="0" />
+          <Double key="DemodApskCustRingMag.Ring6" value="0" />
+          <Double key="DemodApskCustRingMag.Ring7" value="0" />
+          <Double key="DemodApskCustRingMag.Ring8" value="0" />
+          <Int32 key="DemodApskCustRingNumStates" value="1" />
+          <Int32 key="DemodApskCustRingNumStates.Ring2" value="1" />
+          <Int32 key="DemodApskCustRingNumStates.Ring3" value="1" />
+          <Int32 key="DemodApskCustRingNumStates.Ring4" value="1" />
+          <Int32 key="DemodApskCustRingNumStates.Ring5" value="1" />
+          <Int32 key="DemodApskCustRingNumStates.Ring6" value="1" />
+          <Int32 key="DemodApskCustRingNumStates.Ring7" value="1" />
+          <Int32 key="DemodApskCustRingNumStates.Ring8" value="1" />
+          <Double key="DemodApskCustRingPhase" value="0" />
+          <Double key="DemodApskCustRingPhase.Ring2" value="0" />
+          <Double key="DemodApskCustRingPhase.Ring3" value="0" />
+          <Double key="DemodApskCustRingPhase.Ring4" value="0" />
+          <Double key="DemodApskCustRingPhase.Ring5" value="0" />
+          <Double key="DemodApskCustRingPhase.Ring6" value="0" />
+          <Double key="DemodApskCustRingPhase.Ring7" value="0" />
+          <Double key="DemodApskCustRingPhase.Ring8" value="0" />
+          <Boolean key="DemodApskCustRingValid" value="true" />
+          <Boolean key="DemodApskCustRingValid.Ring2" value="true" />
+          <Boolean key="DemodApskCustRingValid.Ring3" value="true" />
+          <Boolean key="DemodApskCustRingValid.Ring4" value="true" />
+          <Boolean key="DemodApskCustRingValid.Ring5" value="true" />
+          <Boolean key="DemodApskCustRingValid.Ring6" value="true" />
+          <Boolean key="DemodApskCustRingValid.Ring7" value="true" />
+          <Boolean key="DemodApskCustRingValid.Ring8" value="true" />
+          <Double key="DemodApskRing2Ratio" value="2.53" />
+          <Double key="DemodApskRing3Ratio" value="4.3" />
+          <Float key="DemodClockDelayAdjust" value="0" />
+          <Boolean key="DemodCpmAutoH" value="false" />
+          <Int32 key="DemodCpmH" value="4" />
+          <Boolean key="DemodEqualizerAdapt" value="true" />
+          <Double key="DemodEqualizerConvergence" value="1E-07" />
+          <Int16 key="DemodEqualizerFilterLength" value="21" />
+          <Boolean key="DemodEqualizerReset" value="false" />
+          <Boolean key="DemodEqualizerState" value="false" />
+          <Double key="DemodFilterAlpha" value="0.35" />
+          <Boolean key="DemodLowSNR" value="false" />
+          <Int16 key="DemodMeasFilterReg" value="1" />
+          <Int32 key="DemodMeasFilterType" value="3" />
+          <Boolean key="DemodMirrorSpectrum" value="false" />
+          <Boolean key="DemodNormalize" value="true" />
+          <Int32 key="DemodNumSymbols" value="157" />
+          <Boolean key="DemodOQPSKAlignIQ" value="false" />
+          <Int32 key="DemodOutputPtsPerSymbol" value="5" />
+          <Boolean key="DemodPPSCoupled" value="false" />
+          <Boolean key="DemodPulseSearch" value="true" />
+          <Int16 key="DemodRefFilterReg" value="1" />
+          <Int16 key="DemodRefFilterType" value="2" />
+          <Boolean key="DemodRxFiltered" value="false" />
+          <Double key="DemodSearchLength" value="0.0483539095" />
+          <Double key="DemodStarQamR2R1" value="2" />
+          <Double key="DemodStarQamR3R1" value="3" />
+          <Double key="DemodStarQamR4R1" value="4" />
+          <Double key="DemodSymbolRate" value="24300" />
+          <Int16 key="DemodSyncOffset" value="0" />
+          <String key="DemodSyncPattern" value="" />
+          <Boolean key="DemodSyncSearch" value="false" />
+          <Int16 key="DemodType" value="6" />
+          <Boolean key="DemodUseLegacyAYA" value="false" />
+          <Boolean key="DemodUserRefFilterLikeHalfSine" value="false" />
+          <Double key="DemodUserRotate" value="0" />
+          <String key="DisplayLayout" value="6" />
+          <Boolean key="EqualizeInvert" value="false" />
+          <Boolean key="EqualizeInvert.InCh2" value="false" />
+          <Boolean key="EqualizeOn" value="false" />
+          <Boolean key="EqualizeOn.InCh2" value="false" />
+          <Int32 key="EqualizeReg" value="1" />
+          <Int32 key="EqualizeReg.InCh2" value="1" />
+          <Double key="ExtBW" value="40000000" />
+          <Double key="ExtBW.InCh2" value="40000000" />
+          <Double key="ExtCenterFreq" value="1000000000" />
+          <Double key="ExtCenterFreq.InCh2" value="1000000000" />
+          <Double key="ExtIF" value="70000000" />
+          <Double key="ExtIF.InCh2" value="70000000" />
+          <Boolean key="ExtMirror" value="false" />
+          <Boolean key="ExtMirror.InCh2" value="false" />
+          <Double key="GateDelay" value="0" />
+          <Double key="GateDelay.InCh2" value="0" />
+          <Boolean key="GateEnable" value="false" />
+          <Double key="GateLength" value="0.006796875" />
+          <String key="GateWindow" value="GAUSSTOP" />
+          <Boolean key="GateWindowSameAsMain" value="true" />
+          <Double key="InpDigCenter" value="0" />
+          <Double key="InpDigCenter.InCh2" value="0" />
+          <Double key="InpDigCenter.InCh3" value="0" />
+          <Double key="InpDigCenter.InCh4" value="0" />
+          <Double key="InpDigCenter.InCh5" value="0" />
+          <Double key="InpDigCenter.InCh6" value="0" />
+          <Double key="InpDigCenter.InCh7" value="0" />
+          <Double key="InpDigCenter.InCh8" value="0" />
+          <String key="InpDigDataBus" value="" />
+          <String key="InpDigDataBus.Idx2" value="" />
+          <String key="InpDigDataBus.InCh2" value="" />
+          <String key="InpDigDataBus.InCh2.Idx2" value="" />
+          <String key="InpDigDataBus.InCh3" value="" />
+          <String key="InpDigDataBus.InCh3.Idx2" value="" />
+          <String key="InpDigDataBus.InCh4" value="" />
+          <String key="InpDigDataBus.InCh4.Idx2" value="" />
+          <String key="InpDigDataBus.InCh5" value="" />
+          <String key="InpDigDataBus.InCh5.Idx2" value="" />
+          <String key="InpDigDataBus.InCh6" value="" />
+          <String key="InpDigDataBus.InCh6.Idx2" value="" />
+          <String key="InpDigDataBus.InCh7" value="" />
+          <String key="InpDigDataBus.InCh7.Idx2" value="" />
+          <String key="InpDigDataBus.InCh8" value="" />
+          <String key="InpDigDataBus.InCh8.Idx2" value="" />
+          <String key="InpDigDataModule" value="" />
+          <String key="InpDigDataModule.InCh2" value="" />
+          <String key="InpDigDataModule.InCh3" value="" />
+          <String key="InpDigDataModule.InCh4" value="" />
+          <String key="InpDigDataModule.InCh5" value="" />
+          <String key="InpDigDataModule.InCh6" value="" />
+          <String key="InpDigDataModule.InCh7" value="" />
+          <String key="InpDigDataModule.InCh8" value="" />
+          <Int16 key="InpDigDataPart" value="1" />
+          <Int16 key="InpDigDataPart.InCh2" value="1" />
+          <Int16 key="InpDigDataPart.InCh3" value="1" />
+          <Int16 key="InpDigDataPart.InCh4" value="1" />
+          <Int16 key="InpDigDataPart.InCh5" value="1" />
+          <Int16 key="InpDigDataPart.InCh6" value="1" />
+          <Int16 key="InpDigDataPart.InCh7" value="1" />
+          <Int16 key="InpDigDataPart.InCh8" value="1" />
+          <Double key="InpDigDataScale" value="1" />
+          <Double key="InpDigDataScale.Idx2" value="1" />
+          <Double key="InpDigDataScale.InCh2" value="1" />
+          <Double key="InpDigDataScale.InCh2.Idx2" value="1" />
+          <Double key="InpDigDataScale.InCh3" value="1" />
+          <Double key="InpDigDataScale.InCh3.Idx2" value="1" />
+          <Double key="InpDigDataScale.InCh4" value="1" />
+          <Double key="InpDigDataScale.InCh4.Idx2" value="1" />
+          <Double key="InpDigDataScale.InCh5" value="1" />
+          <Double key="InpDigDataScale.InCh5.Idx2" value="1" />
+          <Double key="InpDigDataScale.InCh6" value="1" />
+          <Double key="InpDigDataScale.InCh6.Idx2" value="1" />
+          <Double key="InpDigDataScale.InCh7" value="1" />
+          <Double key="InpDigDataScale.InCh7.Idx2" value="1" />
+          <Double key="InpDigDataScale.InCh8" value="1" />
+          <Double key="InpDigDataScale.InCh8.Idx2" value="1" />
+          <Int16 key="InpDigDataSign" value="0" />
+          <Int16 key="InpDigDataSign.InCh2" value="0" />
+          <Int16 key="InpDigDataSign.InCh3" value="0" />
+          <Int16 key="InpDigDataSign.InCh4" value="0" />
+          <Int16 key="InpDigDataSign.InCh5" value="0" />
+          <Int16 key="InpDigDataSign.InCh6" value="0" />
+          <Int16 key="InpDigDataSign.InCh7" value="0" />
+          <Int16 key="InpDigDataSign.InCh8" value="0" />
+          <Double key="InpDigSampleRate" value="1" />
+          <Double key="InpDigSampleRate.InCh2" value="1" />
+          <Double key="InpDigSampleRate.InCh3" value="1" />
+          <Double key="InpDigSampleRate.InCh4" value="1" />
+          <Double key="InpDigSampleRate.InCh5" value="1" />
+          <Double key="InpDigSampleRate.InCh6" value="1" />
+          <Double key="InpDigSampleRate.InCh7" value="1" />
+          <Double key="InpDigSampleRate.InCh8" value="1" />
+          <Double key="InpExmBias" value="0" />
+          <Double key="InpExmBias.InCh2" value="0" />
+          <Boolean key="InpExmBiasEnabled" value="false" />
+          <Boolean key="InpExmBiasEnabled.InCh2" value="false" />
+          <Double key="InpExmCableIFLoss" value="0" />
+          <Double key="InpExmCableIFLoss.InCh2" value="0" />
+          <Int32 key="InpExmHarmonic.Sb1" value="1" />
+          <Int32 key="InpExmHarmonic.Sb1.InCh2" value="1" />
+          <Boolean key="InpExmLODoublerOn.Sb1" value="false" />
+          <Boolean key="InpExmLODoublerOn.Sb1.InCh2" value="false" />
+          <Int16 key="InpExmMixerSelection" value="0" />
+          <Int16 key="InpExmMixerSelection.InCh2" value="0" />
+          <Int32 key="InpExmSubbandCount" value="1" />
+          <Int32 key="InpExmSubbandCount.InCh2" value="1" />
+          <Int32 key="InpExmSubbandCount.InCh3" value="0" />
+          <Int32 key="InputBlockSize" value="8192" />
+          <Double key="InputCenter" value="1128747" />
+          <Double key="InputCenter.InCh2" value="1128747" />
+          <Boolean key="InputCenterStepAuto" value="true" />
+          <Int32 key="InputChanConfigMode" value="0" />
+          <Int32Array key="InputChanLogicalTypes" value="1 1" />
+          <Int32Array key="InputChannelCombining" value="2 0 1 0 0 1 1" />
+          <StringArray key="InputChannelList">
+            <Item value="1:2" />
+            <Item value="1:3" />
+          </StringArray>
+          <Int32 key="InputConnector" value="0" />
+          <Int32 key="InputConnector.InCh2" value="0" />
+          <Int16 key="InputConnector.InCh3" value="0" />
+          <Int16 key="InputConnector.InCh4" value="0" />
+          <Int16 key="InputConnector.InCh5" value="0" />
+          <Int16 key="InputConnector.InCh6" value="0" />
+          <Int16 key="InputConnector.InCh7" value="0" />
+          <Int16 key="InputConnector.InCh8" value="0" />
+          <Int32 key="InputCouple" value="1" />
+          <Int32 key="InputCouple.InCh2" value="1" />
+          <Int16 key="InputCouple.InCh3" value="0" />
+          <Int16 key="InputCouple.InCh4" value="0" />
+          <Int16 key="InputCouple.InCh5" value="0" />
+          <Int16 key="InputCouple.InCh6" value="0" />
+          <Int16 key="InputCouple.InCh7" value="0" />
+          <Int16 key="InputCouple.InCh8" value="0" />
+          <Double key="InputImpedance" value="50" />
+          <Double key="InputImpedance.InCh2" value="50" />
+          <Double key="InputImpedance.InCh3" value="50" />
+          <Double key="InputImpedance.InCh4" value="50" />
+          <Double key="InputImpedance.InCh5" value="50" />
+          <Double key="InputImpedance.InCh6" value="50" />
+          <Double key="InputImpedance.InCh7" value="50" />
+          <Double key="InputImpedance.InCh8" value="50" />
+          <Double key="InputMixerLevel" value="0" />
+          <Double key="InputMixerLevel.InCh2" value="0" />
+          <Double key="InputMixerLevel.InCh3" value="1" />
+          <Double key="InputMixerLevel.InCh4" value="1" />
+          <Double key="InputMixerLevel.InCh5" value="1" />
+          <Double key="InputMixerLevel.InCh6" value="1" />
+          <Double key="InputMixerLevel.InCh7" value="1" />
+          <Double key="InputMixerLevel.InCh8" value="1" />
+          <Boolean key="InputOverloadReject" value="false" />
+          <Double key="InputRange" value="0.5" />
+          <Double key="InputRange.InCh2" value="0.5" />
+          <Double key="InputRange.InCh3" value="1" />
+          <Double key="InputRange.InCh4" value="1" />
+          <Double key="InputRange.InCh5" value="1" />
+          <Double key="InputRange.InCh6" value="1" />
+          <Double key="InputRange.InCh7" value="1" />
+          <Double key="InputRange.InCh8" value="1" />
+          <Double key="InputRefImped" value="50" />
+          <Double key="InputRefImped.InCh2" value="50" />
+          <Double key="InputRefImped.InCh3" value="50" />
+          <Double key="InputRefImped.InCh4" value="50" />
+          <Double key="InputRefImped.InCh5" value="50" />
+          <Double key="InputRefImped.InCh6" value="50" />
+          <Double key="InputRefImped.InCh7" value="50" />
+          <Double key="InputRefImped.InCh8" value="50" />
+          <Boolean key="InputRefImpedanceIsConnector" value="true" />
+          <Boolean key="InputRefImpedanceIsConnector.InCh2" value="true" />
+          <Boolean key="InputRefImpedanceIsConnector.InCh3" value="true" />
+          <Boolean key="InputRefImpedanceIsConnector.InCh4" value="true" />
+          <Boolean key="InputRefImpedanceIsConnector.InCh5" value="true" />
+          <Boolean key="InputRefImpedanceIsConnector.InCh6" value="true" />
+          <Boolean key="InputRefImpedanceIsConnector.InCh7" value="true" />
+          <Boolean key="InputRefImpedanceIsConnector.InCh8" value="true" />
+          <Double key="InputSpan" value="10000" />
+          <Boolean key="InputZoom" value="true" />
+          <Boolean key="InputZoom.InCh2" value="true" />
+          <Boolean key="IsShareEnabled" value="true" />
+          <Double key="MeasCenter" value="1128747" />
+          <Double key="MeasCenter.InCh2" value="1128747" />
+          <Int32Array key="MeasChanMap" value="0 1" />
+          <Boolean key="MirrorSpectrum" value="false" />
+          <Int32 key="NumberOfAverages" value="10" />
+          <Double key="OverlapAverageMaxPercentage" value="0" />
+          <Double key="OverlapMaxPercentage" value="90" />
+          <Boolean key="PlayLoop" value="true" />
+          <Boolean key="PlaybackOn" value="false" />
+          <Int16 key="RbwType" value="2" />
+          <Boolean key="RealTimeForce" value="false" />
+          <Int32 key="RecTrigChannel" value="1" />
+          <Double key="RecTrigDelay" value="0" />
+          <Double key="RecTrigDelay.InCh2" value="0" />
+          <Double key="RecTrigDelay.InCh3" value="0" />
+          <Double key="RecTrigDelay.InCh4" value="0" />
+          <Double key="RecTrigDelay.InCh5" value="0" />
+          <Double key="RecTrigDelay.InCh6" value="0" />
+          <Double key="RecTrigDelay.InCh7" value="0" />
+          <Double key="RecTrigDelay.InCh8" value="0" />
+          <Double key="RecTrigHoldoff" value="0" />
+          <Int32 key="RecTrigHoldoffType" value="1" />
+          <Double key="RecTrigLevel" value="0" />
+          <Double key="RecTrigMagLevel" value="0.01" />
+          <Int32 key="RecTrigSlope" value="1" />
+          <Int32 key="RecTrigType" value="0" />
+          <Boolean key="RecordMaxSize" value="false" />
+          <Boolean key="RecordOn" value="false" />
+          <Boolean key="RecordSettle" value="true" />
+          <Double key="RecordSize" value="50" />
+          <String key="RecordSizeUnit" value="records" />
+          <Double key="ResBW" value="10" />
+          <Boolean key="ResBWArb" value="false" />
+          <Boolean key="SigTrk" value="false" />
+          <Int16 key="SigTrkChan" value="1" />
+          <Double key="TimeMainLength" value="0.2215625" />
+          <Boolean key="TimeResolutionAuto" value="false" />
+          <Int32 key="TriggerChannel" value="1" />
+          <Double key="TriggerDelay" value="0" />
+          <Double key="TriggerDelay.InCh2" value="0" />
+          <Double key="TriggerDelay.InCh3" value="0" />
+          <Double key="TriggerDelay.InCh4" value="0" />
+          <Double key="TriggerDelay.InCh5" value="0" />
+          <Double key="TriggerDelay.InCh6" value="0" />
+          <Double key="TriggerDelay.InCh7" value="0" />
+          <Double key="TriggerDelay.InCh8" value="0" />
+          <Double key="TriggerExtLevel" value="2" />
+          <Double key="TriggerHoldoff" value="0" />
+          <Int32 key="TriggerHoldoffType" value="0" />
+          <Double key="TriggerLevel" value="0" />
+          <Double key="TriggerMagLevel" value="0.01" />
+          <Double key="TriggerPeriodicPeriod" value="0.00025" />
+          <Double key="TriggerPeriodicSyncOffset" value="0" />
+          <Double key="TriggerPeriodicSyncOffset.InCh2" value="0" />
+          <Double key="TriggerPeriodicSyncOffset.InCh3" value="0" />
+          <Double key="TriggerPeriodicSyncOffset.InCh4" value="0" />
+          <Double key="TriggerPeriodicSyncOffset.InCh5" value="0" />
+          <Double key="TriggerPeriodicSyncOffset.InCh6" value="0" />
+          <Double key="TriggerPeriodicSyncOffset.InCh7" value="0" />
+          <Double key="TriggerPeriodicSyncOffset.InCh8" value="0" />
+          <Int32 key="TriggerPeriodicSyncSrc" value="0" />
+          <Int32 key="TriggerSlope" value="1" />
+          <Int32 key="TriggerType" value="0" />
+          <Boolean key="TunersSlaved" value="true" />
+          <Boolean key="UserCalConstsOn" value="false" />
+          <Boolean key="UserCalConstsOn.InCh2" value="false" />
+          <Double key="UserDcOffset" value="0" />
+          <Double key="UserDcOffset.InCh2" value="0" />
+          <Double key="UserDelay" value="0" />
+          <Double key="UserDelay.InCh2" value="0" />
+          <Double key="UserGain" value="1" />
+          <Double key="UserGain.InCh2" value="1" />
+          <String key="UserIfCalFile" value="" />
+          <String key="UserIfCalFile.InCh2" value="" />
+          <Boolean key="UserIfCalOn" value="false" />
+          <Boolean key="UserIfCalOn.InCh2" value="false" />
+          <Boolean key="UserRestart" value="true" />
+          <String key="UserRfCalFile" value="" />
+          <String key="UserRfCalFile.InCh2" value="" />
+          <Boolean key="UserRfCalOn" value="false" />
+          <Boolean key="UserRfCalOn.InCh2" value="false" />
+          <Boolean key="UsingExtConv" value="false" />
+          <Boolean key="UsingExtConv.InCh2" value="false" />
+          <Int32 key="VsaCurIFType" value="2" />
+          <Double key="VsaMaxIfBw" value="25000000" />
+          <String key="WindowType" value="GAUSSTOP" />
+        </State>
+        <AnalyzerConfiguration type="Analyzer" version="16.1.254.0" schemaVersion="15.0.17.0">
+          <Name>Averell</Name>
+          <ExtRefFreq>10000000</ExtRefFreq>
+          <EnableRefLock>false</EnableRefLock>
+          <ExtRefMaster>
+            <InstrumentType>Adc</InstrumentType>
+            <Address>TCPIP0::Averell::inst0::INSTR</Address>
+          </ExtRefMaster>
+          <AutoCalOn>false</AutoCalOn>
+          <Groups>
+            <Group>
+              <Name>Agilent X-Series Signal Analyzer</Name>
+              <GroupInfoGuid>a9e21d7d-822a-4276-b9e0-aa6215a41c73</GroupInfoGuid>
+              <GroupInfoType>Unknown</GroupInfoType>
+              <Instruments>
+                <Instrument>
+                  <Id>
+                    <InstrumentType>Adc</InstrumentType>
+                    <Address>TCPIP0::Averell::inst0::INSTR</Address>
+                  </Id>
+                  <Model>N9020A</Model>
+                  <SerialNumber>MY52090175</SerialNumber>
+                  <DriverRevision>19.15.0.0</DriverRevision>
+                  <FirmwareRevision>17.72.12.0 (A.10.52)</FirmwareRevision>
+                  <Manufacturer>Agilent Technologies</Manufacturer>
+                </Instrument>
+              </Instruments>
+            </Group>
+          </Groups>
+        </AnalyzerConfiguration>
+        <Input>
+          <Extensions>
+            <State>
+              <Int16 key="ADCDither" value="0" />
+              <Int16 key="ADCDither.InCh2" value="0" />
+              <Int16 key="ADCDitherBaseband" value="0" />
+              <Int16 key="ADCDitherBaseband.InCh2" value="0" />
+              <Int16 key="CaptureBitPacking" value="0" />
+              <Int16 key="CaptureBitPacking.InCh2" value="0" />
+              <Int16 key="ExtRefLockBW" value="0" />
+              <Int16 key="ExtRefLockBW.InCh2" value="0" />
+              <Int16 key="ExtTriggerLoc" value="1" />
+              <Int16 key="ExtTriggerLoc.InCh2" value="0" />
+              <Int16 key="IFType" value="0" />
+              <Int16 key="IFType.InCh2" value="0" />
+              <Int32 key="InstrUserCorrections" value="0" />
+              <Int32 key="InstrUserCorrections.InCh2" value="0" />
+              <Int16 key="PhaseNoiseOptDualLoop" value="0" />
+              <Int16 key="PhaseNoiseOptDualLoop.InCh2" value="0" />
+              <Int16 key="uWPathControl" value="0" />
+              <Int16 key="uWPathControl.InCh2" value="0" />
+            </State>
+          </Extensions>
+        </Input>
+      </MeasurementX>
+    </Measurements>
+    <Sources count="1">
+      <Source name="Source1">
+        <State>
+          <Double key="SourceAmplitude" value="-136" />
+          <String key="SourceDownloadFilename" value="" />
+          <Boolean key="SourceEnabled" value="false" />
+          <Double key="SourceFreq" value="1000000000" />
+          <Double key="SourceFreqStep" value="1000000" />
+          <Boolean key="SourceFreqStepAuto" value="false" />
+          <Boolean key="SourceModOn" value="false" />
+        </State>
+      </Source>
+    </Sources>
+    <State>
+      <Boolean key="AcpAcRrcEnabled" value="false" />
+      <Boolean key="AcpAcRrcEnabled.Trace10" value="false" />
+      <Boolean key="AcpAcRrcEnabled.Trace2" value="false" />
+      <Boolean key="AcpAcRrcEnabled.Trace3" value="false" />
+      <Boolean key="AcpAcRrcEnabled.Trace4" value="false" />
+      <Boolean key="AcpAcRrcEnabled.Trace5" value="false" />
+      <Boolean key="AcpAcRrcEnabled.Trace6" value="false" />
+      <Boolean key="AcpAcRrcEnabled.Trace7" value="false" />
+      <Boolean key="AcpAcRrcEnabled.Trace8" value="false" />
+      <Boolean key="AcpAcRrcEnabled.Trace9" value="false" />
+      <DoubleArray key="AcpAlpha" value="0.35 0.35 0.35 0.35 0.35" />
+      <DoubleArray key="AcpAlpha.Trace10" value="0.35 0.35 0.35 0.35 0.35" />
+      <DoubleArray key="AcpAlpha.Trace2" value="0.35 0.35 0.35 0.35 0.35" />
+      <DoubleArray key="AcpAlpha.Trace3" value="0.35 0.35 0.35 0.35 0.35" />
+      <DoubleArray key="AcpAlpha.Trace4" value="0.35 0.35 0.35 0.35 0.35" />
+      <DoubleArray key="AcpAlpha.Trace5" value="0.35 0.35 0.35 0.35 0.35" />
+      <DoubleArray key="AcpAlpha.Trace6" value="0.35 0.35 0.35 0.35 0.35" />
+      <DoubleArray key="AcpAlpha.Trace7" value="0.35 0.35 0.35 0.35 0.35" />
+      <DoubleArray key="AcpAlpha.Trace8" value="0.35 0.35 0.35 0.35 0.35" />
+      <DoubleArray key="AcpAlpha.Trace9" value="0.35 0.35 0.35 0.35 0.35" />
+      <DoubleArray key="AcpBw" value="0 0 0 0 0" />
+      <DoubleArray key="AcpBw.Trace10" value="0 0 0 0 0" />
+      <DoubleArray key="AcpBw.Trace2" value="0 0 0 0 0" />
+      <DoubleArray key="AcpBw.Trace3" value="0 0 0 0 0" />
+      <DoubleArray key="AcpBw.Trace4" value="0 0 0 0 0" />
+      <DoubleArray key="AcpBw.Trace5" value="0 0 0 0 0" />
+      <DoubleArray key="AcpBw.Trace6" value="0 0 0 0 0" />
+      <DoubleArray key="AcpBw.Trace7" value="0 0 0 0 0" />
+      <DoubleArray key="AcpBw.Trace8" value="0 0 0 0 0" />
+      <DoubleArray key="AcpBw.Trace9" value="0 0 0 0 0" />
+      <DoubleArray key="AcpOffset" value="0 0 0 0 0" />
+      <DoubleArray key="AcpOffset.Trace10" value="0 0 0 0 0" />
+      <DoubleArray key="AcpOffset.Trace2" value="0 0 0 0 0" />
+      <DoubleArray key="AcpOffset.Trace3" value="0 0 0 0 0" />
+      <DoubleArray key="AcpOffset.Trace4" value="0 0 0 0 0" />
+      <DoubleArray key="AcpOffset.Trace5" value="0 0 0 0 0" />
+      <DoubleArray key="AcpOffset.Trace6" value="0 0 0 0 0" />
+      <DoubleArray key="AcpOffset.Trace7" value="0 0 0 0 0" />
+      <DoubleArray key="AcpOffset.Trace8" value="0 0 0 0 0" />
+      <DoubleArray key="AcpOffset.Trace9" value="0 0 0 0 0" />
+      <BooleanArray key="AcpOn" value="false false false false false" />
+      <BooleanArray key="AcpOn.Trace10" value="false false false false false" />
+      <BooleanArray key="AcpOn.Trace2" value="false false false false false" />
+      <BooleanArray key="AcpOn.Trace3" value="false false false false false" />
+      <BooleanArray key="AcpOn.Trace4" value="false false false false false" />
+      <BooleanArray key="AcpOn.Trace5" value="false false false false false" />
+      <BooleanArray key="AcpOn.Trace6" value="false false false false false" />
+      <BooleanArray key="AcpOn.Trace7" value="false false false false false" />
+      <BooleanArray key="AcpOn.Trace8" value="false false false false false" />
+      <BooleanArray key="AcpOn.Trace9" value="false false false false false" />
+      <Double key="AcpRefAlpha" value="0.35" />
+      <Double key="AcpRefAlpha.Trace10" value="0.35" />
+      <Double key="AcpRefAlpha.Trace2" value="0.35" />
+      <Double key="AcpRefAlpha.Trace3" value="0.35" />
+      <Double key="AcpRefAlpha.Trace4" value="0.35" />
+      <Double key="AcpRefAlpha.Trace5" value="0.35" />
+      <Double key="AcpRefAlpha.Trace6" value="0.35" />
+      <Double key="AcpRefAlpha.Trace7" value="0.35" />
+      <Double key="AcpRefAlpha.Trace8" value="0.35" />
+      <Double key="AcpRefAlpha.Trace9" value="0.35" />
+      <Double key="AcpRefBw" value="1000000" />
+      <Double key="AcpRefBw.Trace10" value="1000000" />
+      <Double key="AcpRefBw.Trace2" value="1000000" />
+      <Double key="AcpRefBw.Trace3" value="1000000" />
+      <Double key="AcpRefBw.Trace4" value="1000000" />
+      <Double key="AcpRefBw.Trace5" value="1000000" />
+      <Double key="AcpRefBw.Trace6" value="1000000" />
+      <Double key="AcpRefBw.Trace7" value="1000000" />
+      <Double key="AcpRefBw.Trace8" value="1000000" />
+      <Double key="AcpRefBw.Trace9" value="1000000" />
+      <Double key="AcpRefOffsetFreq" value="0" />
+      <Double key="AcpRefOffsetFreq.Trace10" value="0" />
+      <Double key="AcpRefOffsetFreq.Trace2" value="0" />
+      <Double key="AcpRefOffsetFreq.Trace3" value="0" />
+      <Double key="AcpRefOffsetFreq.Trace4" value="0" />
+      <Double key="AcpRefOffsetFreq.Trace5" value="0" />
+      <Double key="AcpRefOffsetFreq.Trace6" value="0" />
+      <Double key="AcpRefOffsetFreq.Trace7" value="0" />
+      <Double key="AcpRefOffsetFreq.Trace8" value="0" />
+      <Double key="AcpRefOffsetFreq.Trace9" value="0" />
+      <Boolean key="AcpRrcEnabled" value="false" />
+      <Boolean key="AcpRrcEnabled.Trace10" value="false" />
+      <Boolean key="AcpRrcEnabled.Trace2" value="false" />
+      <Boolean key="AcpRrcEnabled.Trace3" value="false" />
+      <Boolean key="AcpRrcEnabled.Trace4" value="false" />
+      <Boolean key="AcpRrcEnabled.Trace5" value="false" />
+      <Boolean key="AcpRrcEnabled.Trace6" value="false" />
+      <Boolean key="AcpRrcEnabled.Trace7" value="false" />
+      <Boolean key="AcpRrcEnabled.Trace8" value="false" />
+      <Boolean key="AcpRrcEnabled.Trace9" value="false" />
+      <Boolean key="AcpVisible" value="false" />
+      <Boolean key="AcpVisible.Trace10" value="false" />
+      <Boolean key="AcpVisible.Trace2" value="false" />
+      <Boolean key="AcpVisible.Trace3" value="false" />
+      <Boolean key="AcpVisible.Trace4" value="false" />
+      <Boolean key="AcpVisible.Trace5" value="false" />
+      <Boolean key="AcpVisible.Trace6" value="false" />
+      <Boolean key="AcpVisible.Trace7" value="false" />
+      <Boolean key="AcpVisible.Trace8" value="false" />
+      <Boolean key="AcpVisible.Trace9" value="false" />
+      <String key="DisplayLayoutString" value="" />
+      <String key="DisplayLayoutStringNew" value="&lt;DockSiteLayout xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; SerializationFormat=&quot;All&quot;&gt;&#xD;&#xA;&#x9;&lt;AutoHideHost /&gt;&#xD;&#xA;&#x9;&lt;Content xsi:type=&quot;SplitContainer&quot; AutoHideSize=&quot;1280,933&quot; DockedSize=&quot;1252,898&quot; DocumentSize=&quot;1280,933&quot; FloatingSize=&quot;1280,933&quot; Size=&quot;1252,898&quot; Orientation=&quot;Horizontal&quot;&gt;&#xD;&#xA;&#x9;&#x9;&lt;UIElement xsi:type=&quot;SplitContainer&quot; AutoHideSize=&quot;1280,933&quot; DockedSize=&quot;907,898&quot; DocumentSize=&quot;1280,933&quot; FloatingSize=&quot;1280,933&quot; Size=&quot;907,898&quot; Orientation=&quot;Vertical&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;Workspace&quot; AutoHideSize=&quot;1280,801.548767416935&quot; DockedSize=&quot;1280,801.548767416935&quot; DocumentSize=&quot;907,765.548767416935&quot; FloatingSize=&quot;1280,801.548767416935&quot; Size=&quot;907,765.548767416935&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&lt;Content xsi:type=&quot;TabbedMdiHost&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;Content xsi:type=&quot;SplitContainer&quot; AutoHideSize=&quot;1252,765.548767416935&quot; DockedSize=&quot;1252,765.548767416935&quot; DocumentSize=&quot;907,765.548767416935&quot; FloatingSize=&quot;1252,765.548767416935&quot; Size=&quot;907,765.548767416935&quot; Orientation=&quot;Horizontal&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;SplitContainer&quot; AutoHideSize=&quot;623.5,765.548767416935&quot; DockedSize=&quot;623.5,765.548767416935&quot; DocumentSize=&quot;451,765.548767416935&quot; FloatingSize=&quot;623.5,765.548767416935&quot; Size=&quot;451,765.548767416935&quot; Orientation=&quot;Vertical&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;TabbedMdiContainer&quot; AutoHideSize=&quot;623.5,380.274383708468&quot; DockedSize=&quot;451,380.274383708468&quot; DocumentSize=&quot;451,380.274383708468&quot; FloatingSize=&quot;623.5,380.274383708468&quot; Size=&quot;451,380.274383708468&quot; SelectedWindowUniqueId=&quot;9aa7cad4-83d9-47c9-9705-73d24f09fb0c&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;DocumentWindowRef&quot; UniqueId=&quot;9aa7cad4-83d9-47c9-9705-73d24f09fb0c&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;DocumentWindowRef&quot; UniqueId=&quot;a281c9d1-c465-4d5e-9277-95825867062f&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;/UIElement&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;TabbedMdiContainer&quot; AutoHideSize=&quot;414,251.849589138978&quot; DockedSize=&quot;623.5,187.954321948672&quot; DocumentSize=&quot;623.5,187.954321948672&quot; FloatingSize=&quot;414,251.849589138978&quot; Size=&quot;623.5,187.954321948672&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;Track&quot; UniqueId=&quot;63a36116-e11d-49c5-917f-ca6d0950d10a&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;/UIElement&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;TabbedMdiContainer&quot; AutoHideSize=&quot;623.5,380.274383708468&quot; DockedSize=&quot;451,380.274383708468&quot; DocumentSize=&quot;451,380.274383708468&quot; FloatingSize=&quot;623.5,380.274383708468&quot; Size=&quot;451,380.274383708468&quot; SelectedWindowUniqueId=&quot;4dd6caae-f3e5-466c-a856-cd52a1f3eef2&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;DocumentWindowRef&quot; UniqueId=&quot;4dd6caae-f3e5-466c-a856-cd52a1f3eef2&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;/UIElement&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;/UIElement&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;SplitContainer&quot; AutoHideSize=&quot;623.5,765.548767416935&quot; DockedSize=&quot;623.5,765.548767416935&quot; DocumentSize=&quot;451,765.548767416935&quot; FloatingSize=&quot;623.5,765.548767416935&quot; Size=&quot;451,765.548767416935&quot; Orientation=&quot;Vertical&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;TabbedMdiContainer&quot; AutoHideSize=&quot;623.5,380.274383708468&quot; DockedSize=&quot;451,380.274383708468&quot; DocumentSize=&quot;451,380.274383708468&quot; FloatingSize=&quot;623.5,380.274383708468&quot; Size=&quot;451,380.274383708468&quot; SelectedWindowUniqueId=&quot;f2bbd0e1-a96c-423f-8473-6aea3860d355&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;DocumentWindowRef&quot; UniqueId=&quot;f2bbd0e1-a96c-423f-8473-6aea3860d355&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;/UIElement&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;TabbedMdiContainer&quot; AutoHideSize=&quot;414,251.849589138978&quot; DockedSize=&quot;623.5,187.954321948672&quot; DocumentSize=&quot;623.5,187.954321948672&quot; FloatingSize=&quot;414,251.849589138978&quot; Size=&quot;623.5,187.954321948672&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;Track&quot; UniqueId=&quot;5ea16692-19ed-4c27-9064-8a29ec0f72d2&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;/UIElement&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;TabbedMdiContainer&quot; AutoHideSize=&quot;623.5,380.274383708468&quot; DockedSize=&quot;451,380.274383708468&quot; DocumentSize=&quot;451,380.274383708468&quot; FloatingSize=&quot;623.5,380.274383708468&quot; Size=&quot;451,380.274383708468&quot; SelectedWindowUniqueId=&quot;3478356c-e450-4cc3-8211-e2f06055ef95&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;DocumentWindowRef&quot; UniqueId=&quot;3478356c-e450-4cc3-8211-e2f06055ef95&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;/UIElement&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;/UIElement&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&#x9;&lt;/Content&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&lt;/Content&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&lt;/UIElement&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;ToolWindowContainer&quot; AutoHideSize=&quot;1280,127.451232583065&quot; DockedSize=&quot;907,127.451232583065&quot; DocumentSize=&quot;1280,127.451232583065&quot; FloatingSize=&quot;1280,127.451232583065&quot; Size=&quot;907,127.451232583065&quot; SelectedWindowUniqueId=&quot;3fdc2c01-4af1-4640-94d5-4e83994b677b&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;ToolWindowRef&quot; UniqueId=&quot;3fdc2c01-4af1-4640-94d5-4e83994b677b&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;Track&quot; UniqueId=&quot;589d8955-9c70-46ff-a34f-001aa3a3beb7&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;Track&quot; UniqueId=&quot;c36bd7cd-e998-4550-81fd-c0a519bedf85&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;Track&quot; UniqueId=&quot;5288541b-ef51-4d75-9caf-5cf77ab9a1e1&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&lt;/UIElement&gt;&#xD;&#xA;&#x9;&#x9;&lt;/UIElement&gt;&#xD;&#xA;&#x9;&#x9;&lt;UIElement xsi:type=&quot;ToolWindowContainer&quot; AutoHideSize=&quot;115,115&quot; DockedSize=&quot;115,933&quot; DocumentSize=&quot;115,115&quot; FloatingSize=&quot;115,115&quot; Size=&quot;115,933&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;Track&quot; UniqueId=&quot;fdf0aa73-1940-4b6d-89d8-fdd1eddac311&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&lt;/UIElement&gt;&#xD;&#xA;&#x9;&#x9;&lt;UIElement xsi:type=&quot;ToolWindowContainer&quot; AutoHideSize=&quot;340,115&quot; DockedSize=&quot;340,898&quot; DocumentSize=&quot;340,115&quot; FloatingSize=&quot;340,115&quot; Size=&quot;340,898&quot; SelectedWindowUniqueId=&quot;e4f36979-a1cd-4dcc-8f50-5d7869a062c9&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;ToolWindowRef&quot; UniqueId=&quot;e4f36979-a1cd-4dcc-8f50-5d7869a062c9&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&lt;/UIElement&gt;&#xD;&#xA;&#x9;&lt;/Content&gt;&#xD;&#xA;&#x9;&lt;DocumentWindows&gt;&#xD;&#xA;&#x9;&#x9;&lt;DocumentWindow UniqueId=&quot;9aa7cad4-83d9-47c9-9705-73d24f09fb0c&quot; AutoHideSize=&quot;200,264.516255805645&quot; DockedSize=&quot;200,264.516255805645&quot; DocumentSize=&quot;451,380.274383708468&quot; FloatingSize=&quot;200,264.516255805645&quot; Size=&quot;451,380.274383708468&quot; IsOpen=&quot;true&quot; LastState=&quot;Document&quot; Name=&quot;Trace_A&quot; Type=&quot;Agilent.SA.VsaDisplay.TraceWindow, Agilent.SA.Vsa.Display&quot; State=&quot;Document&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&lt;DocumentWindow UniqueId=&quot;63a36116-e11d-49c5-917f-ca6d0950d10a&quot; AutoHideSize=&quot;200,264.516255805645&quot; DockedSize=&quot;200,264.516255805645&quot; DocumentSize=&quot;200,187.954321948672&quot; FloatingSize=&quot;200,264.516255805645&quot; Size=&quot;200,264.516255805645&quot; IsOpen=&quot;false&quot; LastState=&quot;Document&quot; Name=&quot;Trace_B&quot; Type=&quot;Agilent.SA.VsaDisplay.TraceWindow, Agilent.SA.Vsa.Display&quot; State=&quot;Document&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&lt;DocumentWindow UniqueId=&quot;4dd6caae-f3e5-466c-a856-cd52a1f3eef2&quot; AutoHideSize=&quot;200,398.774383708468&quot; DockedSize=&quot;200,398.774383708468&quot; DocumentSize=&quot;451,380.274383708468&quot; FloatingSize=&quot;200,398.774383708468&quot; Size=&quot;451,380.274383708468&quot; IsOpen=&quot;true&quot; LastState=&quot;Document&quot; Name=&quot;Trace_C&quot; Type=&quot;Agilent.SA.VsaDisplay.TraceWindow, Agilent.SA.Vsa.Display&quot; State=&quot;Document&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&lt;DocumentWindow UniqueId=&quot;f2bbd0e1-a96c-423f-8473-6aea3860d355&quot; AutoHideSize=&quot;200,398.774383708468&quot; DockedSize=&quot;200,398.774383708468&quot; DocumentSize=&quot;451,380.274383708468&quot; FloatingSize=&quot;200,398.774383708468&quot; Size=&quot;451,380.274383708468&quot; IsOpen=&quot;true&quot; LastState=&quot;Document&quot; Name=&quot;Trace_D&quot; Type=&quot;Agilent.SA.VsaDisplay.TraceWindow, Agilent.SA.Vsa.Display&quot; State=&quot;Document&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&lt;DocumentWindow UniqueId=&quot;5ea16692-19ed-4c27-9064-8a29ec0f72d2&quot; AutoHideSize=&quot;200,398.774383708467&quot; DockedSize=&quot;200,398.774383708467&quot; DocumentSize=&quot;200,187.954321948672&quot; FloatingSize=&quot;200,398.774383708467&quot; Size=&quot;200,398.774383708467&quot; IsOpen=&quot;false&quot; LastState=&quot;Document&quot; Name=&quot;Trace_F&quot; Type=&quot;Agilent.SA.VsaDisplay.TraceWindow, Agilent.SA.Vsa.Display&quot; State=&quot;Document&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&lt;DocumentWindow UniqueId=&quot;3478356c-e450-4cc3-8211-e2f06055ef95&quot; AutoHideSize=&quot;200,380.274383708468&quot; DockedSize=&quot;200,398.774383708468&quot; DocumentSize=&quot;451,380.274383708468&quot; FloatingSize=&quot;200,380.274383708468&quot; Size=&quot;451,380.274383708468&quot; IsOpen=&quot;true&quot; LastState=&quot;Document&quot; Name=&quot;Trace_G&quot; Type=&quot;Agilent.SA.VsaDisplay.TraceWindow, Agilent.SA.Vsa.Display&quot; State=&quot;Document&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&lt;DocumentWindow UniqueId=&quot;a281c9d1-c465-4d5e-9277-95825867062f&quot; AutoHideSize=&quot;200,398.774383708467&quot; DockedSize=&quot;200,398.774383708467&quot; DocumentSize=&quot;1430,380.274383708468&quot; FloatingSize=&quot;200,399&quot; Size=&quot;1430,380.274383708468&quot; IsOpen=&quot;true&quot; LastState=&quot;Floating&quot; Name=&quot;Trace_E&quot; RaftingLocation=&quot;974,227&quot; Type=&quot;Agilent.SA.VsaDisplay.TraceWindow, Agilent.SA.Vsa.Display&quot; State=&quot;Document&quot; /&gt;&#xD;&#xA;&#x9;&lt;/DocumentWindows&gt;&#xD;&#xA;&#x9;&lt;RaftingHosts&gt;&#xD;&#xA;&#x9;&#x9;&lt;RaftingHost IsMaximized=&quot;false&quot; Location=&quot;974,227&quot; Size=&quot;0,0&quot; State=&quot;Floating&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&lt;Content xsi:type=&quot;RaftedDocumentWindowContainer&quot; AutoHideSize=&quot;200,398.774383708467&quot; DockedSize=&quot;200,398.774383708467&quot; DocumentSize=&quot;424,765.548767416935&quot; FloatingSize=&quot;200,399&quot; Size=&quot;200,399&quot;&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&#x9;&lt;UIElement xsi:type=&quot;Track&quot; UniqueId=&quot;a281c9d1-c465-4d5e-9277-95825867062f&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&#x9;&lt;/Content&gt;&#xD;&#xA;&#x9;&#x9;&lt;/RaftingHost&gt;&#xD;&#xA;&#x9;&lt;/RaftingHosts&gt;&#xD;&#xA;&#x9;&lt;ToolWindows&gt;&#xD;&#xA;&#x9;&#x9;&lt;ToolWindow UniqueId=&quot;fdf0aa73-1940-4b6d-89d8-fdd1eddac311&quot; AutoHideSize=&quot;115,115&quot; DockedSize=&quot;115,115&quot; DocumentSize=&quot;115,115&quot; FloatingSize=&quot;115,115&quot; Size=&quot;115,115&quot; IsOpen=&quot;false&quot; LastState=&quot;AutoHide&quot; Name=&quot;MacrosWindow&quot; State=&quot;AutoHide&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&lt;ToolWindow UniqueId=&quot;e4f36979-a1cd-4dcc-8f50-5d7869a062c9&quot; AutoHideSize=&quot;340,115&quot; DockedSize=&quot;340,898&quot; DocumentSize=&quot;340,115&quot; FloatingSize=&quot;340,115&quot; Size=&quot;340,898&quot; IsOpen=&quot;true&quot; LastState=&quot;AutoHide&quot; Name=&quot;DynamicHelpWindow&quot; State=&quot;Docked&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&lt;ToolWindow UniqueId=&quot;3fdc2c01-4af1-4640-94d5-4e83994b677b&quot; AutoHideSize=&quot;200,127.451232583065&quot; DockedSize=&quot;907,127.451232583065&quot; DocumentSize=&quot;200,127.451232583065&quot; FloatingSize=&quot;200,127.451232583065&quot; Size=&quot;907,127.451232583065&quot; IsOpen=&quot;true&quot; LastState=&quot;Docked&quot; Name=&quot;MarkersWindow&quot; State=&quot;Docked&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&lt;ToolWindow UniqueId=&quot;589d8955-9c70-46ff-a34f-001aa3a3beb7&quot; AutoHideSize=&quot;200,127.451232583065&quot; DockedSize=&quot;1252,127.451232583065&quot; DocumentSize=&quot;200,127.451232583065&quot; FloatingSize=&quot;200,127.451232583065&quot; Size=&quot;1252,127.451232583065&quot; IsOpen=&quot;false&quot; LastState=&quot;Docked&quot; Name=&quot;OutputWindow&quot; State=&quot;Docked&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&lt;ToolWindow UniqueId=&quot;c36bd7cd-e998-4550-81fd-c0a519bedf85&quot; AutoHideSize=&quot;200,75&quot; DockedSize=&quot;200,75&quot; DocumentSize=&quot;200,75&quot; FloatingSize=&quot;200,75&quot; Size=&quot;200,75&quot; IsOpen=&quot;false&quot; LastState=&quot;Docked&quot; Name=&quot;ResultsWindow&quot; State=&quot;Docked&quot; /&gt;&#xD;&#xA;&#x9;&#x9;&lt;ToolWindow UniqueId=&quot;5288541b-ef51-4d75-9caf-5cf77ab9a1e1&quot; AutoHideSize=&quot;200,75&quot; DockedSize=&quot;200,75&quot; DocumentSize=&quot;200,75&quot; FloatingSize=&quot;200,75&quot; Size=&quot;200,75&quot; IsOpen=&quot;false&quot; LastState=&quot;Docked&quot; Name=&quot;PlayerWindow&quot; State=&quot;Docked&quot; /&gt;&#xD;&#xA;&#x9;&lt;/ToolWindows&gt;&#xD;&#xA;&lt;/DockSiteLayout&gt;" />
+      <String key="LimName" value="" />
+      <String key="LimName.Trace10" value="" />
+      <String key="LimName.Trace2" value="" />
+      <String key="LimName.Trace3" value="" />
+      <String key="LimName.Trace4" value="" />
+      <String key="LimName.Trace5" value="" />
+      <String key="LimName.Trace6" value="" />
+      <String key="LimName.Trace7" value="" />
+      <String key="LimName.Trace8" value="" />
+      <String key="LimName.Trace9" value="" />
+      <Boolean key="LimVisible" value="true" />
+      <Boolean key="LimVisible.Trace10" value="true" />
+      <Boolean key="LimVisible.Trace2" value="true" />
+      <Boolean key="LimVisible.Trace3" value="true" />
+      <Boolean key="LimVisible.Trace4" value="true" />
+      <Boolean key="LimVisible.Trace5" value="true" />
+      <Boolean key="LimVisible.Trace6" value="true" />
+      <Boolean key="LimVisible.Trace7" value="true" />
+      <Boolean key="LimVisible.Trace8" value="true" />
+      <Boolean key="LimVisible.Trace9" value="true" />
+      <Double key="ObwPercent" value="0.99" />
+      <Double key="ObwPercent.Trace10" value="0.99" />
+      <Double key="ObwPercent.Trace2" value="0.99" />
+      <Double key="ObwPercent.Trace3" value="0.99" />
+      <Double key="ObwPercent.Trace4" value="0.99" />
+      <Double key="ObwPercent.Trace5" value="0.99" />
+      <Double key="ObwPercent.Trace6" value="0.99" />
+      <Double key="ObwPercent.Trace7" value="0.99" />
+      <Double key="ObwPercent.Trace8" value="0.99" />
+      <Double key="ObwPercent.Trace9" value="0.99" />
+      <Boolean key="ObwVisible" value="false" />
+      <Boolean key="ObwVisible.Trace10" value="false" />
+      <Boolean key="ObwVisible.Trace2" value="false" />
+      <Boolean key="ObwVisible.Trace3" value="false" />
+      <Boolean key="ObwVisible.Trace4" value="false" />
+      <Boolean key="ObwVisible.Trace5" value="false" />
+      <Boolean key="ObwVisible.Trace6" value="false" />
+      <Boolean key="ObwVisible.Trace7" value="false" />
+      <Boolean key="ObwVisible.Trace8" value="false" />
+      <Boolean key="ObwVisible.Trace9" value="false" />
+      <Int32 key="SelectedTrace" value="0" />
+      <Double key="Trace1.Aperture" value="0.5" />
+      <String key="Trace1.DataName" value="Spectrum1" />
+      <Int32 key="Trace1.DemodCodeOrder" value="1" />
+      <Int32 key="Trace1.DemodFreqUnit" value="0" />
+      <Boolean key="Trace1.DemodShow2DAvgLine" value="true" />
+      <Int32 key="Trace1.DemodStateShape" value="2" />
+      <Double key="Trace1.DemodStateSize" value="5" />
+      <Int32 key="Trace1.DemodSymbolShape" value="2" />
+      <Int32 key="Trace1.DemodTblBitOrder" value="0" />
+      <Int32 key="Trace1.DemodTblFormat" value="1" />
+      <Int32 key="Trace1.DemodTimeUnit" value="1" />
+      <Boolean key="Trace1.Mkr.Carrier" value="false" />
+      <Boolean key="Trace1.Mkr.Consolidate" value="true" />
+      <Int32 key="Trace1.Mkr.PolarFmt" value="0" />
+      <Boolean key="Trace1.Mkr.TrcSelVisible" value="false" />
+      <Boolean key="Trace1.Mkr1.BandPower" value="false" />
+      <Int32 key="Trace1.Mkr1.BandPowerCalc" value="0" />
+      <Double key="Trace1.Mkr1.BandPowerSpan" value="0" />
+      <Int32 key="Trace1.Mkr1.BandPowerType" value="0" />
+      <Boolean key="Trace1.Mkr1.Couple" value="false" />
+      <Boolean key="Trace1.Mkr1.FreqCount" value="false" />
+      <Boolean key="Trace1.Mkr1.PeakTrack" value="false" />
+      <Int32 key="Trace1.Mkr1.Position" value="0" />
+      <Int32 key="Trace1.Mkr1.Reference" value="0" />
+      <Double key="Trace1.Mkr1.Value" value="2028867.1875" />
+      <Boolean key="Trace1.Mkr1.Visible" value="true" />
+      <Double key="Trace1.Mkr1.Y" value="-121.02721483643143" />
+      <Double key="Trace1.Mkr1.Z" value="0" />
+      <Boolean key="Trace1.Overlay" value="true" />
+      <Double key="Trace1.PhsOffset" value="0" />
+      <Int32 key="Trace1.Spec.ColorCount" value="64" />
+      <Int32 key="Trace1.Spec.ColorMap" value="0" />
+      <Int32 key="Trace1.Spec.Count" value="1000" />
+      <Double key="Trace1.Spec.Enhance" value="50" />
+      <Int32 key="Trace1.Spec.First" value="1" />
+      <Boolean key="Trace1.Spec.FirstAuto" value="true" />
+      <Double key="Trace1.Spec.Height" value="0" />
+      <Boolean key="Trace1.Spec.HeightAuto" value="true" />
+      <Boolean key="Trace1.Spec.IsClearOnRestart" value="true" />
+      <Int32 key="Trace1.Spec.Style" value="0" />
+      <Double key="Trace1.Spec.Threshold" value="0" />
+      <Boolean key="Trace1.Spec.Visible" value="false" />
+      <Boolean key="Trace1.TrigRefLineVis" value="true" />
+      <Double key="Trace1.UnwrapRef" value="0" />
+      <Double key="Trace1.VectXCtr" value="0" />
+      <Boolean key="Trace1.Visible" value="true" />
+      <Double key="Trace1.XEyeLength" value="2" />
+      <Double key="Trace1.XLeft" value="400000" />
+      <Boolean key="Trace1.XLog" value="false" />
+      <Double key="Trace1.XRight" value="2400000" />
+      <Boolean key="Trace1.XScaleAuto" value="true" />
+      <Double key="Trace1.YBottom" value="-105" />
+      <Int32 key="Trace1.YCoordinate" value="0" />
+      <Double key="Trace1.YRefPos" value="100" />
+      <Boolean key="Trace1.YRefTrackRange" value="false" />
+      <Boolean key="Trace1.YRefVisible" value="false" />
+      <Double key="Trace1.YTop" value="-55" />
+      <Int32 key="Trace1.YUnit" value="0" />
+      <Double key="Trace2.Aperture" value="0.5" />
+      <String key="Trace2.DataName" value="1:Spectrum1" />
+      <Int32 key="Trace2.DemodCodeOrder" value="1" />
+      <Int32 key="Trace2.DemodFreqUnit" value="1" />
+      <Boolean key="Trace2.DemodShow2DAvgLine" value="true" />
+      <Int32 key="Trace2.DemodStateShape" value="2" />
+      <Double key="Trace2.DemodStateSize" value="5" />
+      <Int32 key="Trace2.DemodSymbolShape" value="2" />
+      <Int32 key="Trace2.DemodTblBitOrder" value="0" />
+      <Int32 key="Trace2.DemodTblFormat" value="1" />
+      <Int32 key="Trace2.DemodTimeUnit" value="1" />
+      <Boolean key="Trace2.Mkr.Carrier" value="false" />
+      <Boolean key="Trace2.Mkr.Consolidate" value="true" />
+      <Int32 key="Trace2.Mkr.PolarFmt" value="0" />
+      <Boolean key="Trace2.Mkr.TrcSelVisible" value="false" />
+      <Boolean key="Trace2.Mkr1.BandPower" value="false" />
+      <Int32 key="Trace2.Mkr1.BandPowerCalc" value="0" />
+      <Double key="Trace2.Mkr1.BandPowerSpan" value="0" />
+      <Int32 key="Trace2.Mkr1.BandPowerType" value="0" />
+      <Boolean key="Trace2.Mkr1.Couple" value="false" />
+      <Boolean key="Trace2.Mkr1.FreqCount" value="false" />
+      <Boolean key="Trace2.Mkr1.PeakTrack" value="false" />
+      <Int32 key="Trace2.Mkr1.Position" value="0" />
+      <Int32 key="Trace2.Mkr1.Reference" value="0" />
+      <Double key="Trace2.Mkr1.Value" value="1123747" />
+      <Boolean key="Trace2.Mkr1.Visible" value="false" />
+      <Double key="Trace2.Mkr1.Y" value="0" />
+      <Double key="Trace2.Mkr1.Z" value="0" />
+      <Boolean key="Trace2.Overlay" value="false" />
+      <Double key="Trace2.PhsOffset" value="0" />
+      <Int32 key="Trace2.Spec.ColorCount" value="64" />
+      <Int32 key="Trace2.Spec.ColorMap" value="0" />
+      <Int32 key="Trace2.Spec.Count" value="1000" />
+      <Double key="Trace2.Spec.Enhance" value="50" />
+      <Int32 key="Trace2.Spec.First" value="1" />
+      <Boolean key="Trace2.Spec.FirstAuto" value="true" />
+      <Double key="Trace2.Spec.Height" value="0" />
+      <Boolean key="Trace2.Spec.HeightAuto" value="true" />
+      <Boolean key="Trace2.Spec.IsClearOnRestart" value="true" />
+      <Int32 key="Trace2.Spec.Style" value="0" />
+      <Double key="Trace2.Spec.Threshold" value="0" />
+      <Boolean key="Trace2.Spec.Visible" value="false" />
+      <Boolean key="Trace2.TrigRefLineVis" value="true" />
+      <Double key="Trace2.UnwrapRef" value="0" />
+      <Double key="Trace2.VectXCtr" value="0" />
+      <Boolean key="Trace2.Visible" value="false" />
+      <Double key="Trace2.XEyeLength" value="2" />
+      <Double key="Trace2.XLeft" value="1123747" />
+      <Boolean key="Trace2.XLog" value="false" />
+      <Double key="Trace2.XRight" value="1133747" />
+      <Boolean key="Trace2.XScaleAuto" value="true" />
+      <Double key="Trace2.YBottom" value="-98.061799739838875" />
+      <Int32 key="Trace2.YCoordinate" value="0" />
+      <Double key="Trace2.YRefPos" value="100" />
+      <Boolean key="Trace2.YRefTrackRange" value="false" />
+      <Boolean key="Trace2.YRefVisible" value="false" />
+      <Double key="Trace2.YTop" value="1.9382002601611283" />
+      <Int32 key="Trace2.YUnit" value="0" />
+      <Double key="Trace3.Aperture" value="0.5" />
+      <String key="Trace3.DataName" value="Cross Spectrum" />
+      <Int32 key="Trace3.DemodCodeOrder" value="1" />
+      <Int32 key="Trace3.DemodFreqUnit" value="1" />
+      <Boolean key="Trace3.DemodShow2DAvgLine" value="true" />
+      <Int32 key="Trace3.DemodStateShape" value="2" />
+      <Double key="Trace3.DemodStateSize" value="5" />
+      <Int32 key="Trace3.DemodSymbolShape" value="2" />
+      <Int32 key="Trace3.DemodTblBitOrder" value="0" />
+      <Int32 key="Trace3.DemodTblFormat" value="1" />
+      <Int32 key="Trace3.DemodTimeUnit" value="1" />
+      <Boolean key="Trace3.Mkr.Carrier" value="false" />
+      <Boolean key="Trace3.Mkr.Consolidate" value="true" />
+      <Int32 key="Trace3.Mkr.PolarFmt" value="0" />
+      <Boolean key="Trace3.Mkr.TrcSelVisible" value="false" />
+      <Boolean key="Trace3.Mkr1.BandPower" value="true" />
+      <Int32 key="Trace3.Mkr1.BandPowerCalc" value="0" />
+      <Double key="Trace3.Mkr1.BandPowerSpan" value="4895.7997744847089" />
+      <Int32 key="Trace3.Mkr1.BandPowerType" value="0" />
+      <Boolean key="Trace3.Mkr1.Couple" value="false" />
+      <Boolean key="Trace3.Mkr1.FreqCount" value="false" />
+      <Boolean key="Trace3.Mkr1.PeakTrack" value="false" />
+      <Int32 key="Trace3.Mkr1.Position" value="0" />
+      <Int32 key="Trace3.Mkr1.Reference" value="0" />
+      <Double key="Trace3.Mkr1.Value" value="1403813.4765625" />
+      <Boolean key="Trace3.Mkr1.Visible" value="true" />
+      <Double key="Trace3.Mkr1.Y" value="-136.40185189119083" />
+      <Double key="Trace3.Mkr1.Z" value="0" />
+      <Boolean key="Trace3.Overlay" value="false" />
+      <Double key="Trace3.PhsOffset" value="0" />
+      <Int32 key="Trace3.Spec.ColorCount" value="64" />
+      <Int32 key="Trace3.Spec.ColorMap" value="0" />
+      <Int32 key="Trace3.Spec.Count" value="1000" />
+      <Double key="Trace3.Spec.Enhance" value="50" />
+      <Int32 key="Trace3.Spec.First" value="1" />
+      <Boolean key="Trace3.Spec.FirstAuto" value="true" />
+      <Double key="Trace3.Spec.Height" value="0" />
+      <Boolean key="Trace3.Spec.HeightAuto" value="true" />
+      <Boolean key="Trace3.Spec.IsClearOnRestart" value="true" />
+      <Int32 key="Trace3.Spec.Style" value="0" />
+      <Double key="Trace3.Spec.Threshold" value="0" />
+      <Boolean key="Trace3.Spec.Visible" value="false" />
+      <Boolean key="Trace3.TrigRefLineVis" value="true" />
+      <Double key="Trace3.UnwrapRef" value="0" />
+      <Double key="Trace3.VectXCtr" value="0" />
+      <Boolean key="Trace3.Visible" value="true" />
+      <Double key="Trace3.XEyeLength" value="2" />
+      <Double key="Trace3.XLeft" value="400000" />
+      <Boolean key="Trace3.XLog" value="false" />
+      <Double key="Trace3.XRight" value="2400000" />
+      <Boolean key="Trace3.XScaleAuto" value="true" />
+      <Double key="Trace3.YBottom" value="-150" />
+      <Int32 key="Trace3.YCoordinate" value="0" />
+      <Double key="Trace3.YRefPos" value="100" />
+      <Boolean key="Trace3.YRefTrackRange" value="false" />
+      <Boolean key="Trace3.YRefVisible" value="false" />
+      <Double key="Trace3.YTop" value="-50" />
+      <Int32 key="Trace3.YUnit" value="0" />
+      <Double key="Trace4.Aperture" value="0.5" />
+      <String key="Trace4.DataName" value="Spectrum2" />
+      <Int32 key="Trace4.DemodCodeOrder" value="1" />
+      <Int32 key="Trace4.DemodFreqUnit" value="1" />
+      <Boolean key="Trace4.DemodShow2DAvgLine" value="true" />
+      <Int32 key="Trace4.DemodStateShape" value="2" />
+      <Double key="Trace4.DemodStateSize" value="5" />
+      <Int32 key="Trace4.DemodSymbolShape" value="2" />
+      <Int32 key="Trace4.DemodTblBitOrder" value="0" />
+      <Int32 key="Trace4.DemodTblFormat" value="1" />
+      <Int32 key="Trace4.DemodTimeUnit" value="1" />
+      <Boolean key="Trace4.Mkr.Carrier" value="false" />
+      <Boolean key="Trace4.Mkr.Consolidate" value="true" />
+      <Int32 key="Trace4.Mkr.PolarFmt" value="0" />
+      <Boolean key="Trace4.Mkr.TrcSelVisible" value="false" />
+      <Boolean key="Trace4.Mkr1.BandPower" value="false" />
+      <Int32 key="Trace4.Mkr1.BandPowerCalc" value="0" />
+      <Double key="Trace4.Mkr1.BandPowerSpan" value="0" />
+      <Int32 key="Trace4.Mkr1.BandPowerType" value="0" />
+      <Boolean key="Trace4.Mkr1.Couple" value="false" />
+      <Boolean key="Trace4.Mkr1.FreqCount" value="false" />
+      <Boolean key="Trace4.Mkr1.PeakTrack" value="false" />
+      <Int32 key="Trace4.Mkr1.Position" value="0" />
+      <Int32 key="Trace4.Mkr1.Reference" value="0" />
+      <Double key="Trace4.Mkr1.Value" value="1128745.1171875" />
+      <Boolean key="Trace4.Mkr1.Visible" value="true" />
+      <Double key="Trace4.Mkr1.Y" value="-107.96702945312462" />
+      <Double key="Trace4.Mkr1.Z" value="0" />
+      <Boolean key="Trace4.Overlay" value="false" />
+      <Double key="Trace4.PhsOffset" value="0" />
+      <Int32 key="Trace4.Spec.ColorCount" value="64" />
+      <Int32 key="Trace4.Spec.ColorMap" value="0" />
+      <Int32 key="Trace4.Spec.Count" value="1000" />
+      <Double key="Trace4.Spec.Enhance" value="50" />
+      <Int32 key="Trace4.Spec.First" value="1" />
+      <Boolean key="Trace4.Spec.FirstAuto" value="true" />
+      <Double key="Trace4.Spec.Height" value="0" />
+      <Boolean key="Trace4.Spec.HeightAuto" value="true" />
+      <Boolean key="Trace4.Spec.IsClearOnRestart" value="true" />
+      <Int32 key="Trace4.Spec.Style" value="0" />
+      <Double key="Trace4.Spec.Threshold" value="0" />
+      <Boolean key="Trace4.Spec.Visible" value="false" />
+      <Boolean key="Trace4.TrigRefLineVis" value="true" />
+      <Double key="Trace4.UnwrapRef" value="0" />
+      <Double key="Trace4.VectXCtr" value="0" />
+      <Boolean key="Trace4.Visible" value="true" />
+      <Double key="Trace4.XEyeLength" value="2" />
+      <Double key="Trace4.XLeft" value="400000" />
+      <Boolean key="Trace4.XLog" value="false" />
+      <Double key="Trace4.XRight" value="2400000" />
+      <Boolean key="Trace4.XScaleAuto" value="true" />
+      <Double key="Trace4.YBottom" value="-130" />
+      <Int32 key="Trace4.YCoordinate" value="0" />
+      <Double key="Trace4.YRefPos" value="100" />
+      <Boolean key="Trace4.YRefTrackRange" value="false" />
+      <Boolean key="Trace4.YRefVisible" value="false" />
+      <Double key="Trace4.YTop" value="-30" />
+      <Int32 key="Trace4.YUnit" value="0" />
+      <Double key="Trace5.Aperture" value="0.5" />
+      <String key="Trace5.DataName" value="1:Cross Spectrum" />
+      <Int32 key="Trace5.DemodCodeOrder" value="1" />
+      <Int32 key="Trace5.DemodFreqUnit" value="0" />
+      <Boolean key="Trace5.DemodShow2DAvgLine" value="true" />
+      <Int32 key="Trace5.DemodStateShape" value="1" />
+      <Double key="Trace5.DemodStateSize" value="10" />
+      <Int32 key="Trace5.DemodSymbolShape" value="1" />
+      <Int32 key="Trace5.DemodTblBitOrder" value="0" />
+      <Int32 key="Trace5.DemodTblFormat" value="0" />
+      <Int32 key="Trace5.DemodTimeUnit" value="1" />
+      <Boolean key="Trace5.Mkr.Carrier" value="false" />
+      <Boolean key="Trace5.Mkr.Consolidate" value="true" />
+      <Int32 key="Trace5.Mkr.PolarFmt" value="0" />
+      <Boolean key="Trace5.Mkr.TrcSelVisible" value="false" />
+      <Boolean key="Trace5.Mkr1.BandPower" value="false" />
+      <Int32 key="Trace5.Mkr1.BandPowerCalc" value="0" />
+      <Double key="Trace5.Mkr1.BandPowerSpan" value="0" />
+      <Int32 key="Trace5.Mkr1.BandPowerType" value="0" />
+      <Boolean key="Trace5.Mkr1.Couple" value="false" />
+      <Boolean key="Trace5.Mkr1.FreqCount" value="false" />
+      <Boolean key="Trace5.Mkr1.PeakTrack" value="false" />
+      <Int32 key="Trace5.Mkr1.Position" value="0" />
+      <Int32 key="Trace5.Mkr1.Reference" value="0" />
+      <Double key="Trace5.Mkr1.Value" value="1123747" />
+      <Boolean key="Trace5.Mkr1.Visible" value="true" />
+      <Double key="Trace5.Mkr1.Y" value="1.6500148872954567E-17" />
+      <Double key="Trace5.Mkr1.Z" value="0" />
+      <Boolean key="Trace5.Overlay" value="false" />
+      <Double key="Trace5.PhsOffset" value="0" />
+      <Int32 key="Trace5.Spec.ColorCount" value="64" />
+      <Int32 key="Trace5.Spec.ColorMap" value="0" />
+      <Int32 key="Trace5.Spec.Count" value="1000" />
+      <Double key="Trace5.Spec.Enhance" value="50" />
+      <Int32 key="Trace5.Spec.First" value="1" />
+      <Boolean key="Trace5.Spec.FirstAuto" value="true" />
+      <Double key="Trace5.Spec.Height" value="0" />
+      <Boolean key="Trace5.Spec.HeightAuto" value="true" />
+      <Boolean key="Trace5.Spec.IsClearOnRestart" value="true" />
+      <Int32 key="Trace5.Spec.Style" value="0" />
+      <Double key="Trace5.Spec.Threshold" value="0" />
+      <Boolean key="Trace5.Spec.Visible" value="false" />
+      <Boolean key="Trace5.TrigRefLineVis" value="true" />
+      <Double key="Trace5.UnwrapRef" value="0" />
+      <Double key="Trace5.VectXCtr" value="0" />
+      <Boolean key="Trace5.Visible" value="true" />
+      <Double key="Trace5.XEyeLength" value="2" />
+      <Double key="Trace5.XLeft" value="1123747" />
+      <Boolean key="Trace5.XLog" value="false" />
+      <Double key="Trace5.XRight" value="1133747" />
+      <Boolean key="Trace5.XScaleAuto" value="true" />
+      <Double key="Trace5.YBottom" value="-1E-08" />
+      <Int32 key="Trace5.YCoordinate" value="6" />
+      <Double key="Trace5.YRefPos" value="50" />
+      <Boolean key="Trace5.YRefTrackRange" value="false" />
+      <Boolean key="Trace5.YRefVisible" value="false" />
+      <Double key="Trace5.YTop" value="1E-08" />
+      <Int32 key="Trace5.YUnit" value="0" />
+      <Double key="Trace6.Aperture" value="0.5" />
+      <String key="Trace6.DataName" value="1:Main Time1" />
+      <Int32 key="Trace6.DemodCodeOrder" value="1" />
+      <Int32 key="Trace6.DemodFreqUnit" value="1" />
+      <Boolean key="Trace6.DemodShow2DAvgLine" value="true" />
+      <Int32 key="Trace6.DemodStateShape" value="2" />
+      <Double key="Trace6.DemodStateSize" value="5" />
+      <Int32 key="Trace6.DemodSymbolShape" value="2" />
+      <Int32 key="Trace6.DemodTblBitOrder" value="0" />
+      <Int32 key="Trace6.DemodTblFormat" value="1" />
+      <Int32 key="Trace6.DemodTimeUnit" value="1" />
+      <Boolean key="Trace6.Mkr.Carrier" value="false" />
+      <Boolean key="Trace6.Mkr.Consolidate" value="true" />
+      <Int32 key="Trace6.Mkr.PolarFmt" value="0" />
+      <Boolean key="Trace6.Mkr.TrcSelVisible" value="false" />
+      <Boolean key="Trace6.Mkr1.BandPower" value="false" />
+      <Int32 key="Trace6.Mkr1.BandPowerCalc" value="0" />
+      <Double key="Trace6.Mkr1.BandPowerSpan" value="0" />
+      <Int32 key="Trace6.Mkr1.BandPowerType" value="0" />
+      <Boolean key="Trace6.Mkr1.Couple" value="false" />
+      <Boolean key="Trace6.Mkr1.FreqCount" value="false" />
+      <Boolean key="Trace6.Mkr1.PeakTrack" value="false" />
+      <Int32 key="Trace6.Mkr1.Position" value="0" />
+      <Int32 key="Trace6.Mkr1.Reference" value="0" />
+      <Double key="Trace6.Mkr1.Value" value="0" />
+      <Boolean key="Trace6.Mkr1.Visible" value="false" />
+      <Double key="Trace6.Mkr1.Y" value="0" />
+      <Double key="Trace6.Mkr1.Z" value="0" />
+      <Boolean key="Trace6.Overlay" value="false" />
+      <Double key="Trace6.PhsOffset" value="0" />
+      <Int32 key="Trace6.Spec.ColorCount" value="64" />
+      <Int32 key="Trace6.Spec.ColorMap" value="0" />
+      <Int32 key="Trace6.Spec.Count" value="1000" />
+      <Double key="Trace6.Spec.Enhance" value="50" />
+      <Int32 key="Trace6.Spec.First" value="1" />
+      <Boolean key="Trace6.Spec.FirstAuto" value="true" />
+      <Double key="Trace6.Spec.Height" value="0" />
+      <Boolean key="Trace6.Spec.HeightAuto" value="true" />
+      <Boolean key="Trace6.Spec.IsClearOnRestart" value="true" />
+      <Int32 key="Trace6.Spec.Style" value="0" />
+      <Double key="Trace6.Spec.Threshold" value="0" />
+      <Boolean key="Trace6.Spec.Visible" value="false" />
+      <Boolean key="Trace6.TrigRefLineVis" value="true" />
+      <Double key="Trace6.UnwrapRef" value="0" />
+      <Double key="Trace6.VectXCtr" value="0" />
+      <Boolean key="Trace6.Visible" value="false" />
+      <Double key="Trace6.XEyeLength" value="2" />
+      <Double key="Trace6.XLeft" value="0" />
+      <Boolean key="Trace6.XLog" value="false" />
+      <Double key="Trace6.XRight" value="0.22148437500001275" />
+      <Boolean key="Trace6.XScaleAuto" value="true" />
+      <Double key="Trace6.YBottom" value="-108.06179973983888" />
+      <Int32 key="Trace6.YCoordinate" value="0" />
+      <Double key="Trace6.YRefPos" value="100" />
+      <Boolean key="Trace6.YRefTrackRange" value="false" />
+      <Boolean key="Trace6.YRefVisible" value="false" />
+      <Double key="Trace6.YTop" value="-8.0617997398388734" />
+      <Int32 key="Trace6.YUnit" value="0" />
+      <Double key="Trace7.Aperture" value="0.5" />
+      <String key="Trace7.DataName" value="Cross Spectrum" />
+      <Int32 key="Trace7.DemodCodeOrder" value="1" />
+      <Int32 key="Trace7.DemodFreqUnit" value="1" />
+      <Boolean key="Trace7.DemodShow2DAvgLine" value="true" />
+      <Int32 key="Trace7.DemodStateShape" value="2" />
+      <Double key="Trace7.DemodStateSize" value="5" />
+      <Int32 key="Trace7.DemodSymbolShape" value="2" />
+      <Int32 key="Trace7.DemodTblBitOrder" value="0" />
+      <Int32 key="Trace7.DemodTblFormat" value="1" />
+      <Int32 key="Trace7.DemodTimeUnit" value="1" />
+      <Boolean key="Trace7.Mkr.Carrier" value="false" />
+      <Boolean key="Trace7.Mkr.Consolidate" value="true" />
+      <Int32 key="Trace7.Mkr.PolarFmt" value="0" />
+      <Boolean key="Trace7.Mkr.TrcSelVisible" value="false" />
+      <Boolean key="Trace7.Mkr1.BandPower" value="false" />
+      <Int32 key="Trace7.Mkr1.BandPowerCalc" value="0" />
+      <Double key="Trace7.Mkr1.BandPowerSpan" value="0" />
+      <Int32 key="Trace7.Mkr1.BandPowerType" value="0" />
+      <Boolean key="Trace7.Mkr1.Couple" value="false" />
+      <Boolean key="Trace7.Mkr1.FreqCount" value="false" />
+      <Boolean key="Trace7.Mkr1.PeakTrack" value="false" />
+      <Int32 key="Trace7.Mkr1.Position" value="0" />
+      <Int32 key="Trace7.Mkr1.Reference" value="0" />
+      <Double key="Trace7.Mkr1.Value" value="400000" />
+      <Boolean key="Trace7.Mkr1.Visible" value="false" />
+      <Double key="Trace7.Mkr1.Y" value="0" />
+      <Double key="Trace7.Mkr1.Z" value="0" />
+      <Boolean key="Trace7.Overlay" value="false" />
+      <Double key="Trace7.PhsOffset" value="0" />
+      <Int32 key="Trace7.Spec.ColorCount" value="64" />
+      <Int32 key="Trace7.Spec.ColorMap" value="0" />
+      <Int32 key="Trace7.Spec.Count" value="1000" />
+      <Double key="Trace7.Spec.Enhance" value="50" />
+      <Int32 key="Trace7.Spec.First" value="1" />
+      <Boolean key="Trace7.Spec.FirstAuto" value="true" />
+      <Double key="Trace7.Spec.Height" value="0" />
+      <Boolean key="Trace7.Spec.HeightAuto" value="true" />
+      <Boolean key="Trace7.Spec.IsClearOnRestart" value="true" />
+      <Int32 key="Trace7.Spec.Style" value="0" />
+      <Double key="Trace7.Spec.Threshold" value="0" />
+      <Boolean key="Trace7.Spec.Visible" value="false" />
+      <Boolean key="Trace7.TrigRefLineVis" value="true" />
+      <Double key="Trace7.UnwrapRef" value="0" />
+      <Double key="Trace7.VectXCtr" value="0" />
+      <Boolean key="Trace7.Visible" value="true" />
+      <Double key="Trace7.XEyeLength" value="2" />
+      <Double key="Trace7.XLeft" value="1400000" />
+      <Boolean key="Trace7.XLog" value="false" />
+      <Double key="Trace7.XRight" value="1410000" />
+      <Boolean key="Trace7.XScaleAuto" value="false" />
+      <Double key="Trace7.YBottom" value="-180" />
+      <Int32 key="Trace7.YCoordinate" value="4" />
+      <Double key="Trace7.YRefPos" value="50" />
+      <Boolean key="Trace7.YRefTrackRange" value="false" />
+      <Boolean key="Trace7.YRefVisible" value="false" />
+      <Double key="Trace7.YTop" value="180" />
+      <Int32 key="Trace7.YUnit" value="0" />
+      <Boolean key="XCenterFreq" value="true" />
+    </State>
+  </Application>
+</Agilent89601Setup>
