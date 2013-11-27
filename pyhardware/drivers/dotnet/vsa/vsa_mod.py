@@ -10,8 +10,7 @@ from numpy import *
 sys.path.append('C:\\Program Files\\Agilent\\89600 Software 16.0\\89600 VSA Software\\Interfaces') # if people complain about this, it should be a persistentConfig...
 clr.AddReference("Agilent.SA.Vsa.Interfaces") ## no .dll
 import Agilent.SA.Vsa as Vsa
-from Agilent.SA.Vsa import ApplicationFactory,TraceDataSelect
-
+from Agilent.SA.Vsa import ApplicationFactory, TraceDataSelect
 
 class Vsa(GuiWrapper, FetcherMixin):
     _fields = ["active_label"]
@@ -25,6 +24,8 @@ class Vsa(GuiWrapper, FetcherMixin):
         GuiWrapper.__init__(self)
         self.app.IsVisible = True
         self._active_label = 'A'
+        #self.active_measurement = 0
+        #self.active_data = "Main Time1"
     
     def _setupUi(self, widget):
         """sets up the graphical user interface"""
@@ -75,7 +76,6 @@ class Vsa(GuiWrapper, FetcherMixin):
         while self.current_average()<count:
             pass
 
-    
     def current_average(self, label="A"):
         return self._trace_(label).MeasurementData.State.Value("CurrentNumAverages", 1)
     
@@ -102,14 +102,24 @@ class Vsa(GuiWrapper, FetcherMixin):
         
         if name == None:
             name = tr.DataName
-        else:
-            name = name + "_" + tr.DataName
+        
+            
         res = Series(Y, index=X)
+        
         meas = self.app.Measurements[tr.MeasurementIndex]
         curve = Curve()
-        curve.set_data(res)
         curve.set_params(**self.params_from_meas(meas))
-        curve.set_params(trace_label=label) 
+        y_unit=tr.YAxisUnit
+        if y_unit=="dBm":
+            res = 1000*(10**(res/10))/curve.params['bandwidth']
+            y_unit='J'
+        curve.set_data(res)
+        curve.set_params(y_unit=y_unit, x_unit=tr.XAxisUnit)
+        
+        curve.set_params(trace_label=label)
+        curve.set_params(current_average=self.current_average(label))
+        
+        curve.set_params(data_name=tr.DataName)
         return curve
         
     def _get_curve(self):
@@ -120,16 +130,43 @@ class Vsa(GuiWrapper, FetcherMixin):
         dic["name"] = "vsa_curve"
         dic["curve_type"] = 'VsaCurve'
         dic["averaging"] = meas.Average.Count
+        dic["current_average"] = self.current_average()
         dic["center_freq"] = meas.Frequency.Center
         dic["start_freq"] = meas.Frequency.StartFrequency
         dic["stop_freq"] = meas.Frequency.StopFrequency
         dic["span"] = meas.Frequency.Span
         dic["bandwidth"] = meas.Frequency.ResBW
         dic["sweep_time"] = meas.Time.Length
+        
         #dic["detector_type"] = self.detector_types[self.detector_type]
         dic["instrument_type"] = "Vsa"
         dic["instrument_logical_name"] = "vsa"
         return dic
+    
+    """
+    def get_data(self):
+        "returns the active_data of the active_measurement as a curve with complex values"
+        meas = self.app.Measurements[self.active_measurement]
+        trData = meas.MeasurementData(self.active_data)
+        n = trData.Points
+        start = trData.XStart
+        stop = start + n*trData.XDelta
+        X = linspace(start, stop, n, endpoint=False)
+        #X = list(tr.DoubleData(TraceDataSelect.X,True))
+        Y = list(trData.DoubleData)
+        if trData.IsComplex:
+            Y = array(Y[::2])+1j*array(Y[1::2])
+        #cols[i] = Series(Y,index = X,name = i)
+        ser = Series(Y, index=X)
+        curve = Curve()
+        curve.set_data(ser)
+        curve.set_params(**self.params_from_meas(meas))
+        #set_meta_from_meas(cols[i],app.Measurements[measurement])
+        return curve
+    
+    def available(self,measurement = 0):
+        return list(app.Display.Traces.DataNames)
+    """
 """
 class _data:
     def __call__(self,list_of_names = ["Main Time1","Main Time2"],measurement = 0):   

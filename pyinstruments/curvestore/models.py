@@ -352,8 +352,7 @@ class CurveDB(models.Model, Curve):
         for col in columns:
             if col.required:
                 if not col.name in self.params:
-                    self.params[col.name] = col.default
-        
+                    self.params[col.name] = col.default        
 
     @transaction.commit_on_success
     def save(self):
