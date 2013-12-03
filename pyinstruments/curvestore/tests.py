@@ -10,7 +10,7 @@ from pyinstruments.curvestore.models import CurveDB
 from django.test import TestCase
 import pandas
 from datetime import datetime
-
+import time
 
 class SimpleTest(TestCase):
     def test_curve_save(self):
@@ -271,7 +271,7 @@ class TestHierarchicalTagFromModelTag(TestCase):
         ROOT.build_children_from_model()
         self.assertTrue(ROOT.children[1].children[0].name=='tag2')
         
-   
+""" 
 class TestTagsGui(TestCase):
     def test_child(self):
         tag, cr = Tag.objects.get_or_create(name='tag')
@@ -281,13 +281,27 @@ class TestTagsGui(TestCase):
         ROOT.build_children_from_model()
         from pyinstruments.curvestore.tag_widget import TagTreeView
         from guidata import qapplication
-        app = qapplication()
+        #app = qapplication()
         t = TagTreeView()
-        t.show()
-        app.exec_()
+        #t.show()
+        #app.exec_()
         
         ROOT.build_children_from_model()
-        app = qapplication()
+        #app = qapplication()
         t = TagTreeView()
-        t.show()
-        app.exec_()
+        #t.show()
+        #app.exec_()
+"""
+
+
+class Profiling(TestCase):
+    def test_insert(self):
+        curve = CurveDB()
+        curve.set_data(pandas.Series([1,4,6]))
+        curve.save()
+        
+        tic = time.time()
+        for i in range(100):
+            curve.params['coucou'] = i
+            curve.save()
+        print time.time() - tic
