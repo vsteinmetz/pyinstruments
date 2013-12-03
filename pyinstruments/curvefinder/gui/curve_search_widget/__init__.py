@@ -39,7 +39,7 @@ class CurveSearchWidget(QtGui.QWidget):
         self.setLayout(self.lay)
         self.lay.addWidget(self.curve_filter_widget)
         self.lay.addWidget(self.list_curve_widget)
-        self.curve_filter_widget.value_changed.connect(self.list_curve_widget.refresh)
+        #self.curve_filter_widget.value_changed.connect(self.list_curve_widget.refresh)
         self.curve_filter_widget.value_changed.connect(self.value_changed)
         self.list_curve_widget.current_item_changed.connect(self.current_item_changed)
         self.list_curve_widget.refresh_clicked.connect(self.refresh_clicked)

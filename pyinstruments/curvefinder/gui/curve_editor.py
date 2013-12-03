@@ -45,7 +45,7 @@ class CurveEditor(QtGui.QMainWindow, object):
         
         self.curve_display_widget = CurveDisplayWidget(self)
         self.setCentralWidget(self.curve_display_widget)
-        self.search_widget.value_changed.connect(self.refresh)
+        #self.search_widget.value_changed.connect(self.refresh)
         self.search_widget.value_changed.connect(self.save_defaults)        
         self.search_widget.current_item_changed.connect(self.display)
         self.curve_display_widget.delete_done.connect(self.refresh)
