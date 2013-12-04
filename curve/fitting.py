@@ -187,7 +187,7 @@ class FitFunctions(object):
                 ringstart = min(low.index)
                 for i in low.index:
                     #result[i]=max([y0,y0+scale+overshoot-slope*(i-ringstart)])
-                    result[i]=math.log10(10**y0+10**(y0+scale+overshoot-abs(slope)*(i-ringstart)))
+                    result[i]=numpy.log10(10**y0+10**(y0+scale+overshoot-abs(slope)*(i-ringstart)))
         return numpy.array(result.values,dtype=float)
 
     def _guessringdown(self):
@@ -511,6 +511,48 @@ class FitFunctions(object):
         self.comment("Manual: "+str(self.manualguess_params))
         self.comment("Automatic: "+str(fitparams))
         return fitparams
+    
+    '''square root'''
+    def sqrt(self,scale,y0):
+        x=self.x()
+        return scale*(x**0.5)+y0
+
+    def _guesssqrt(self):
+        y0 = 0.0
+        data = (self.data-y0)**2
+        sum=0.0
+        elements=0
+        for x,y in data.iteritems():      
+            if not x==0:
+                sum+=(y/x)**0.5
+                elements+=1
+        if elements>0:
+            scale = sum/elements
+        else:
+            scale=1
+        fit_params = {'y0': y0, 'scale': scale}
+        return fit_params
+
+    def pow(self,scale,exponent,y0):
+        x=self.x()
+        return scale*(x**exponent)+y0
+
+    def _guesspow(self):
+        y0 = 0.0
+        exponent=1
+        data = (self.data-y0)**(1/exponent)
+        sum=0.0
+        elements=0
+        for x,y in data.iteritems():      
+            if not x==0:
+                sum+=(y/x)**exponent
+                elements+=1
+        if elements>0:
+            scale = sum/elements
+        else:
+            scale=1
+        fit_params = {'y0': y0, 'exponent':exponent, 'scale': scale}
+        return fit_params
 
 
 

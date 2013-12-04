@@ -61,10 +61,10 @@ class DPO3014(VisaDriver,  GuiWrapper, FetcherMixin):
 
     @property
     def number_of_averages(self):
-        return int(self.ask("ACQuire:NUMACq?"))
+        return int(self.ask("ACQuire:NUMAVg?"))
     @number_of_averages.setter
     def number_of_averages(self,val=2):
-        self.write("ACQuire:NUMACq "+str(val))
+        self.write("ACQuire:NUMAVg "+str(val))
 
     @property
     def acquisition_type(self):
