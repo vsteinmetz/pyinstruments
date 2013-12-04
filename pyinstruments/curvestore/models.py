@@ -3,6 +3,7 @@ from pyinstruments.datastore.settings import MEDIA_ROOT
 from curve import Curve
 from curve import load as load_curve
 
+import copy
 from django.db import transaction
 from PyQt4 import QtCore, QtGui
 from django.db import models
@@ -143,13 +144,15 @@ def get_column(name, type_):
     If it exists and has the required type, returns the existing one
     otherwise throws a WrongTypeError.
     """
+    
     col, new = ParamColumn.objects.get_or_create(name=name)
     if new:
         col.type = type_
         col.save()
     else:
         if col.type!=type_:
-            raise WrongTypeError("column " + name + " allready exists and has the wong type " + col.type + " not " + type_)
+            if col.type not in ('char', 'text') and  type_ not in ('char', 'text'):
+                raise WrongTypeError("column " + name + " already exists and has the wrong type " + col.type + " not " + type_)
     return col
 
 
@@ -198,7 +201,7 @@ class CurveDB(models.Model, Curve):
     
     @property
     def tags(self):
-        if not self._tags:
+        if self._tags==None:
             if self.pk:
                 self._tags = [tag.name for tag in self.tags_relation.all()]
             else:
@@ -242,38 +245,6 @@ class CurveDB(models.Model, Curve):
             self.load_params()
             return self._params
     
-    def save_char_param(self, col, val):
-        try:
-            column = get_column(col, 'char')
-        except WrongTypeError:
-            self._save_generic_param(col, val, TextParam)            
-        else:
-            self._save_generic_param(col, val, CharParam)
-                
-    def _save_generic_param(self, col, val, cls):
-        #import time
-        #tic = time.time()
-        column = get_column(col, cls.type)
-        param, new = cls.objects.get_or_create(col=column, curve=self, defaults={'value':val})
-        if not new:
-            if not column.read_only:
-                param.value = val
-                param.save()
-            else:
-                if param.value!=val:
-                    print "Modified value of read_only parameter " + column.name + " was not saved!"
-        #print time.time() - tic
-    def save_num_param(self, col, val):
-        if numpy.isnan(val):
-            val=1e100
-        self._save_generic_param(col, val, FloatParam)
-            
-    def save_date_param(self, col, val):
-        self._save_generic_param(col, val, DateParam)
-    
-    def save_bool_param(self, col, val):
-        self._save_generic_param(col, val, BooleanParam)        
-    
     @property
     def name(self):
         return self._name
@@ -314,40 +285,83 @@ class CurveDB(models.Model, Curve):
         elif not "parent_id" in self.params:
             self.params["parent_id"] = 0
         
-
+        float_params   = dict([(v.name_txt, v) for v in self.floatparam.all().select_related('col')])
+        boolean_params = dict([(v.name_txt, v) for v in self.booleanparam.all().select_related('col')])
+        char_params    = dict([(v.name_txt, v) for v in self.charparam.all().select_related('col')])
+        text_params    = dict([(v.name_txt, v) for v in self.textparam.all().select_related('col')])
+        date_params    = dict([(v.name_txt, v) for v in self.dateparam.all().select_related('col')])
         
+        params = float_params
+        params.update(boolean_params)
+        params.update(char_params)
+        params.update(text_params)
+        params.update(date_params)
         
         for par, val in self.params.iteritems():
-            if isinstance(val, basestring):
-                self.save_char_param(par, val)
-                continue
-            if isinstance(val, (bool, numpy.bool_)):
-                self.save_bool_param(par, val)
-                continue
-            if isinstance(val, (numpy.integer, numpy.float)):
-                val = float(val)
-            if isinstance(val, (int, float, long)):
-                self.save_num_param(par, val)
-                continue
-            if isinstance(val, datetime):
-                self.save_date_param(par, val)
-                continue
-            raise ValueError('could not find the type of parameter ' + str(val))
+            try:
+                db_param = params.pop(par)
+            except KeyError:
+                cls = self.get_type(val)
+                column = get_column(par, cls.type)
+                if column.type=='text':
+                    cls = TextParam
+                if column.type=='char':
+                    cls = CharParam
+                param, new = cls.objects.get_or_create(col=column, curve=self, defaults={'value':val})
+            else:
+                if db_param.value!=val:
+                    if not db_param.col.read_only:
+                        db_param.value = val
+                        db_param.save()
+                    else:
+                        print "Modified value of read_only parameter " + par + " was not saved!"
+        
+        ## parameters left over in params should be deleted
+        for val in params.values():
+            val.delete()
         
         self.params_json = json.dumps(self.params, default=default)
         #models.Model.save(self)
+        
+    def get_type(self, val):
+        if isinstance(val, basestring):
+            return CharParam
+        if isinstance(val, (bool, numpy.bool_)):
+            return BooleanParam
+        if isinstance(val, (numpy.integer, numpy.float)):
+            return FloatParam
+        if isinstance(val, (int, float, long)):
+            return FloatParam
+        if isinstance(val, datetime):
+            return DateParam
+        raise ValueError('could not find the type of parameter ' + str(val))
+        
+
 
     def get_full_filename(self):
         return os.path.join(MEDIA_ROOT, \
                                  self.data_file.name)
  
     def save_tags(self):
+        tags = copy.deepcopy(self.tags)
+        for tag in self.tags_relation.all():
+            try:
+                tags.remove(tag.name)
+            except ValueError:
+                self.tags_relation.remove(tag)
+        # remaining tags have to be added
+        for tag_name in tags:
+            (tag, new) = Tag.objects.get_or_create(name=tag_name)
+            if new:
+                model_monitor.tag_added.emit()
+            self.tags_relation.add(tag)
+        """
         for tag_txt in self.tags:
             (tag, new) = Tag.objects.get_or_create(name=tag_txt)
             if new:
                 model_monitor.tag_added.emit()
             self.tags_relation.add(tag)
-
+        """
     
     def set_default_params(self):
         """
@@ -503,7 +517,7 @@ class CharParam(Param):
     def __init__(self, *args, **kwds):
         super(CharParam, self).__init__(*args, **kwds)
     curve = models.ForeignKey(CurveDB, related_name='charparam')
-    value = models.CharField(max_length = 255)
+    value = models.CharField(max_length=255)
     
 class FloatParam(Param):
     type = 'float'
@@ -592,6 +606,15 @@ def curve_db_from_file(filename,inplace=False,overwrite=None):
         curve_db.tags = curve.params['tags_flatten'].rstrip(";").split(";")[1:]
     return curve_db
 
+def clear_unused_columns():
+    print "clearing unused columns"
+    for col in ParamColumn.objects.all():
+        if col.__getattribute__(col.type + "param_set").count()==0:
+            print "clearing column: " + col.name
+            col.delete()
+
+clear_unused_columns() #at each startup            
+        
 class ModelMonitor(QtCore.QObject):
     tag_added = QtCore.pyqtSignal()
     tag_deletted = QtCore.pyqtSignal()

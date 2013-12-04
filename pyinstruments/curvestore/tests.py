@@ -5,7 +5,7 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 
-from pyinstruments.curvestore.models import CurveDB
+from pyinstruments.curvestore.models import CurveDB, Tag, ParamColumn, clear_unused_columns
 
 from django.test import TestCase
 import pandas
@@ -141,6 +141,41 @@ class SimpleTest(TestCase):
         qs = CurveDB.objects.filter_tag('new_tag').filter_tag("other_tag")
         self.assertTrue(self.curve in qs)
         self.assertFalse(self.curve2 in qs)
+     
+     
+    def test_remove_tag(self):
+        """
+        Tests that a curve can be retrieved by a date.
+        """
+        self.curve = CurveDB()
+        self.curve.set_data(pandas.Series([1,4,6]))
+        self.curve.save()
+        self.curve.tags.append('other_tag')
+        self.curve.save()
+        qs = CurveDB.objects.filter_tag('other_tag')
+        self.assertTrue(self.curve in qs)
+        self.curve.tags.pop(0)
+        self.curve.save()
+        curve = CurveDB.objects.get(id=self.curve.id)
+        self.assertTrue("other_tag" not in curve.tags)
+        
+       
+    def test_rename_tag(self):
+        """
+        Tests that a curve can be retrieved by a date.
+        """
+        self.curve = CurveDB()
+        self.curve.set_data(pandas.Series([1,4,6]))
+        self.curve.save()
+        self.curve.tags.append('other_tag')
+        self.curve.save()
+        
+        tag = Tag.objects.get(name='other_tag')
+        tag.name = 'brand_new_name'
+        tag.save()
+        curve = CurveDB.objects.get(id=self.curve.id)
+        
+        self.assertTrue(curve.tags == ['brand_new_name'])
         
     def test_chained_filter(self):
         self.curve = CurveDB()
@@ -293,6 +328,55 @@ class TestTagsGui(TestCase):
         #app.exec_()
 """
 
+class TestParams(TestCase):
+    def test_insert_param(self):
+        curve = CurveDB()
+        curve.set_data(pandas.Series([1,4,6]))
+        curve.save()
+        
+        for i in range(100):
+            curve.params['coucou' + str(i)] = i
+        curve.save()
+        cu = CurveDB.objects.get(id=curve.id)
+        self.assertTrue(cu.params['coucou12']==12)
+        
+        cu.params['coucou12'] = 45.
+        cu.save()
+        cu2 = CurveDB.objects.get(id=curve.id)
+        self.assertTrue(cu2.params['coucou12']==45.)
+        
+        search = CurveDB.objects.filter_param('coucou12', value__gte=44)
+        self.assertTrue(cu2 in search)
+        
+    def test_remove_param(self):
+        curve = CurveDB()
+        curve.set_data(pandas.Series([1,4,6]))
+        curve.save()
+        
+        for i in range(20):
+            curve.params['coucou' + str(i)] = i
+        curve.save()
+        curve = CurveDB.objects.get(id=curve.id)
+        curve.params.pop("coucou12")
+        curve.save()
+        curve = CurveDB.objects.get(id=curve.id)
+        self.assertTrue("coucou12" not in curve.params)
+        
+    def test_clear_columns(self):
+        curve = CurveDB()
+        curve.set_data(pandas.Series([1,4,6]))
+        curve.save()
+        
+        curve.params['dummy_name'] = 89
+        curve.save()
+        curve = CurveDB.objects.get(id=curve.id)
+        self.assertTrue("dummy_name" in [o.name for o in ParamColumn.objects.all()])
+        
+        curve.params.pop('dummy_name')
+        curve.save()
+        self.assertTrue("dummy_name" in [o.name for o in ParamColumn.objects.all()])
+        clear_unused_columns()
+        self.assertFalse("dummy_name" in [o.name for o in ParamColumn.objects.all()])
 
 class Profiling(TestCase):
     def test_insert(self):
@@ -301,7 +385,7 @@ class Profiling(TestCase):
         curve.save()
         
         tic = time.time()
-        for i in range(100):
+        for i in range(10):
             curve.params['coucou'] = i
             curve.save()
         print "time for saving 100 dummy curves: " , time.time() - tic
@@ -312,8 +396,8 @@ class Profiling(TestCase):
         curve.save()
         
         tic = time.time()
-        for i in range(100):
-            for j in range(30):
+        for i in range(10):
+            for j in range(10):
                 curve.params['coucou' + str(j)] = j
                 curve.save()
         print time.time() - tic
