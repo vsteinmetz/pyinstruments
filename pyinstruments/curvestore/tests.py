@@ -304,4 +304,16 @@ class Profiling(TestCase):
         for i in range(100):
             curve.params['coucou'] = i
             curve.save()
+        print "time for saving 100 dummy curves: " , time.time() - tic
+        
+    def test_insert(self):
+        curve = CurveDB()
+        curve.set_data(pandas.Series([1,4,6]))
+        curve.save()
+        
+        tic = time.time()
+        for i in range(100):
+            for j in range(30):
+                curve.params['coucou' + str(j)] = j
+                curve.save()
         print time.time() - tic

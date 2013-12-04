@@ -165,6 +165,7 @@ def date_to_date(dic):
         dic['date'] = datetime.strptime(dic['date'], "%y/%m/%d/%H/%M/%S/%f")
     return dic
  
+
 class CurveDB(models.Model, Curve):
     """
     The base object containing the path to the curves, with all the meta 
@@ -250,6 +251,8 @@ class CurveDB(models.Model, Curve):
             self._save_generic_param(col, val, CharParam)
                 
     def _save_generic_param(self, col, val, cls):
+        #import time
+        #tic = time.time()
         column = get_column(col, cls.type)
         param, new = cls.objects.get_or_create(col=column, curve=self, defaults={'value':val})
         if not new:
@@ -259,7 +262,7 @@ class CurveDB(models.Model, Curve):
             else:
                 if param.value!=val:
                     print "Modified value of read_only parameter " + column.name + " was not saved!"
-        
+        #print time.time() - tic
     def save_num_param(self, col, val):
         if numpy.isnan(val):
             val=1e100
@@ -310,6 +313,9 @@ class CurveDB(models.Model, Curve):
             self.params["parent_id"] = self.parent.pk
         elif not "parent_id" in self.params:
             self.params["parent_id"] = 0
+        
+
+        
         
         for par, val in self.params.iteritems():
             if isinstance(val, basestring):
@@ -550,10 +556,11 @@ def curve_db_from_curve(curve):
 
 class IdError(ValueError):
     pass
+
 def curve_db_from_file(filename,inplace=False,overwrite=None):
-    """overwrite = None: raise Exception if id conflict
-       overvrite = True: overwrite id if conflict
-       overvrite = False: use new id"""
+    """overwrite=None: raise Exception if id conflict
+       overwrite=True: overwrite id if conflict
+       overwrite=False: use new id"""
     curve = load_curve(filename, with_data=not inplace)
     curve_db = CurveDB()
     if inplace:
