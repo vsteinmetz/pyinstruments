@@ -6,6 +6,7 @@ Replace this with more appropriate tests for your application.
 """
 
 from pyinstruments.curvestore.models import CurveDB, Tag, ParamColumn, clear_unused_columns
+from pyinstruments.curvestore import models
 
 from django.test import TestCase
 import pandas
@@ -385,19 +386,68 @@ class Profiling(TestCase):
         curve.save()
         
         tic = time.time()
-        for i in range(10):
+        for i in range(100):
             curve.params['coucou'] = i
             curve.save()
         print "time for saving 100 dummy curves: " , time.time() - tic
         
-    def test_insert(self):
+    def test_insert2(self):
         curve = CurveDB()
         curve.set_data(pandas.Series([1,4,6]))
         curve.save()
         
+        for i in range(3):
+            for j in range(100):
+                curve.params['coucou' + str(j)] = i*j
+            tic = time.time()
+            curve.save()
+            print "time for saving 100 parameters: " + str(time.time() - tic)
+    
+    def test_save_curve_only(self):
+        from curve import Curve
+        curve = CurveDB()
+        curve.set_data(pandas.Series([1,4,6]))
+        curve.save()
+        
+        for i in range(3):
+            for j in range(100):
+                curve.params['coucou' + str(j)] = i*j
+            tic = time.time()
+            Curve.save(curve, curve.get_full_filename())
+            print "time for saving 100 parameters in h5: " + str(time.time() - tic)
+        
+    def test_save_params_only(self):
+        from curve import Curve
+        curve = CurveDB()
+        curve.set_data(pandas.Series([1,4,6]))
+        curve.save()
+        
+        
+        print "================================"
+        
+        for i in range(5):
+            curve = CurveDB()
+            curve.set_data(pandas.Series([1,4,6]))
+            for j in range(100):
+                curve.params['coucou' + str(j)] = i*j
+            tic = time.time()
+            curve.save_params()
+            print "time for saving 100 parameters in db only: " + str(time.time() - tic)
+        print "================================"
+        
+        
+        
+    def test_alter_params_only(self):
+        from curve import Curve
+        curve = CurveDB()
+        curve.set_data(pandas.Series([1,4,6]))
+        curve.params["dummy"] = 24.5
+        for j in range(100):
+            curve.params['coucou' + str(j)] = j
+        curve.save()
         tic = time.time()
-        for i in range(10):
-            for j in range(10):
-                curve.params['coucou' + str(j)] = j
-                curve.save()
-        print time.time() - tic
+        curve.params["dummy"] = 25.5
+        models.PROFILING = True
+        curve.save_params()
+        print "time for altering just one value: ", time.time() - tic 
+        models.PROFILING = False

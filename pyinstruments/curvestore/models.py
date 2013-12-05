@@ -15,6 +15,7 @@ from django.template.defaultfilters import slugify
 import numpy
 from django.core.exceptions import ObjectDoesNotExist
 
+PROFILING = False
 
 def top_level_tags():
     tag_names = set()
@@ -271,6 +272,10 @@ class CurveDB(models.Model, Curve):
             ';'
     
     def save_params(self):
+        if PROFILING:
+            print """
+           
+            """
         self._name = self.params["name"]
         self._date = self.params["date"]
         if not self.pk:
@@ -284,12 +289,18 @@ class CurveDB(models.Model, Curve):
             self.params["parent_id"] = self.parent.pk
         elif not "parent_id" in self.params:
             self.params["parent_id"] = 0
-        
-        float_params   = dict([(v.name_txt, v) for v in self.floatparam.all().select_related('col')])
+            
+        if PROFILING:
+            import time
+            tic = time.time()
+        qs_float = self.floatparam.all().select_related('col')
+        float_params   = dict([(v.name_txt, v) for v in qs_float])
         boolean_params = dict([(v.name_txt, v) for v in self.booleanparam.all().select_related('col')])
         char_params    = dict([(v.name_txt, v) for v in self.charparam.all().select_related('col')])
         text_params    = dict([(v.name_txt, v) for v in self.textparam.all().select_related('col')])
         date_params    = dict([(v.name_txt, v) for v in self.dateparam.all().select_related('col')])
+        if PROFILING:
+            print "time for queries: ", time.time() - tic 
         
         params = float_params
         params.update(boolean_params)
@@ -297,30 +308,97 @@ class CurveDB(models.Model, Curve):
         params.update(text_params)
         params.update(date_params)
         
+        to_add = dict()
+        subclasses = Param.__subclasses__()
+        #dic_param = dict()
+        for cls in subclasses:
+            to_add[cls.type] = []
+        
+        if PROFILING:
+            tic = time.time()
+            total = 0
+            total_save = 0
+            total_get_type = 0
+            total_else = 0
+        
+        
+        columns = None
+        
         for par, val in self.params.iteritems():
             try:
                 db_param = params.pop(par)
             except KeyError:
+                if PROFILING:
+                    tuc = time.time()
                 cls = self.get_type(val)
-                column = get_column(par, cls.type)
+                if PROFILING:
+                    total_get_type+= time.time() - tuc
+                if PROFILING:
+                    toc = time.time()
+                if not columns:
+                    if PROFILING:
+                        tac = time.time()
+                    columns = dict([(o.name, o) for o in ParamColumn.objects.filter(name__in=self.params.keys())])
+                    if PROFILING:
+                        print "querying columns already in db: ", time.time() - tac
+                try:
+                    column = columns[par]#get_column(par, cls.type)
+                except KeyError:
+                    column = get_column(par, cls.type)
+                if PROFILING:
+                    total+=time.time() - toc
                 if column.type=='text':
                     cls = TextParam
                 if column.type=='char':
                     cls = CharParam
-                param, new = cls.objects.get_or_create(col=column, curve=self, defaults={'value':val})
+
+                to_add[column.type].append((column, self, val))
+#                param, new = cls.objects.get_or_create(col=column,
+#                                                       curve=self,
+#                                                       defaults={'value':val})
             else:
+                if PROFILING:
+                    tyc = time.time()
                 if db_param.value!=val:
                     if not db_param.col.read_only:
                         db_param.value = val
+                        if PROFILING:
+                            tec = time.time()
                         db_param.save()
+                        if PROFILING:
+                            total_save+= time.time()-tec
                     else:
                         print "Modified value of read_only parameter " + par + " was not saved!"
-        
+                if PROFILING:
+                    total_else+= time.time() - tyc
+        if PROFILING:
+            print "total time get_type: ", total_get_type
+            print "total time get_column: ", total
+            print "total time else: ", total_else
+            print "total time save: ", total_save
+            print "lot of time here ?: ", time.time() - tic 
+
+        if PROFILING:
+            toc = time.time()
+        for cls in subclasses:
+            add_list = to_add[cls.type]
+            cls.objects.bulk_create([cls(col=col, curve=curve, value=val) for (col, curve, val) in add_list])
+ #           for (col, curve, val) in add_list:
+ #               param, new = cls.objects.get_or_create(col=col,
+ #                                                      curve=curve,
+ #                                                      defaults={'value':val})     
+        if PROFILING:
+            print "total time for create parameters: ", time.time() - toc
         ## parameters left over in params should be deleted
         for val in params.values():
             val.delete()
         
+        if PROFILING:
+            tic = time.time()
         self.params_json = json.dumps(self.params, default=default)
+        if PROFILING:
+            print "total time for json: ", time.time() - tic
+        
         #models.Model.save(self)
         
     def get_type(self, val):
