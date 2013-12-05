@@ -14,9 +14,18 @@ from django.core.files.storage import default_storage
 from django.template.defaultfilters import slugify
 import numpy
 from django.core.exceptions import ObjectDoesNotExist
-
+import time
 PROFILING = False
+PROFILE_SAVE = False
+TIC = 0
 
+def profile(flag=PROFILING, text="", tic=None):
+    if flag:
+        if tic is not None:
+            print text, time.time() - tic
+        tic = time.time()
+        return tic
+    
 def top_level_tags():
     tag_names = set()
     ch = Tag.objects.all()
@@ -284,7 +293,6 @@ class CurveDB(models.Model, Curve):
         
         self.params["tags_flatten"] = self.do_flatten_tags()
         
-        
         if self.parent is not None:
             self.params["parent_id"] = self.parent.pk
         elif not "parent_id" in self.params:
@@ -458,33 +466,52 @@ class CurveDB(models.Model, Curve):
         Saves the curve in the database. If the curve is data_read_only 
         The actual datafile will be saved only on the first call of save().
         """
+        tic = profile(PROFILE_SAVE, "start: ")
         
         self.set_default_params()
+        tic = profile(PROFILE_SAVE, "set_defaults: ", tic)
+        
+        
+        #models.Model.save(self) #this way, the id is correct
+        
+        tic = profile(PROFILE_SAVE, "other default assignements: ", tic)
+        self.save_params() #this saves the curve with the correct id
+        
+        
         if not self.data_file:
             self.data_file = os.path.join( \
                     self.params["date"].strftime('%Y/%m/%d'), \
-                    slugify(self.name) + '.h5')
+                    slugify(str(self.id) +"_"+ self.name) + '.h5')
             full_path = self.get_full_filename()
             dirname = os.path.dirname(full_path)
+            
+            tic = profile(PROFILE_SAVE, "format dirname: ", tic)
+            
             if not os.path.exists(dirname):
                 os.makedirs(dirname) 
+            tic = profile(PROFILE_SAVE, "create dir: ", tic)
             full_path = default_storage.get_available_name(full_path)
+            tic = profile(PROFILE_SAVE, "get_available_name: ", tic)
             self.data_file = os.path.relpath(full_path, MEDIA_ROOT)
+            tic = profile(PROFILE_SAVE, "set datafile: ", tic)
         
-        #models.Model.save(self) #this way, the id is correct
-        self.save_params() #this saves the curve with the correct id
+        
+        
+        tic = profile(PROFILE_SAVE, "save_params: ", tic)
         if not self.params["data_read_only"]:
             Curve.save(self, self.get_full_filename())
+            tic = profile(PROFILE_SAVE, "Curve.save(): ", tic)
         else:
             if not os.path.exists(self.get_full_filename()):
                 Curve.save(self, self.get_full_filename())
+                tic = profile(PROFILE_SAVE, "Curve.save(): ", tic)
         self.save_tags()
-        
+        tic = profile(PROFILE_SAVE, "save tags ", tic)
         #if self.saved_in_db==False:
         #    self.saved_in_db=True
         #    models.Model.save(self)
         models.Model.save(self)
-     
+        tic = profile(PROFILE_SAVE, "Model.save(): ", tic)
     @transaction.commit_on_success
     def delete(self):
         try:

@@ -13,6 +13,17 @@ import pandas
 from datetime import datetime
 import time
 
+log_file = __file__ + '.log'
+with open(log_file, 'w'):
+    pass
+
+def print_and_log(*args):
+    string = "".join([str(arg) for arg in args])
+    print string
+    with open(log_file, 'a') as f:
+        f.write(string + '\n')
+        
+        
 class SimpleTest(TestCase):
     def test_curve_save(self):
         """
@@ -381,17 +392,31 @@ class TestParams(TestCase):
 
 class Profiling(TestCase):
     def test_insert(self):
+        print_and_log("================================")
         curve = CurveDB()
         curve.set_data(pandas.Series([1,4,6]))
         curve.save()
         
         tic = time.time()
         for i in range(100):
-            curve.params['coucou'] = i
             curve.save()
-        print "time for saving 100 dummy curves: " , time.time() - tic
+        print_and_log("time for saving 100 times the same simple dummy curve: " , time.time() - tic)
         
+    def test_insertbis(self):
+        print_and_log("================================")
+        curve = CurveDB()
+        curve.set_data(pandas.Series([1,4,6]))
+        curve.save()
+        
+        tic = time.time()
+        for i in range(100):
+            curve = CurveDB()
+            curve.set_data(pandas.Series([1,4,6]))
+            curve.save()
+        print_and_log("time for saving 100 simple dummy curves (new each time): " , time.time() - tic)
+
     def test_insert2(self):
+        print_and_log("================================")
         curve = CurveDB()
         curve.set_data(pandas.Series([1,4,6]))
         curve.save()
@@ -401,29 +426,46 @@ class Profiling(TestCase):
                 curve.params['coucou' + str(j)] = i*j
             tic = time.time()
             curve.save()
-            print "time for saving 100 parameters: " + str(time.time() - tic)
+            print_and_log("time for saving 1 curve with 100 parameters (always same curve, values changing): " + str(time.time() - tic))
+    
+     
+         
+    def test_insert3(self):
+        print_and_log("================================")
+        
+        for i in range(3):
+            curve = CurveDB()
+            curve.set_data(pandas.Series([1,4,6]))
+            for j in range(100):
+                curve.params['coucou' + str(j)] = i*j
+            tic = time.time()
+            curve.save()
+            print_and_log("time for saving 1 curve with 100 parameters (new curve each time): " + str(time.time() - tic))
+    
+     
     
     def test_save_curve_only(self):
         from curve import Curve
         curve = CurveDB()
         curve.set_data(pandas.Series([1,4,6]))
         curve.save()
-        
+        print_and_log("================================")
         for i in range(3):
             for j in range(100):
                 curve.params['coucou' + str(j)] = i*j
             tic = time.time()
             Curve.save(curve, curve.get_full_filename())
-            print "time for saving 100 parameters in h5: " + str(time.time() - tic)
+            print_and_log("time for saving 1 curve with 100 parameters in h5: " + str(time.time() - tic))
         
     def test_save_params_only(self):
         from curve import Curve
+        models.PROFILE_SAVE = True
         curve = CurveDB()
         curve.set_data(pandas.Series([1,4,6]))
         curve.save()
         
         
-        print "================================"
+        print_and_log("================================")
         
         for i in range(5):
             curve = CurveDB()
@@ -432,8 +474,33 @@ class Profiling(TestCase):
                 curve.params['coucou' + str(j)] = i*j
             tic = time.time()
             curve.save_params()
-            print "time for saving 100 parameters in db only: " + str(time.time() - tic)
-        print "================================"
+            print_and_log("time for saving 100 parameters in db only, new curve each time: " + str(time.time() - tic))
+        print_and_log("================================")
+        for i in range(5):
+            curve = CurveDB()
+            curve.set_data(pandas.Series([1,4,6]))
+            for j in range(100):
+                curve.params['coucou' + str(j)] = i*j
+            tic = time.time()
+            curve.save()
+            print_and_log("time for saving 1 curve with 100 parameters, new curve each time: " + str(time.time() - tic))
+        models.PROFILE_SAVE = False
+    def test_save_altered_curve(self):
+        from curve import Curve
+        curve = CurveDB()
+        curve.set_data(pandas.Series([1,4,6]))
+        curve.save()
+        
+        
+        print_and_log("================================")
+        curve = CurveDB()
+        curve.set_data(pandas.Series([1,4,6]))
+        for i in range(5):
+            for j in range(100):
+                curve.params['coucou' + str(j)] = i*j
+            tic = time.time()
+            curve.save_params()
+            print_and_log("time for saving 100 parameters in db only, same curve each time: " + str(time.time() - tic))
         
         
         
@@ -449,5 +516,6 @@ class Profiling(TestCase):
         curve.params["dummy"] = 25.5
         models.PROFILING = True
         curve.save_params()
-        print "time for altering just one value: ", time.time() - tic 
+        print_and_log("================================")
+        print_and_log("time for altering just one value: ", time.time() - tic)
         models.PROFILING = False
