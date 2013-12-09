@@ -87,6 +87,7 @@ class ListCurveWidget(QtGui.QWidget, object):
         
         self._show_only_spinbox = QtGui.QSpinBox()
         self._show_only_spinbox.setValue(25)
+        self._show_only_spinbox.setMaximum(9999999)
         self._lay_refresh.addWidget(self._show_only_spinbox)
         
         self._show_only_total = QtGui.QLabel('/')
