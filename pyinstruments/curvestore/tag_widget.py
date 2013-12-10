@@ -173,13 +173,21 @@ class TagModel(QAbstractItemModel):
         for dragNode in dragNodes:
             # make an copy of the node being moved 
             old_index = self.index_from_fullname(dragNode.fullname)
-            self.beginRemoveRows(old_index.parent(), old_index.row(), row + 1)
+            try:
+                dragNode.move(parentNode)#newNode.move(parentNode)
+            except ValueError:
+                QtGui.QMessageBox.question(QtGui.QWidget(),
+                                   "Can't move",
+                                   "A tag with name " + dragNode.name + "already exists there",
+                                    'Cancel')
+            else:
+                self.beginRemoveRows(old_index.parent(), old_index.row(), row + 1)
+                
+                node = self.nodeFromIndex(parentIndex)
+                #newNode = deepcopy(dragNode) 
             
-            node = self.nodeFromIndex(parentIndex)
-            #newNode = deepcopy(dragNode) 
-            dragNode.move(parentNode)#newNode.move(parentNode)
-            self.endRemoveRows()
-            self.insertRow(len(parentNode)-1, parentIndex)
+                self.endRemoveRows()
+                self.insertRow(len(parentNode)-1, parentIndex)
             
             
         self.emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), parentIndex, parentIndex) 
@@ -404,10 +412,10 @@ class TagTreeView(QTreeView):
             #    proposition = name_clicked + '/'
             #else:
             #    proposition = name_clicked
-            (tag, confirm) = dialog.getText(QtGui.QWidget(), \
-                                     "new tag", \
-                                     "enter tag name", \
-                                     0, \
+            (tag, confirm) = dialog.getText(QtGui.QWidget(),
+                                     "new tag",
+                                     "enter tag name",
+                                     0,
                                      "")
             tag = str(tag)
             if confirm:
@@ -415,8 +423,15 @@ class TagTreeView(QTreeView):
                     raise ValueError("""tag name should not contain /""")
                 if tag=="":
                     raise ValueError("""tag name should not be blank""")
-                node_clicked.add_child(tag)
-                self.model().emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index, index) 
+                try:
+                    node_clicked.add_child(tag)
+                except ValueError:
+                    QtGui.QMessageBox.question(QtGui.QWidget(),
+                                   "can't add",
+                                   "A tag with name " + tag + " already exists there",
+                                    'Cancel')
+                else:
+                    self.model().emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index, index) 
                 
                 
         def remove_tag(dummy, name=name_clicked):
@@ -442,8 +457,15 @@ class TagTreeView(QTreeView):
                                      proposition)
             if confirm:
                 new_name = str(tag)
-                node_clicked.rename(new_name)
-                self.model().emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index, index) 
+                try:
+                    node_clicked.rename(new_name)
+                except ValueError:
+                    QtGui.QMessageBox.question(QtGui.QWidget(),
+                                   "Can't rename",
+                                   "A tag with name " + new_name + " already exists there",
+                                    'Cancel')
+                else:
+                    self.model().emit(SIGNAL("dataChanged(QModelIndex,QModelIndex)"), index, index) 
                 
         
         

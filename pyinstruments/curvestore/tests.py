@@ -231,6 +231,32 @@ class TestTagModel(TestCase):
         self.assertTrue(top_level_tags()[1].name == 'tag2')
 
 
+    def test_move_tag(self):
+        self.tag = Tag(name='tag1')
+        self.tag.save()
+        self.tag.add_child('tag2')
+
+        self.tag2 = Tag(name='tag2')
+        self.tag2.save()
+        tag2 = self.tag.childs()[0]
+        try:
+            tag2.move("")
+        except ValueError:
+            pass
+        else:
+            self.assertTrue(False, "this tag should not be moveable here")
+
+    def test_rename_tag_fails(self):
+        self.tag = Tag(name='tag1')
+        self.tag.save()
+        self.tag2 = Tag(name='tag3')
+        self.tag.save()
+        try:
+            self.tag2.set_shortname('tag1')
+        except ValueError:
+            pass
+        else:
+            self.assertTrue(False, "this tag should not be renameble with this name")
 
     def test_childs(self):
         tag, cr = Tag.objects.get_or_create(name='tag1')

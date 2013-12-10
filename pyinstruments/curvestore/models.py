@@ -53,16 +53,22 @@ class Tag(models.Model):
         childs = self.childs()
         path = self.name.split('/')[:-1]
         if path:
-            self.name = '/'.join(path) + '/' + val
+            newname = '/'.join(path) + '/' + val
         else:
-            self.name = val
-        self.save()
-        for child in childs:
-            child.move(self.name)
+            newname = val
+        try:
+            Tag.objects.get(name=newname)
+        except ObjectDoesNotExist:
+            self.name = newname
+            self.save()
+            for child in childs:
+                child.move(self.name)
+        else:
+            raise ValueError("A tag with name " + val + "already exists there")
     
     def add_child(self, name):
-        child, create = Tag.objects.get_or_create(name=self.name + '/' + name)
-      
+        return Tag.objects.get_or_create(name=self.name + '/' + name)
+        
     def remove(self):
         """
         removes tag and all childs
@@ -75,9 +81,17 @@ class Tag(models.Model):
     def move(self, new_parent):
         childs = self.childs()
         if new_parent=="":
-            self.name = self.shortname
+            new_name = self.shortname
         else:
-            self.name = new_parent + '/' + self.shortname
+            new_name = new_parent + '/' + self.shortname
+        try:
+            Tag.objects.get(name=new_name)
+        except ObjectDoesNotExist:  
+            pass
+        else:
+            raise ValueError("a tag with name " + new_name + " already exist")
+        
+        self.name = new_name
         self.save()
         for child in childs:
             child.move(self.name)

@@ -12,12 +12,15 @@ class HierarchicalTag(object):
         self.setParent(parent)
 
     def add_child(self, name):
-        HierarchicalTag(name, parent=self)
         if self.fullname == "":
-            Tag.objects.get_or_create(name=name)
+            tag, new = Tag.objects.get_or_create(name=name)
         else:
-            self.model_tag().add_child(name)
-            
+            tag, new = self.model_tag().add_child(name)
+        if new:
+            HierarchicalTag(name, parent=self)
+        else:
+            raise ValueError('A tag with name '+ name + ' already exists there')
+        
     def remove(self):
         self.model_tag().remove()
 #        self.parent.children.remove()
@@ -28,7 +31,7 @@ class HierarchicalTag(object):
         self.name = new_name
 
     def move(self, new_parent):
-        self.model_tag().move(new_parent.fullname)
+        self.model_tag().move(new_parent.fullname)  
         self.parent.children.remove(self)
         self.setParent(new_parent)
 
