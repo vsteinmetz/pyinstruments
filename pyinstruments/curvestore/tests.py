@@ -519,3 +519,18 @@ class Profiling(TestCase):
         print_and_log("================================")
         print_and_log("time for altering just one value: ", time.time() - tic)
         models.PROFILING = False
+        
+        
+    
+        
+    def test_delete(self):
+        from curve import Curve
+        curve = CurveDB()
+        curve.set_data(pandas.Series([1,4,6]))
+        curve.params["dummy"] = 24.5
+        for j in range(100):
+            curve.params['coucou' + str(j)] = j
+        curve.save()
+        tic = time.time()
+        curve.delete()
+        print_and_log("time for deleting one curve: ", time.time() - tic)

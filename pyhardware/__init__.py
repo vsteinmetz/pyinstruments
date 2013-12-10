@@ -14,7 +14,7 @@ import curve
 
 from guidata import qapplication as __qapplication
 _APP = __qapplication()
-
+_TITLE = "pyhardware"
 
 def instrument(logical_name):
     from pyhardware.config import PyInstrumentsConfig as _PIC

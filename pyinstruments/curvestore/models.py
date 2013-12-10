@@ -525,8 +525,7 @@ class CurveDB(models.Model, Curve):
             name = cls.__name__.lower()
             param_set = self.__getattribute__(name)
             params = param_set.all()
-            for par in params:
-                par.delete()
+            params.delete()
         
     def add_child(self, curve):
         curve.parent = self

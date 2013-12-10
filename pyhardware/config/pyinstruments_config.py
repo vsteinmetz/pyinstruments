@@ -93,9 +93,6 @@ instrument = {0}(logical_name, address, simulate)
             if model in serial_driver_type.supported_models():
                 return string_serial.format(serial_driver_type.__name__)
         
-        return """no supporting drivers in ivi, visa or serial, sorry..."""
-    
-    
         string_ivi = """import pyivi
 from pyhardware.drivers.ivi import {0}
 driver = pyivi.ivi_instrument(address, model=model, simulate=simulate)
@@ -106,3 +103,5 @@ instrument = {0}(logical_name, driver)
                     in list_all_child_classes(IviDriver).iteritems():
             if model in ivi_driver_type.supported_models():
                 return string_ivi.format(ivi_driver_type.__name__)
+            
+        return """no supporting drivers in ivi, visa or serial, sorry..."""
