@@ -32,7 +32,7 @@ class SimpleTest(TestCase):
         self.curve = CurveDB()
         self.curve.set_data(pandas.Series([1,4,6]))
         self.curve.save()
-        
+    
     def test_curve_filter_param_string(self):
         """
         Tests that a curve can be retrieved by a string param.
@@ -154,7 +154,21 @@ class SimpleTest(TestCase):
         self.assertTrue(self.curve in qs)
         self.assertFalse(self.curve2 in qs)
      
-     
+    def test_curve_filter_hierarchical_tag(self):
+        self.curve = CurveDB()
+        self.curve.params['comment'] = 'bla bla bla'
+        self.curve.params['Q'] = 1e6
+        self.curve.params['nice_curve'] = True
+        self.curve.tags.append('new_tag/subtag')
+        self.curve.set_data(pandas.Series([1,4,6]))
+        self.curve.save()
+        
+        qs = CurveDB.objects.filter_tag("new_tag")
+        self.assertTrue(self.curve in qs)
+        
+        qs = CurveDB.objects.filter_tag("new_t")
+        self.assertFalse(self.curve in qs)
+        
     def test_remove_tag(self):
         """
         Tests that a curve can be retrieved by a date.
@@ -245,6 +259,9 @@ class TestTagModel(TestCase):
             pass
         else:
             self.assertTrue(False, "this tag should not be moveable here")
+
+
+        
 
     def test_rename_tag_fails(self):
         self.tag = Tag(name='tag1')
