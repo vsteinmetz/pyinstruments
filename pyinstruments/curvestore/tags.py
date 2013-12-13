@@ -7,8 +7,7 @@ class HierarchicalTag(object):
 #        self.description = description
 
         self.parent = parent 
-        self.children = [] 
-
+        self.children = []
         self.setParent(parent)
 
     def add_child(self, name):

@@ -221,33 +221,31 @@ class TagModel(QAbstractItemModel):
         return True 
 
 
-    def index(self, row, column, parent): 
+    def index(self, row, column, parent):
         node = self.nodeFromIndex(parent) 
-        return self.createIndex(row, column, node.childAtRow(row)) 
+        return self.createIndex(row, column, node.childAtRow(row))
 
 
-    def data(self, index, role): 
+    def data(self, index, role):
         if role == Qt.DecorationRole: 
             return QVariant() 
 
         if role == Qt.TextAlignmentRole: 
             return QVariant(int(Qt.AlignTop | Qt.AlignLeft)) 
 
+
+        if role == Qt.EditRole:
+            #print "returning" + node.name
+            node = self.nodeFromIndex(index) 
+            return QString(node.name)
+
         if role != Qt.DisplayRole: 
-            return QVariant() 
-
+           return QVariant() 
+        
         node = self.nodeFromIndex(index) 
-
         if index.column() == 0: 
             return QVariant(node.name) 
 
-        elif index.column() == 1: 
-            return QVariant(node.state) 
-
-        elif index.column() == 2: 
-            return QVariant(node.description) 
-        else: 
-            return QVariant() 
 
 
     def columnCount(self, parent): 
@@ -534,3 +532,48 @@ class CurveTagWidget(QtGui.QWidget):
         return self.tree.set_tags(tags)
     
 TAG_MODEL = TagModel(ROOT)
+
+class DummyNode:
+    def __init__(self, name):
+        self.name = name
+
+class TagStringModel(QtGui.QStringListModel):
+    def __init__(self):
+        super(TagStringModel, self).__init__() 
+        self.refresh_nodes()
+        
+    def refresh_nodes(self):
+        self.nodes = [DummyNode(tag.name) for tag in Tag.objects.all()]
+        
+    def index(self, row, column, parent):
+        return self.createIndex(row, column, self.nodes[row])
+    
+    def flags(self, index):
+        defaultFlags = QAbstractItemModel.flags(self, index) 
+
+        if index.isValid(): 
+            return Qt.ItemIsEditable | Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled | defaultFlags 
+
+        else: 
+            return Qt.ItemIsDropEnabled | defaultFlags 
+
+    def data(self, index, role):
+        if role == Qt.DecorationRole: 
+            return QVariant() 
+        if role == Qt.TextAlignmentRole: 
+            return QVariant(int(Qt.AlignTop | Qt.AlignLeft))
+        if role == Qt.EditRole:
+            return QString(index.internalPointer().name)
+        if role != Qt.DisplayRole: 
+           return QVariant()
+        if index.column() == 0: 
+            return QVariant(index.internalPointer().name)
+        
+    def columnCount(self, parent): 
+        return 1
+
+    def rowCount(self, parent):
+        self.refresh_nodes()
+        return len(self.nodes)
+    
+TAG_STRING_MODEL = TagStringModel()#QtGui.QStringListModel([tag.name for tag in Tag.objects.all()])

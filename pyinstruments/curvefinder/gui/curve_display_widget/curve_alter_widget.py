@@ -1,8 +1,13 @@
 from pyinstruments.curvestore.curve_create_widget import CurveCreateWidget
+from pyinstruments.curvestore import models
 from pyinstruments.curvefinder.gui.curve_display_widget.id_display_widget import IdDisplayWidget
+from pyinstruments.curvestore.tag_widget import TAG_MODEL, TAG_STRING_MODEL
 
-
+import os
 from PyQt4 import QtCore, QtGui
+
+
+
 
 class CurveAlterWidget(CurveCreateWidget):
     curve_saved = QtCore.pyqtSignal()
