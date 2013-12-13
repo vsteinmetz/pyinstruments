@@ -11,7 +11,6 @@ from cPickle import dumps, load, loads
 from cStringIO import StringIO 
 
 
-
 def oldest_ancestors(list_of_nodes):
     """
     returns a list where elements that are descendant of others have been removed

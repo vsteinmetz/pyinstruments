@@ -13,15 +13,22 @@ TAG_COMPLETER.setModel(TAG_STRING_MODEL)
 
 
 class TagEditListWidget(QtGui.QWidget):
+    value_changed = QtCore.pyqtSignal()
+    
     def __init__(self, parent=None):
         super(TagEditListWidget, self).__init__(parent)
         self.lines = []
-        self.lay = QtGui.QVBoxLayout()
+        self.lay = QtGui.QHBoxLayout()
+        self.label_tags = QtGui.QLabel("tags:")
+        self.lay.addWidget(self.label_tags)
+        self.lay.addStretch()
+        
         self.current = ButtonLineEdit(self)
         self.lay.addWidget(self.current)
+        #self.mainlay.addStretch()
         self.setLayout(self.lay)
         self.current.validated.connect(self.add_line)
-        
+        self.setMinimumWidth(250)
 
     def add_line(self):
         self.current.setReadOnly(True)
@@ -34,7 +41,7 @@ class TagEditListWidget(QtGui.QWidget):
         self.current.close_clicked.connect(self.current.remove)
         
         self.current = ButtonLineEdit(self)
-        self.current.setFocus(True)
+        #self.current.setFocus(True)
         self.current.validated.connect(self.add_line)
         self.lay.addWidget(self.current)
 
@@ -46,12 +53,12 @@ class TagEditListWidget(QtGui.QWidget):
                 return
             else:
                 button.deleteLater()
-    @property
-    def tags(self):
+    #@property
+    def get_tags(self):
         return [str(button.text()) for button in self.lines]
 
-    @tags.setter
-    def tags(self, val):
+    #@tags.setter
+    def set_tags(self, val):
         self.clear()
         for tag in val:
             self.current.setText(tag)
@@ -62,11 +69,12 @@ class ButtonLineEdit(QtGui.QLineEdit):
     close_clicked = QtCore.pyqtSignal(bool)
     validated = QtCore.pyqtSignal()
     
+    
     def __init__(self, parent=None):
         super(ButtonLineEdit, self).__init__(parent)
 
         self.button = QtGui.QToolButton(self)
-        icon_file = os.path.join(os.path.split(os.path.split(os.path.split(os.path.split(__file__)[0])[0])[0])[0], "icons", "close.png")
+        icon_file = os.path.join(os.path.split(os.path.split(__file__)[0])[0], "icons", "close.png")
         self.button.setIcon(QtGui.QIcon(icon_file))
         self.button.setStyleSheet('border: 0px; padding: 0px;')
         self.button.setCursor(QtCore.Qt.ArrowCursor)
@@ -88,6 +96,7 @@ class ButtonLineEdit(QtGui.QLineEdit):
     def remove(self):
         self.parent().lines.remove(self)
         self.deleteLater()
+        self.parent().value_changed.emit()
     
     def validate(self):
         if self.isReadOnly():
@@ -96,6 +105,7 @@ class ButtonLineEdit(QtGui.QLineEdit):
             return
         if self.text() in [tag.name for tag in models.Tag.objects.all()]:
             self.validated.emit()
+            self.parent().value_changed.emit()
         else:
             print "nein!"
         

@@ -14,21 +14,23 @@ class CurveAlterWidget(CurveCreateWidget):
     delete_done = QtCore.pyqtSignal()
     def __init__(self, parent=None):
         super(CurveAlterWidget, self).__init__(parent=parent)
-        self.id_widget = IdDisplayWidget()
-        self.h_lay1.insertWidget(0, self.id_widget)
-        self.save_button.deleteLater()
-        self.save_button = self.id_widget.save_button
+        #self.id_widget = IdDisplayWidget()
+        #self.lay1.insertWidget(0, self.id_widget)
+        #self.save_button.deleteLater()
+        #self.save_button = self.id_widget.save_button
         
         self.curve_modified.connect(
                             self.save_button.show)
-
+        self.save_button.clicked.connect(self.save_button.hide)
 #        self.setLayout(self.h_lay1)
+#        self.id_widget.save_pressed.connect(
+#                                    self.save_button.hide)
         
-        self.id_widget.save_pressed.connect(
-                                    self.save_button.hide)
-        self.id_widget.save_pressed.connect(self.save)
-        self.id_widget.delete_done.connect(self.delete_done)
+        self.save_button.clicked.connect(self.save)
+        #self.id_widget.delete_done.connect(self.delete_done)
         self.current_curve = None
+        self.delete_button = QtGui.QPushButton("delete")
+        self.lay3.addWidget(self.delete_button)
     
     def save(self):
         if self.current_curve!=None:
@@ -37,5 +39,5 @@ class CurveAlterWidget(CurveCreateWidget):
             
     def display_curve(self, curve):
         self.current_curve = curve
-        self.id_widget.display_curve(curve)
+        #self.id_widget.display_curve(curve)
         self.dump_in_gui(curve)

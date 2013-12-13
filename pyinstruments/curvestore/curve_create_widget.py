@@ -1,6 +1,7 @@
 from PyQt4 import QtGui, QtCore
 from pyinstruments.curvestore.models import Tag, model_monitor
-from pyinstruments.curvestore.tag_widget import CurveTagWidget
+#from pyinstruments.curvestore.tag_widget import CurveTagWidget
+from pyinstruments.curvestore.tag_edit_list_widget import TagEditListWidget
 
 class ToolTiper(object):
     def __init__(self,parent_widget):
@@ -108,31 +109,32 @@ class CurveCreateWidget(QtGui.QWidget, object):
     
     def setup_ui(self):
         """sets up the GUI"""
-        
-        self.h_lay1 = QtGui.QHBoxLayout()
-        self.curve_tag_widget = CurveTagWidget()
-        self.h_lay1.addWidget(self.curve_tag_widget)
-        self.v_lay1 = QtGui.QVBoxLayout()
-        self.h_lay1.addLayout(self.v_lay1)
-        
+        self.lay1 = QtGui.QVBoxLayout()
+        #self.h_lay1 = QtGui.QHBoxLayout()
+        self.curve_tag_widget = TagEditListWidget()
+
+        self.lay1.addWidget(self.curve_tag_widget)
+        self.lay2 = QtGui.QHBoxLayout()
+        self.lay1.addLayout(self.lay2)
         self.name_label = QtGui.QLabel("name")
+        self.lay2.addWidget(self.name_label)
         self.name_widget = QtGui.QLineEdit("some_curve")
-        
-        self.v_lay1.addWidget(self.name_label)
-        self.v_lay1.addWidget(self.name_widget)
+        self.lay2.addWidget(self.name_widget)
         self.window_widget = QtGui.QLineEdit("default")
         self.window_label = QtGui.QLabel("plot window")
-        self.v_lay1.addWidget(self.window_label)
-        self.v_lay1.addWidget(self.window_widget)
+        self.lay2.addWidget(self.window_label)
+        self.lay2.addWidget(self.window_widget)
         
         
         self.curve_comment_widget = CurveCommentWidget()
-        self.v_lay1.addWidget(self.curve_comment_widget)
+        self.lay1.addWidget(self.curve_comment_widget)
         
+        self.lay3 = QtGui.QHBoxLayout()
         self.save_button = QtGui.QPushButton("save")
-        self.v_lay1.addWidget(self.save_button)
+        self.lay3.addWidget(self.save_button)
+        self.lay1.addLayout(self.lay3)
         
-        self.setLayout(self.h_lay1)
+        self.setLayout(self.lay1)
         
     def dump_in_gui(self, curve):
         self.blockSignals(True)
