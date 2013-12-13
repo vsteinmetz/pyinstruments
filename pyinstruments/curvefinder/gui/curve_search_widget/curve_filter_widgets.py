@@ -49,7 +49,18 @@ class MultiFilterWidget(QtGui.QWidget):
             for tag in self.tag_widget.get_tags():
                 qs = qs.filter_tag(tag)
         return qs
-
+    
+    def query_string(self):
+        query = "CurveDB.objects"
+        if self.tag_widget.active:
+            for tag in self.tag_widget.get_tags():
+                query+=".filter_tag(\"" +tag+"\")"
+        for filter in self.filters:
+            query+= filter.query_string()
+        if query=="CurveDB.objects":
+            query+=".all()"
+        return query
+    
     def add_row(self):
         self.n_rows+=1
         gui_filter = GuiFilter(self)
@@ -149,13 +160,16 @@ class GuiFilter(QtCore.QObject, object):
         super(GuiFilter, self).__init__()
         self.parent = parent
         self.combo_par = QtGui.QComboBox()
+        self.combo_par.setMaximumWidth(100)
         for col in models.ParamColumn.objects.all():
             self.combo_par.addItem(col.name)
         self.combo_rel = QtGui.QComboBox()
-        self.combo_rel.setMinimumWidth(100)
+        self.combo_rel.setMaximumWidth(40)
         self.widget_value = WidgetValue()
+        self.widget_value.setMaximumWidth(100)
         
-        self.button_remove = QtGui.QPushButton('remove')
+        self.button_remove = QtGui.QPushButton('del')
+        self.button_remove.setMaximumWidth(40)
         self.button_remove.pressed.connect(self.remove)
         self.combo_par.currentIndexChanged.connect(self.update_widgets)
         self.update_widgets()
@@ -167,7 +181,7 @@ class GuiFilter(QtCore.QObject, object):
         val = {'<':'lt', '<=':'lte', '>':'gt', '>=':'gte', '=':'', 'contains':'contains'}
         return val[self.relation]
     
-    def filter(self, queryset):
+    def query_string_dict(self):
         rel_string = self.rel_string()
         if rel_string != '':
             rel_string = '__' + rel_string
@@ -182,8 +196,22 @@ class GuiFilter(QtCore.QObject, object):
             if self.relation == '=':
                 kwds1 = {'value__gte':value}
                 kwds2 = {'value__lte':value + timedelta(days = 1)}
-                return queryset.filter_param(self.col_name, **kwds1).filter_param(self.col_name, **kwds2)
-        kwds = {query_str:value}
+                return kwds1, kwds2
+                #return queryset.filter_param(self.col_name, **kwds1).filter_param(self.col_name, **kwds2)
+        return {query_str:value}
+        
+    def query_string(self):
+        kwds = self.query_string_dict()
+        if isinstance(kwds, tuple):
+            kwds1, kwds2 = kwds
+            return ".filter_param(" + self.col_name + ", " + kwds1.keys()[0] + "=" + str(kwds1.values()[0]) + ").filter_param(" + self.col_name +  ", " + kwds2.keys()[0] + "=" + str(kwds2.values()[0]) + ")"
+        return ".filter_param(" + self.col_name + ", " + kwds.keys()[0] + "=" + str(kwds.values()[0]) + ")"  
+    
+    def filter(self, queryset):
+        kwds = self.query_string_dict()
+        if isinstance(kwds, tuple):
+            kwds1, kwds2 = kwds
+            return queryset.filter_param(self.col_name, **kwds1).filter_param(self.col_name, **kwds2)
         return queryset.filter_param(self.col_name, **kwds)    
     
     def repopulate_combo_rel(self):

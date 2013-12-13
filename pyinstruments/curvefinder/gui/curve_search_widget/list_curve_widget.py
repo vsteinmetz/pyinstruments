@@ -99,6 +99,11 @@ class ListCurveWidget(QtGui.QWidget, object):
         self.popup.setText('refreshing list, please wait.')
         self._tree_widget = self._get_tree_widget()
         self._lay = QtGui.QVBoxLayout()
+        self.query_textbox = QtGui.QTextEdit()
+        self.query_textbox.setMaximumHeight(60)
+        self.query_textbox.setReadOnly(True)
+        self._lay.addWidget(self.query_textbox)
+        
         self._refresh_button = QtGui.QPushButton('refresh')
         self._refresh_button.clicked.connect(self.refresh)
         
@@ -243,6 +248,8 @@ class ListCurveWidget(QtGui.QWidget, object):
     def refresh(self):
         self.popup.show()
         curves = self.parent().query()
+        query_string = self.parent().query_string()
+        self.query_textbox.setText(query_string)
         
         if self.sort_order():# doesn't work when first doing order_by and then reverse!!! 
             curves = curves.filter(parent=None).order_by(self.sort_field()).reverse()

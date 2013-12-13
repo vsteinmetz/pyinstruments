@@ -30,7 +30,21 @@ class CurveAlterWidget(CurveCreateWidget):
         #self.id_widget.delete_done.connect(self.delete_done)
         self.current_curve = None
         self.delete_button = QtGui.QPushButton("delete")
+        self.delete_button.clicked.connect(self.delete)
         self.lay3.addWidget(self.delete_button)
+    
+    def delete(self, confirm=True):
+        if self.current_curve==None:
+            return
+        if confirm:
+            message_box = QtGui.QMessageBox(self)
+            answer = message_box.question(self, 'delete', \
+                        'are you sure you want to delete curve id =' \
+                        + str(self.current_curve.id) + ' ?', 'No', 'Yes')
+            if not answer:
+                return
+        self.current_curve.delete()
+        self.delete_done.emit()
     
     def save(self):
         if self.current_curve!=None:

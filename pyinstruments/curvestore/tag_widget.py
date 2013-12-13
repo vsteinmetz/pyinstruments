@@ -327,7 +327,7 @@ class TagTreeView(QTreeView):
         self.refresh_requested.emit()
         self.expandAll()
     
-
+    
 
     def get_tags(self):
         return self.get_selected_tags()
@@ -498,6 +498,7 @@ class CurveTagWidget(QtGui.QWidget):
         
         width = self.tag_list.sizeHint().width()
         self.tag_list.setMaximumHeight(30)
+        self.setMaximumWidth(170)
         self.tag_list.setEnabled(False)
         
         

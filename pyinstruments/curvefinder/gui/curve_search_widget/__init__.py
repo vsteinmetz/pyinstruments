@@ -48,6 +48,9 @@ class CurveSearchWidget(QtGui.QWidget):
     def query(self):
         return self.curve_filter_widget.query()
     
+    def query_string(self):
+        return self.curve_filter_widget.query_string()
+    
     def select_by_id(self, id):
         return self.list_curve_widget.select_by_id(id)
     
