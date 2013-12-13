@@ -1,6 +1,7 @@
-from pyinstruments.curvestore.models import CurveDB
+from pyinstruments.curvestore.models import CurveDB, Tag
 from pyinstruments.curvefinder.gui.plot_window import get_window
 from pyinstruments.curvefinder import _APP
+from pyinstruments.curvestore.tag_edit_list_widget import TAG_COMPLETER
 
 from curve.fitting import FitFunctions
 
@@ -59,6 +60,34 @@ class MyItemOld(QtGui.QTreeWidgetItem):
             for child in curve.childs.all():
                 item_child = MyItem(child)
                 self.addChild(item_child)
+
+class MyTagInputDialog(QtGui.QDialog):
+    def __init__(self):
+        super(MyTagInputDialog, self).__init__()
+        self.lay = QtGui.QVBoxLayout()
+        self.label = QtGui.QLabel('Enter existing tag name:')
+        self.line  = QtGui.QLineEdit()
+        
+        self.lay.addWidget(self.label)
+        self.lay.addWidget(self.line)
+        self.setLayout(self.lay)
+        self.button_cancel = QtGui.QPushButton("Cancel")
+        self.button_ok = QtGui.QPushButton("OK")
+        self.hlay = QtGui.QHBoxLayout()
+        self.lay.addLayout(self.hlay)
+        self.hlay.addWidget(self.button_cancel)
+        self.hlay.addWidget(self.button_ok)
+        self.button_ok.clicked.connect(self.validate)
+        self.button_cancel.clicked.connect(self.reject)
+        self.line.setCompleter(TAG_COMPLETER)
+    
+    def validate(self):
+        if str(self.line.text()) in [tag.name for tag in Tag.objects.all()]:
+            self.accept()
+    
+    def ask_tag(self):
+        ok = self.exec_()==1
+        return self.line.text(), ok
 
 class ListCurveWidget(QtGui.QWidget, object):
     current_item_changed = QtCore.pyqtSignal(object)
@@ -355,7 +384,9 @@ class ListCurveWidget(QtGui.QWidget, object):
                 create_csv(curves, f)
                 
         def addtag(dummy,curves=curves):
-            text,ok= QtGui.QInputDialog.getText(self, 'Add a tag','Tagname to add:')
+            #text, ok = QtGui.QInputDialog.getText(self, 'Add a tag','Tagname to add:')
+            text, ok = MyTagInputDialog().ask_tag()
+            
             text = str(text)
             if ok:
                 for curve in curves:

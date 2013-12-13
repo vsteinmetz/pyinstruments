@@ -11,7 +11,6 @@ TAG_COMPLETER.setModel(TAG_STRING_MODEL)
 #TAG_COMPLETER.setCompletionMode(0)
 #TAG_COMPLETER = QtGui.QCompleter(TAG_MODEL)
 
-
 class TagEditListWidget(QtGui.QWidget):
     value_changed = QtCore.pyqtSignal()
     
@@ -102,6 +101,8 @@ class ButtonLineEdit(QtGui.QLineEdit):
         if self.isReadOnly():
             return 
         if self.text() == "":
+            return
+        if self.text() in self.parent().get_tags():
             return
         if self.text() in [tag.name for tag in models.Tag.objects.all()]:
             self.validated.emit()

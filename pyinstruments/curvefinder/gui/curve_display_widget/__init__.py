@@ -151,7 +151,7 @@ class CurveDisplayLeftPanel(QtGui.QWidget):
             return models.CurveDB.objects.get(id=self.displayed_curve_id)
     
     def setup_plot_widget(self):
-        self.plot_widget = plot.CurveWidget(self, 'curve graph', \
+        self.plot_widget = plot.CurveWidget(self, 'curve graph',
                                             show_itemlist=False)
         self.plot_widget.plot.set_antialiasing(True)
         
@@ -185,6 +185,8 @@ class CurveDisplayLeftPanel(QtGui.QWidget):
     def display_curve(self, curve):
         self.displayed_curve_id = curve.id
         if curve:
+            self.plot_widget.get_plot().set_title(str(curve.id) + " (" + curve.params["curve_type"] + ")")
+            #self.plot_widget.title = str(curve.id)
             curvedata = curve.get_plottable_data()
             #downsample large files for quick preview
             if len(curvedata)>50000:
