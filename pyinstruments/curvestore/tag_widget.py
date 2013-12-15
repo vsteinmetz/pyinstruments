@@ -1,4 +1,4 @@
-from pyinstruments.curvestore.models import Tag, top_level_tags
+from pyinstruments.curvestore.models import CurveDB, Tag, top_level_tags
 from pyinstruments.curvestore.tags import ROOT
 
 
@@ -119,7 +119,6 @@ class TagModel(QAbstractItemModel):
 
         self.columns = 1
         self.root = root
-        
 
     def supportedDropActions(self): 
         return Qt.CopyAction | Qt.MoveAction
@@ -243,7 +242,7 @@ class TagModel(QAbstractItemModel):
         
         node = self.nodeFromIndex(index) 
         if index.column() == 0: 
-            return QVariant(node.name) 
+            return QVariant(node.name + "(" + str(CurveDB.objects.filter_tag(node.fullname).count()) + ")")
 
 
 
@@ -307,7 +306,7 @@ class TagTreeView(QTreeView):
     refresh_requested = QtCore.pyqtSignal()
     def __init__(self, parent=None): 
         super(TagTreeView, self).__init__(parent) 
-        self.setMinimumWidth(300)
+        self.setMinimumWidth(170)
         self.myModel = TAG_MODEL
         self.setModel(self.myModel) 
 
@@ -432,12 +431,12 @@ class TagTreeView(QTreeView):
                 
                 
         def remove_tag(dummy, name=name_clicked):
-            dial = QtGui.QMessageBox()
-            dial.setText("Delete tag '" + name + "': are you sure ?")
-            dial.setInformativeText("Tag will be removed from all referenced curves...")
-            dial.setStandardButtons(QtGui.QMessageBox.Cancel|QtGui.QMessageBox.Ok)
-            dial.setDefaultButton(QtGui.QMessageBox.Ok);
-            if dial.exec_():
+            confirm = QtGui.QMessageBox.question(QtGui.QWidget(),
+                                   "Delete ?",
+                                   "Delete tag '" + name + "': are you sure ?\n" + \
+                                   "Tag will be removed from all referenced curves...",
+                                    'Cancel', 'OK')
+            if confirm:
                 tag = node_clicked.model_tag()
                 self.model().remove_row(index.row(), index.parent())
                 tag.remove()
@@ -498,7 +497,6 @@ class CurveTagWidget(QtGui.QWidget):
         
         width = self.tag_list.sizeHint().width()
         self.tag_list.setMaximumHeight(30)
-        self.setMaximumWidth(170)
         self.tag_list.setEnabled(False)
         
         
@@ -509,6 +507,7 @@ class CurveTagWidget(QtGui.QWidget):
         self.setLayout(self.lay)
         self.lay.setSpacing(0)
         
+
         
     def _update_tag_list(self, *args, **kwds):
         string = ""
@@ -537,7 +536,7 @@ class DummyNode:
     def __init__(self, name):
         self.name = name
 
-class TagStringModel(QtGui.QStringListModel):
+class TagStringModelOld(QtGui.QStringListModel):
     def __init__(self):
         super(TagStringModel, self).__init__() 
         self.refresh_nodes()
@@ -575,5 +574,13 @@ class TagStringModel(QtGui.QStringListModel):
     def rowCount(self, parent):
         self.refresh_nodes()
         return len(self.nodes)
-    
-TAG_STRING_MODEL = TagStringModel()#QtGui.QStringListModel([tag.name for tag in Tag.objects.all()])
+"""
+class TagStringModel(QtGui.QStringListModel):
+    def __init__(self):
+        super(TagStringModel, self).__init__() 
+        self.refresh_nodes()
+        
+    def refresh_nodes(self):
+        self.setStringList([tag.name for tag in Tag.objects.all()])
+
+TAG_STRING_MODEL = TAG_MODEL#TagStringModel()#QtGui.QStringListModel([tag.name for tag in Tag.objects.all()])"""

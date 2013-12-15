@@ -1,15 +1,31 @@
-from pyinstruments.curvestore.tag_widget import TAG_MODEL, TAG_STRING_MODEL
+from pyinstruments.curvestore.tag_widget import TAG_MODEL
 from pyinstruments.curvestore import models
 
 import os
 from PyQt4 import QtCore, QtGui
 #model = QtGui.QStringListModel([tag.name for tag in models.Tag.objects.all()])
 #completerCommune->setModel(model);
-TAG_COMPLETER = QtGui.QCompleter()
-#TAG_COMPLETER.setModel(model)
-TAG_COMPLETER.setModel(TAG_STRING_MODEL)
-#TAG_COMPLETER.setCompletionMode(0)
-#TAG_COMPLETER = QtGui.QCompleter(TAG_MODEL)
+
+#http://qt.developpez.com/doc/4.6/tools-treemodelcompleter/
+class TagCompleter(QtGui.QCompleter):
+    def __init__(self):
+        super(TagCompleter, self).__init__()
+        self.setModel(TAG_MODEL)
+    def separator(self):
+        return '/'
+    def splitPath(self, path):
+        return path.split('/')
+    def pathFromIndex(self, index):
+        strings = []
+        strings.append(index.internalPointer().name)
+        index = index.parent()
+        while index.internalPointer() is not None:
+            strings.append(index.internalPointer().name)
+            index = index.parent()
+        strings.reverse()
+        return "/".join(strings)
+        
+TAG_COMPLETER = TagCompleter()
 
 class TagEditListWidget(QtGui.QWidget):
     value_changed = QtCore.pyqtSignal()
@@ -17,6 +33,7 @@ class TagEditListWidget(QtGui.QWidget):
     def __init__(self, parent=None):
         super(TagEditListWidget, self).__init__(parent)
         self.lines = []
+        self.need_refresh = False
         self.lay = QtGui.QHBoxLayout()
         self.label_tags = QtGui.QLabel("tags:")
         self.lay.addWidget(self.label_tags)
@@ -28,6 +45,8 @@ class TagEditListWidget(QtGui.QWidget):
         self.setLayout(self.lay)
         self.current.validated.connect(self.add_line)
         self.setMinimumWidth(250)
+
+
 
     def add_line(self):
         self.current.setReadOnly(True)
@@ -51,6 +70,7 @@ class TagEditListWidget(QtGui.QWidget):
             except IndexError:
                 return
             else:
+                button.hide()
                 button.deleteLater()
     #@property
     def get_tags(self):
@@ -91,6 +111,11 @@ class ButtonLineEdit(QtGui.QLineEdit):
                             max(self.minimumSizeHint().height(), buttonSize.height() + frameWidth*2 + 2))
 
         self.editingFinished.connect(self.validate)
+
+    def focusInEvent(self, event):
+        super(ButtonLineEdit, self).focusInEvent(event)
+        if self.parent().need_refresh:
+            TAG_MODEL.refresh()
 
     def remove(self):
         self.parent().lines.remove(self)

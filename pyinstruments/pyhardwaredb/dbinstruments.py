@@ -63,7 +63,8 @@ def _setup_fetch_buttons(self, widget):
     """sets up the gui to fetch the waveforms in widget"""
 
     self._dbwidget = CurveCreateWidget(**self._get_defaults())
-    self._dbwidget.hide_save_button()
+    
+    self._dbwidget.curve_tag_widget.need_refresh = True ## each time focusing, will refresh the tag_model
     p = self._dbwidget.palette()
     p.setColor(self._dbwidget.backgroundRole(), QtCore.Qt.gray)
     self._dbwidget.setPalette(p)

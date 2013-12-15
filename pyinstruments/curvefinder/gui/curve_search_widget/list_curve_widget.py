@@ -351,10 +351,12 @@ class ListCurveWidget(QtGui.QWidget, object):
             message = "plot in " + curves[0].params['window']
             message_delete = "delete " + curves[0].name
             message_tags = "add a tag to selected curve"
+            message_remove_tags = "remove a tag to selected curve"
         else:
             message = "plot these in their window"
             message_delete = "delete " + str(len(curves)) + " curves ?"
             message_tags = "add a tag to selected " + str(len(curves)) + " curves"
+            message_remove_tags = "remove a tag to selected " +  str(len(curves)) + " curves"
         
         def delete(dummy, curves=curves):
             message_box = QtGui.QMessageBox(self)
@@ -399,7 +401,18 @@ class ListCurveWidget(QtGui.QWidget, object):
                 for curve in curves:
                     curve.tags.append(text)
                     curve.save()
-                
+        def removetag(dummy, curves=curves):
+            text, ok = MyTagInputDialog().ask_tag()
+            text = str(text)
+            if ok:
+                for curve in curves:
+                    try:
+                        curve.tags.remove(text)
+                    except ValueError:
+                        pass
+                    else:
+                        curve.save()
+        
         menu = QtGui.QMenu(self)
         action_plot = QtGui.QAction(message, self)
         action_plot.triggered.connect(plot)
@@ -410,9 +423,13 @@ class ListCurveWidget(QtGui.QWidget, object):
         action_tags = QtGui.QAction(message_tags, self)
         action_tags.triggered.connect(addtag)
         
+        action_remove_tags = QtGui.QAction(message_remove_tags, self)
+        action_remove_tags.triggered.connect(removetag)
+        
         menu.addAction(action_plot)
         menu.addAction(action_delete)
         menu.addAction(action_tags)
+        menu.addAction(action_remove_tags)
         
         
         ###second option: fit curve(s)

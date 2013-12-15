@@ -49,6 +49,7 @@ class Tag(models.Model):
     @property
     def shortname(self):
         return self.name.split('/')[-1]
+    
         
     def set_shortname(self, val):
         childs = self.childs()
