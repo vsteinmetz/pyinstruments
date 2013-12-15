@@ -153,6 +153,18 @@ class SimpleTest(TestCase):
         qs = CurveDB.objects.filter_tag('new_tag').filter_tag("other_tag")
         self.assertTrue(self.curve in qs)
         self.assertFalse(self.curve2 in qs)
+
+
+    def test_curve_filter_distinct_elements(self):
+        """
+        Tests that a curve can be retrieved by a date.
+        """
+        self.curve = CurveDB()
+        self.curve.set_data(pandas.Series([1,4,6]))
+        self.curve.tags.append('new_tag')
+        self.curve.tags.append('new_tag/sub')
+        self.curve.save()
+        self.assertTrue(CurveDB.objects.filter_tag("new_tag").count()==1)
      
     def test_curve_filter_hierarchical_tag(self):
         self.curve = CurveDB()

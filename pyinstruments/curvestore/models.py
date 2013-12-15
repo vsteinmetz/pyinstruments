@@ -143,7 +143,7 @@ class MyQuerySet(models.query.QuerySet):
         #return self.filter_param('tags_flatten', value__contains=";"+tagname+";")
         q1 = Q(tags_relation__name__contains=tagname + "/") ##parent tag
         q2 = Q(tags_relation__name=tagname) ##tag itself
-        return self.filter(q1|q2)
+        return self.filter(q1|q2).distinct()
 
 class CurveManager(models.Manager):
     """

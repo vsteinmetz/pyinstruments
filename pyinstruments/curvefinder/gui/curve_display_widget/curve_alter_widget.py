@@ -33,7 +33,7 @@ class CurveAlterWidget(CurveCreateWidget):
         self.delete_button.clicked.connect(self.delete)
         self.lay3.addWidget(self.delete_button)
     
-    def delete(self, confirm=True):
+    def delete(self, dummy=False, confirm=True):
         if self.current_curve==None:
             return
         if confirm:
