@@ -219,32 +219,44 @@ class CurveDisplayWidget(QtGui.QSplitter):
         self.left_panel = CurveDisplayLeftPanel()
         self.addWidget(self.left_panel)
         self.display_params = ParamsDisplayWidget()
+        self.display_params.curve_modified.connect(self.left_panel.alter_curve_widget.curve_modified)
+        self.left_panel.alter_curve_widget.curve_modified.connect(self.display_params.refresh)
         self.addWidget(self.display_params)
-        self.left_panel.save_pressed.connect(self.refresh_params)
+        self.left_panel.alter_curve_widget.curve_saved.connect(self.refresh_params)
+        
         self.left_panel.delete_done.connect(self.delete_done)
         self.displayed_curve_id = None
-    
+        self._displayed_curve = None
+        
     @property
     def displayed_curve(self):
-        if self.displayed_curve_id:
-            return models.CurveDB.objects.get(id=self.displayed_curve_id)
+        if self._displayed_curve:
+            return self._displayed_curve
+        else:
+            return None
+            if self.displayed_curve_id:
+                return models.CurveDB.objects.get(id=self.displayed_curve_id)
     
     def refresh(self):
         self.left_panel.refresh()
         self.refresh_params()
     
     def refresh_params(self):
-        if self.displayed_curve:
-            self.display_params.display_curve(self.displayed_curve)
+        print 'refreshing params'
+        self.display_params.refresh()
+        #print self.displayed_curve.params
+        #if self.displayed_curve:
+        #    self.display_params.display_curve(self.displayed_curve)
     
     def save(self):
         curve = self.displayed_curve
         self.save_curve(curve)
-    
+        
     def save_curve(self, curve):
         self.left_panel.save_curve(curve)
     
     def display_curve(self, curve):
+        self._display_curve = curve
         self.displayed_curve_id = curve.id
         self.left_panel.display_curve(curve)
         if curve:

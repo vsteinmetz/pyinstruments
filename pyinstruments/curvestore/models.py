@@ -197,6 +197,20 @@ def date_to_date(dic):
     return dic
  
 
+def get_type(val):
+    if isinstance(val, basestring):
+        return CharParam
+    if isinstance(val, (bool, numpy.bool_)):
+        return BooleanParam
+    if isinstance(val, (numpy.integer, numpy.float)):
+        return FloatParam
+    if isinstance(val, (int, float, long)):
+        return FloatParam
+    if isinstance(val, datetime):
+        return DateParam
+    raise ValueError('could not find the type of parameter ' + str(val))
+        
+
 class CurveDB(models.Model, Curve):
     """
     The base object containing the path to the curves, with all the meta 
@@ -356,7 +370,7 @@ class CurveDB(models.Model, Curve):
             except KeyError:
                 if PROFILING:
                     tuc = time.time()
-                cls = self.get_type(val)
+                cls = get_type(val)
                 if PROFILING:
                     total_get_type+= time.time() - tuc
                 if PROFILING:
@@ -427,19 +441,7 @@ class CurveDB(models.Model, Curve):
         
         #models.Model.save(self)
         
-    def get_type(self, val):
-        if isinstance(val, basestring):
-            return CharParam
-        if isinstance(val, (bool, numpy.bool_)):
-            return BooleanParam
-        if isinstance(val, (numpy.integer, numpy.float)):
-            return FloatParam
-        if isinstance(val, (int, float, long)):
-            return FloatParam
-        if isinstance(val, datetime):
-            return DateParam
-        raise ValueError('could not find the type of parameter ' + str(val))
-        
+
 
 
     def get_full_filename(self):

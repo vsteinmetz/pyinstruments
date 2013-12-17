@@ -16,7 +16,6 @@ class CurveAlterWidget(CurveCreateWidget):
         #self.lay1.insertWidget(0, self.id_widget)
         #self.save_button.deleteLater()
         #self.save_button = self.id_widget.save_button
-        
         self.curve_modified.connect(
                             self.save_button.show)
         self.save_button.clicked.connect(self.save_button.hide)

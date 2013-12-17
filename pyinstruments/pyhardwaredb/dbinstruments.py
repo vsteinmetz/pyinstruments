@@ -74,6 +74,7 @@ def _setup_fetch_buttons(self, widget):
     widget.add_below(self._dbwidget)
     widget._setup_horizontal_layout()
     self.button_save = QtGui.QPushButton('save')
+    self._dbwidget.save_button.hide()
     self.button_save.pressed.connect(graphical_exception(self.save_curve))
     
     widget.current_layout.addWidget(self.button_save)
