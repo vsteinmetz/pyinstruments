@@ -14,6 +14,7 @@ import json
 from django.core.files.storage import default_storage
 from django.template.defaultfilters import slugify
 import numpy
+import pandas
 from django.core.exceptions import ObjectDoesNotExist
 import time
 PROFILING = False
@@ -222,6 +223,43 @@ class CurveDB(models.Model, Curve):
     def __unicode__(self):
         return self.name
 
+    @classmethod
+    def create(cls, *args, **kwds):
+        """
+        Creates a new curve, first arguments should be either x or x, y 
+        kwds will be passed to self.params
+        if kwds[tags] is defined, then, also tags will be added...
+        """
+        if len(args)==1:
+            y = numpy.array(args[0])
+            ser = pandas.Series(y)
+        elif len(args)==2:
+            x = numpy.array(args[0])
+            y = numpy.array(args[1])
+            ser = pandas.Series(y, index=x)
+        else:
+            raise ValueError("first arguments should be either x or x, y")
+        obj = cls()
+        obj.set_data(ser)
+        if "data_read_only" not in kwds:
+            kwds["data_read_only"] = False
+        if "tags" in kwds:
+            tags = kwds.pop("tags")
+            if isinstance(tags, basestring):
+                tags = [tags]
+            obj.tags = tags 
+        obj.set_params(**kwds)
+        obj.save()
+        return obj
+
+    def add_point(self, x, y):
+        """
+        Works only on curves that have params["data_read_only"] set to False
+        """
+        
+        self.data = self.data.append(pandas.Series([y], index=[x]))
+        self.save()
+
     tags_relation = models.ManyToManyField(Tag)
     _name = models.CharField(max_length=255, default='some_curve')
     params_json = models.TextField(default="{}")
@@ -265,11 +303,13 @@ class CurveDB(models.Model, Curve):
 
     @data.setter
     def data(self, table):
-        if self.data_read_only:
+        if self.params["data_read_only"]:
             if self.pk is not None:
                 raise ValueError(\
                     "Trying to modify the data in a read-only curve")
         self._data = table
+
+
 
 
     def load_params(self):
