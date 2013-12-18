@@ -69,6 +69,8 @@ class Curve(object):
             except KeyError:
                 params = the_file.create_group("params")
             for key, value in self.params.iteritems():
+                if isinstance(value, basestring):
+                    value = str(value)
                 if isinstance(value, datetime):
                     value = value.strftime("%y/%m/%d/%H/%M/%S/%f")
                 try:
