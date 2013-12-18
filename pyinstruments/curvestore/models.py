@@ -777,7 +777,7 @@ def clear_unused_columns():
             print "clearing column: " + col.name
             col.delete()
 
-clear_unused_columns() #at each startup            
+      
         
 class ModelMonitor(QtCore.QObject):
     tag_added = QtCore.pyqtSignal()

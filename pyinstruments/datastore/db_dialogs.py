@@ -35,6 +35,7 @@ class DialogChooseDatabase(QtGui.QDialog):
                          'syncdb',
                          '--noinput'],
                     shell=False):
+            change_default_database_name("")
             raise ValueError("problem with db synchronization")
         
         settings.setValue('database_login', dial.login)

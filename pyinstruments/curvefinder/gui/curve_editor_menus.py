@@ -102,6 +102,11 @@ class MenuDB(QtGui.QMenu):
         self.open_django_admin.triggered.connect(self._open_django_admin)
         self.addAction(self.open_django_admin)
         
+        self.clear_unused_columns = QtGui.QAction(widget)
+        self.clear_unused_columns.setText('clear_unused_columns')
+        self.clear_unused_columns.triggered.connect(self._clear_unused_columns)
+        self.addAction(self.clear_unused_columns)
+        
         self.backup_all_files = QtGui.QAction(widget)
         self.backup_all_files.setText('backup all files...')
         self.backup_all_files.triggered.connect(
@@ -119,6 +124,9 @@ class MenuDB(QtGui.QMenu):
         self.import_oldformat_h5_files.triggered.connect(self._import_oldformat_h5_files)
         self.addAction(self.import_oldformat_h5_files)
         
+    def _clear_unused_columns(self):
+        models.clear_unused_columns() #at each startup      
+    
     
     def _backup_all_files(self):
         filename = str(QtGui.QFileDialog.getSaveFileName(parent=self))

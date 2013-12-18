@@ -242,7 +242,6 @@ class CurveDisplayWidget(QtGui.QSplitter):
         self.refresh_params()
     
     def refresh_params(self):
-        print 'refreshing params'
         self.display_params.refresh()
         #print self.displayed_curve.params
         #if self.displayed_curve:
