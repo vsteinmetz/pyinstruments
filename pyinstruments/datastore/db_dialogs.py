@@ -20,8 +20,9 @@ class DialogChooseDatabase(QtGui.QDialog):
         print 'new database'
         settings = QSettings('pyinstruments', 'pyinstruments')
         dial = DialogNewDatabase()
-        while not dial.exec_():
-            pass
+        if not dial.exec_():
+            dial.hide()
+            return 
         #settings.setValue('database_file', dial.filename)
         change_default_database_name(dial.filename)
         #settings.sync()
@@ -123,12 +124,8 @@ class LoginForm(QtGui.QWidget):
         
         self.setLayout(self.lay)
 
-
-
-
-
 class DialogNewDatabase(DialogOpenDatabase):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super(DialogNewDatabase, self).__init__(parent)
         self.login_form = LoginForm(self)
         self.lay.insertWidget(1, self.login_form)
@@ -138,8 +135,8 @@ class DialogNewDatabase(DialogOpenDatabase):
     validated = QtCore.pyqtSignal(name='validated')
     
     def connect_buttons_to_slots(self):
-        self.cancel_button.pressed.connect(self.reject)
-        self.ok_button.pressed.connect(self.ok_clicked)
+        self.cancel_button.clicked.connect(self.reject)
+        self.ok_button.clicked.connect(self.ok_clicked)
         self.validated.connect(self.accept)
     
     def ok_clicked(self):
@@ -202,7 +199,7 @@ def create_super_user(login, password):
     command._get_pass = lambda *args: password
     command.execute(login)
     
-def _new_database(dummy = True, cancel_allowed = True):
+def _new_database(dummy=True, cancel_allowed=True):
     dialog_new_database = DialogNewDatabase()
     if not dialog_new_database.exec_():
         if cancel_allowed:
