@@ -54,9 +54,9 @@ class Curve(object):
         if not os.path.exists(filename) and not with_data:
             print "Tried to save a new file without data. Overriding false with_data argument! "
             with_data=True
-        if self._data is None and with_data:
+        if self.data is None and with_data:
             raise ValueError("could not save curve, no data was set")
-        if self._params is None:
+        if self.params is None:
             raise ValueError("could not save curve, no params were set")
         
         if with_data:
