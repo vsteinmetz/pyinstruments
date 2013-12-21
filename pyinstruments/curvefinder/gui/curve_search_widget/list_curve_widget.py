@@ -10,6 +10,7 @@ import functools
 import numpy
 from StringIO import StringIO
 import pandas
+import json
 
 
 class MyItem(QtGui.QTreeWidgetItem):
@@ -336,6 +337,19 @@ class ListCurveWidget(QtGui.QWidget, object):
                 self.setSortingEnabled(True)
                 self.setSelectionMode( \
                             QtGui.QAbstractItemView.ExtendedSelection)
+                self.setDragEnabled(True)
+                
+            def mimeTypes(self):
+                mime_types = super(ListTreeWidget, self).mimeTypes()
+                mime_types.append("application/curve_ids_json")
+                return mime_types
+            
+            
+            def mimeData(self, indexes):
+                mime = super(ListTreeWidget, self).mimeData(indexes)
+                mime.setData("application/curve_ids_json", json.dumps([index.pk for index in indexes]))
+                return mime
+            
         return ListTreeWidget(self)
 
 

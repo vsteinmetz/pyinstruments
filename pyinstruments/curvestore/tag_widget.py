@@ -9,7 +9,7 @@ from PyQt4 import QtCore, QtGui
 from copy import deepcopy 
 from cPickle import dumps, load, loads 
 from cStringIO import StringIO 
-
+import json
 
 def oldest_ancestors(list_of_nodes):
     """
@@ -141,7 +141,8 @@ class TagModel(QAbstractItemModel):
 
     def mimeTypes(self): 
         types = QStringList() 
-        types.append('application/x-ets-qt4-instance') 
+        types.append('application/x-ets-qt4-instance')
+        types.append('application/curve_ids_json') 
         return types 
 
     def mimeData(self, index): 
@@ -153,13 +154,35 @@ class TagModel(QAbstractItemModel):
     def dropMimeData(self, mimedata, action, row, column, parentIndex): 
         if action == Qt.IgnoreAction: 
             return True 
-        
-        dragNodes = mimedata.instance()
-        dragNodes = oldest_ancestors(dragNodes)
-        parentNode = self.nodeFromIndex(parentIndex) 
+        parentNode = self.nodeFromIndex(parentIndex)
         where = parentNode.name
         if where=="":
             where = "root"
+        full_tag = parentNode.fullname
+        data_id = mimedata.data("application/curve_ids_json")
+        if data_id.count(): #curves were dropped
+            if where=="root":
+                return
+            ids = json.loads(data_id.data())
+            if QtGui.QMessageBox.question(QtGui.QWidget(),
+                                          "add tag",
+                                          "do you want to assign tag " \
+                                          + full_tag + " to " + str(len(ids)) \
+                                          + " curves ?",
+                                          "Cancel",
+                                          "OK"):
+                for curve_id in ids:
+                    curve = CurveDB.objects.get(id=curve_id)
+                    curve.tags.append(full_tag)
+                    curve.save()
+            return
+        
+        dragNodes = mimedata.instance()
+        dragNodes = oldest_ancestors(dragNodes)
+        
+        if len(dragNodes)==1 and dragNodes[0]==parentNode:
+            return
+        
             
         if not QtGui.QMessageBox.question(QtGui.QWidget(),
                                    'Confirm move',
@@ -310,10 +333,10 @@ class TagTreeView(QTreeView):
         self.myModel = TAG_MODEL
         self.setModel(self.myModel) 
 
-        self.dragEnabled() 
-        self.acceptDrops() 
+        self.setDragEnabled(True) 
+        self.setAcceptDrops(True) 
         self.showDropIndicator() 
-        self.setDragDropMode(QAbstractItemView.InternalMove) 
+#        self.setDragDropMode(QAbstractItemView.DragDrop)#InternalMove) 
         self.setSelectionMode(self.ExtendedSelection)
 
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
