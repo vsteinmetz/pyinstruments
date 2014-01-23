@@ -105,6 +105,27 @@ class FitFunctions(object):
         fit_params = {'y0': y0, 'slope': slope}
         return fit_params
 
+    '''log function, fixed on ordinate axis'''
+    def log10(self, y0):
+        x=self.x()
+        return np.log10(x)+y0
+
+    def _guesslog10(self):
+        y0 = self.data.mean()
+        fit_params = {'y0': y0}
+        return fit_params
+
+    '''log function, fixed on ordinate axis'''
+    def log10exp(self, y0, exp):
+        x=self.x()
+        return exp*10*np.log10(x)+y0
+
+    def _guesslog10exp(self):
+        y0 = self.data.mean()
+        fit_params = {'y0': y0,'exp': 1}
+        return fit_params
+
+
     '''linear function, fixed on abscisse axis'''
     def linear_x0(self, x0, slope):
         x=self.x()
