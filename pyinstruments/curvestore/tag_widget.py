@@ -150,7 +150,6 @@ class TagModel(QAbstractItemModel):
         mimeData = PyMimeData(node) 
         return mimeData 
 
-
     def dropMimeData(self, mimedata, action, row, column, parentIndex): 
         if action == Qt.IgnoreAction: 
             return True 
@@ -265,7 +264,7 @@ class TagModel(QAbstractItemModel):
         
         node = self.nodeFromIndex(index) 
         if index.column() == 0: 
-            return QVariant(node.name + "(" + str(CurveDB.objects.filter_tag(node.fullname).count()) + ")")
+            return QVariant(node.name)# + "(" + str(CurveDB.objects.filter_tag(node.fullname).count()) + ")")
 
 
 
