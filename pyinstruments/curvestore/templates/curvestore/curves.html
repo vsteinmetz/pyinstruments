@@ -1,0 +1,9 @@
+{% if curves %}
+    <ul>
+    {% for curve in curves %}
+        <li><a href="/curves/{{ curve.id }}/">{{ curve.name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No curves are available.</p>
+{% endif %}

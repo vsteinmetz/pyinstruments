@@ -459,6 +459,7 @@ class ListCurveWidget(QtGui.QWidget, object):
         def fitcurve(curvestofit, funcname):
             for curve in curvestofit:
                 curve.fit(func=funcname, autosave=True)
+                
         def gfitcurve(curvestofit, funcname):
             for curve in curvestofit:
                 curve.fit(func=funcname, autosave=True, graphicalfit=True)
@@ -466,11 +467,11 @@ class ListCurveWidget(QtGui.QWidget, object):
         for f in fitfuncs:
             specificfit = functools.partial(fitcurve, curvestofit=curves, funcname=f)
             specificgfit = functools.partial(gfitcurve, curvestofit=curves, funcname=f)
-            action_add_tag = QtGui.QAction(f, self)
-            action_add_tag.triggered.connect(specificfit)
+            action_fit = QtGui.QAction(f, self)
+            action_fit.triggered.connect(specificfit)
             action_gfit = QtGui.QAction(f, self)
             action_gfit.triggered.connect(specificgfit)
-            fitsmenu.addAction(action_add_tag)
+            fitsmenu.addAction(action_fit)
             gfitsmenu.addAction(action_gfit)
 
 

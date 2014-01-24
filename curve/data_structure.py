@@ -4,6 +4,7 @@ import pandas
 import h5py
 import os
 import numpy
+import numpy as np
 from datetime import datetime
 
 class MetaData(dict):
@@ -115,7 +116,7 @@ class Curve(object):
         fit_curve.set_data(fitter.fitdata)
         fit_curve.set_params(**fitter.getparams())
         fit_curve.params["fit_rms"] = fitter.getsqerror()**0.5
-        fit_curve.params["fit_dataminmax"] = self.data.max()-self.data.min()
+        fit_curve.params["fit_dataminmax"] = np.abs(self.data.max()-self.data.min())
         if not fit_curve.params["fit_dataminmax"]==0:
             fit_curve.params["fit_quality"] = \
                     fitter.getsqerror()**0.5/fit_curve.params["fit_dataminmax"]

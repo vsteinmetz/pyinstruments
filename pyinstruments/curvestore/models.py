@@ -594,7 +594,7 @@ class CurveDB(models.Model, Curve):
         curve.save()
         model_monitor.child_added.emit(self.id)
 
-    def fit(self, func, autoguessfunction='', autosave=False, maxiter = 10, verbosemode = False,\
+    def fit(self, func, autoguessfunction='', autosave=False, maxiter=10000, verbosemode = False,\
                     manualguess_params = {},fixed_params = {},graphicalfit=False):
         fitter, fit_curve = super(CurveDB, self).fit(
                         func,

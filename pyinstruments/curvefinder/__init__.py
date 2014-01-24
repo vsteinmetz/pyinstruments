@@ -1,7 +1,14 @@
+"""
+This module helps to graphically browse between curves
+"""
+
 from guidata import qapplication as __qapplication
 _APP = __qapplication()
 
 def refresh():
+    """
+    refresh the content of the curve editor
+    """
     curve_editor.refresh()
 
 def displayed_curve():

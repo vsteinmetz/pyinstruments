@@ -376,7 +376,7 @@ class FitFunctions(object):
         bw = magdata.sum()/magmax*(self.x().max()-self.x().min())/length
         fit_params = {'x0': x0, 'y0': bg, 'scale': max-bg, 'bandwidth': bw}
         return fit_params
-
+    
     
     def lorentz_log(self, scale, x0, y0, bandwidth):
         """logarithmic lorentz, typ. SA traces"""
@@ -395,6 +395,39 @@ class FitFunctions(object):
         bw = magdata.sum()/magmax*(self.x().max()-self.x().min())/length
         fit_params = {'x0': x0, 'y0': bg, 'scale': max-bg, 'bandwidth': bw}
         return fit_params
+
+    def lorentz_complex_sam(self, scale, x0, y0, bandwidth, phi, phi2):
+        return np.exp(1j*phi)*y0*(1-np.exp(1j*phi2)*scale/(1+1j*(self.x()-x0)/bandwidth))
+    
+    def _guesslorentz_complex_sam(self):
+        '''estimate background from first and last 10% of datapoints in the trace'''
+        length = len(self.x())
+        y0_real = (np.real(self.data[:length/10]).mean() + np.real(self.data[-length/10:]).mean())/2
+        y0_imag = (np.imag(self.data[:length/10]).mean() + np.imag(self.data[-length/10:]).mean())/2
+        y0 = np.sqrt(y0_real**2 + y0_imag**2)
+        phi = np.arctan2(y0_imag, y0_real)
+        bg = y0_real + 1j*y0_imag
+        
+        mag_data = (self.data - bg)
+        index_res = np.argmax(mag_data.abs())
+        scale = abs(mag_data[index_res])
+        x0 = self.data.index[index_res]
+        
+        index_plus = index_res
+        for val in mag_data[index_res:]:
+            index_plus += 1
+            if abs(val)<scale/2:
+                break
+        bw = self.data.index[index_plus] - x0
+        
+        fit_params = dict(bandwidth=bw, 
+                          scale=scale,
+                          x0=x0,
+                          y0=y0,
+                          phi=phi,
+                          phi2=0)
+        return fit_params
+    
 
     '''complex lorentz in linear scale, typically from NA traces'''
     def lorentz_complex(self, bandwidth, scale_re, scale_im, x0, y0_re,y0_im):
@@ -579,7 +612,7 @@ class FitFunctions(object):
 
 class Fit(FitFunctions):
     def __init__(self, data, func, fixed_params={}, manualguess_params={},
-                 autoguessfunction='' , verbosemode=True, maxiter=1000, 
+                 autoguessfunction='' , verbosemode=True, maxiter=10000, 
                  errfn='error_vector', autofit=True, graphicalfit=False):
                  #errfn='squareerror_dbweighted'):
         self._x_npy = None
@@ -688,6 +721,9 @@ class Fit(FitFunctions):
         
         # calculate the square error
         self.sqerror_vector = self.fn(**self.getparams())-self.data.values
+        
+        if self.sqerror_vector.dtype==np.dtype('complex128'):
+            self.sqerror_vector = np.abs(self.sqerror_vector)
         #print "params: ", args
         #print "sqerr: ", self.sqerror
         return self.sqerror_vector
@@ -698,7 +734,7 @@ class Fit(FitFunctions):
             self.fit_params[key] = float(args[index])
         
         # calculate the square error
-        self.sqerror = float(((self.fn(**self.getparams())-self.data.values)**2).mean())
+        self.sqerror = float(((np.abs(self.fn(**self.getparams())-self.data.values))**2).mean())
         
         #print "params: ", args
         #print "sqerr: ", self.sqerror
@@ -743,9 +779,10 @@ class Fit(FitFunctions):
     def fit(self):
         res = scipy.optimize.leastsq(func=self.fn_error,
                                      x0=self.fit_params.values(),
-                                     xtol=1e-4,
-                                     ftol=1e-4,
-                                     gtol=1e-4)
+                                     xtol=1e-15,#1e-4,
+                                     ftol=1e-15,#1e-4,
+                                     gtol=1e-15,
+                                     maxfev=self.maxiter)#1e-4)
         self.sqerror = self.getsqerror() 
         self.comment("Fit completed with sqerror = " + str(self.sqerror))
         self.comment("Obtained parameter values: ")
