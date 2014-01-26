@@ -396,22 +396,24 @@ class FitFunctions(object):
         fit_params = {'x0': x0, 'y0': bg, 'scale': max-bg, 'bandwidth': bw}
         return fit_params
 
-    def lorentz_complex_sam(self, scale, x0, y0, bandwidth, phi, phi2):
-        return np.exp(1j*phi)*y0*(1-np.exp(1j*phi2)*scale/(1+1j*(self.x()-x0)/bandwidth))
+    def lorentz_complex_sam(self, scale, x0, y0_real, y0_imag, bandwidth, phi):
+        return y0_real + 1j*y0_imag + np.exp(1j*phi)*scale/(1+1j*(self.x()-x0)/bandwidth)
     
     def _guesslorentz_complex_sam(self):
         '''estimate background from first and last 10% of datapoints in the trace'''
         length = len(self.x())
         y0_real = (np.real(self.data[:length/10]).mean() + np.real(self.data[-length/10:]).mean())/2
         y0_imag = (np.imag(self.data[:length/10]).mean() + np.imag(self.data[-length/10:]).mean())/2
-        y0 = np.sqrt(y0_real**2 + y0_imag**2)
-        phi = np.arctan2(y0_imag, y0_real)
+        #y0 = np.sqrt(y0_real**2 + y0_imag**2)
+        #phi = np.arctan2(y0_imag, y0_real)
         bg = y0_real + 1j*y0_imag
         
         mag_data = (self.data - bg)
         index_res = np.argmax(mag_data.abs())
         scale = abs(mag_data[index_res])
         x0 = self.data.index[index_res]
+        mag_data_max = mag_data[index_res]
+        phi = np.arctan2(np.imag(mag_data_max), np.real(mag_data_max))
         
         index_plus = index_res
         for val in mag_data[index_res:]:
@@ -423,9 +425,9 @@ class FitFunctions(object):
         fit_params = dict(bandwidth=bw, 
                           scale=scale,
                           x0=x0,
-                          y0=y0,
-                          phi=phi,
-                          phi2=0)
+                          y0_real=y0_real,
+                          y0_imag=y0_imag,
+                          phi=phi)
         return fit_params
     
 
@@ -693,7 +695,7 @@ class Fit(FitFunctions):
         
         self.graphical_params=list()
         for index, key in enumerate(self.fit_params):
-                fp=FitParam(key,self.fit_params[key],0.001*abs(self.fit_params[key]),10.0*abs(self.fit_params[key]),logscale=False,steps=2000,format='%.8f')
+                fp=FitParam(key, self.fit_params[key],0.001*abs(self.fit_params[key]),10.0*abs(self.fit_params[key]),logscale=False,steps=2000,format='%.8f')
                 self.graphical_params.append(fp)
         values = guifit(x, y, fitfn, self.graphical_params, xlabel="x-axis", ylabel="y-axis")
         if values is None:
@@ -712,7 +714,6 @@ class Fit(FitFunctions):
         self.fitdata = pandas.Series(data = self.fn(**self.getparams()), index = self.x(), \
                             name = 'fitfunction: '+ self.func)    
         return values
- 
  
     def error_vector(self, args):
         # unfold the list of parameters back into the dictionary 
@@ -829,10 +830,11 @@ class Fit(FitFunctions):
         print maxindex
         minindex = self.x().min()
         print minindex
-        newindex = numpy.array(numpy.linspace(minindex,maxindex,numbersamples),dtype=float)
-        self.data = pandas.Series(data=newindex,index=newindex)
-        self.fitdata = pandas.Series(data = self.fn(**self.getparams()), index = self.x(), \
-                       name = 'fitfunction: '+ self.func )
+        newindex = numpy.linspace(minindex , maxindex, numbersamples)
+        #self.data = pandas.Series(data=newindex, index=newindex)
+        self._x_npy = newindex
+        self.fitdata = pandas.Series(data=self.fn(**self.getparams()), index=self.x(), \
+                       name='fitfunction: '+ self.func)
         self.data = datasafe
         return self.fitdata
 
