@@ -1,131 +1,201 @@
-from pyhardware.drivers import VisaDriver
-
+from pyhardware.drivers.visa import VisaDriver
 
 import visa
 ### quick and dirty for now, waiting for answers to the question :
 #http://stackoverflow.com/questions/13840997/python-instrument-drivers
 
 
-class AFG3102(VisaDriver):
+class AFG(VisaDriver):
     _supported_models = ["AFG3102", "AFG3022B"]    
     def __init__(self, *args,**kwds):
-        super(AFG3102, self).__init__(*args, **kwds)
-    #    self.instr = visa.instrument(adr)
-        self._activeCh = 1
-        
-        #ArbSigGenTwoCh.__init__(self)
-        #ArbSigGen.__init__(self)
-        #MultiChannel.__init__(self)
-        #self.setChParam("V","SOURCE%d:VOLTAGE:AMPLITUDE",1,V,[0,5])
-        #self.setChParam("f","SOURCE%d:FREQUENCY",1,Hz,[0,100e6])
-        #self.setChParam("phi","SOURCE%d:PHASE:ADJUST",0,deg,[-360,360])
-    
- #   def ask(self,s):
-  #      return self.instr.ask(s)   
+        super(AFG, self).__init__(*args, **kwds)
+        self.waveforms = list(["SINusoid","SQUare","PULse","RAMP","PRNoise","DC","SINC","GAUSsian","LORentz","ERISe","EDECay","HAVersine"])
+        self.channel_idx = 1
+        self.amplitudelock = False
+        self.frequencylock = False
+        self.phaseinit()
 
-  #  def write(self,s):
-  #      return self.instr.write(s)   
-    
-    def output1(self,on = True):
-        if all_on_off:
-            self.write("OUTPUT1 ON")
-        else:
-            self.write("OUTPUT1 OFF")
-            
-    def output2(self,on = True):
-        if all_on_off:
-            self.write("OUTPUT2 ON")
-        else:
-            self.write("OUTPUT2 OFF")
-    
-    def output(self,all_on_off = True,ch1 = None,ch2 = None):        
-        ret = False
-        if ch1 is not None:
-            self.output1(ch1)
-            ret = True
-        if ch2 is not None:
-            self.output1(ch2)
-            ret = True
-        if ret:
-            return
-        
-        if all_on_off:
-            self.write("OUTPUT1 ON")
-            self.write("OUTPUT2 ON")
-        else:
-            self.write("OUTPUT1 OFF")
-            self.write("OUTPUT2 OFF")
-        
-    
-    def trig(self):
-        self.write("*TRG")
-    
-    def recall(self,num):
-        self.write("*RCL " + str(num))
+    def recall(self, num='0'):
+        self.write("*RCL "+str(num))
 
-
-    def save(self,num):
+    def save(self,num='0'):
         self.write("*SAV " + str(num))
+
+    @property
+    def output_enabled(self):
+        return self.ask("OUTPut%d:STATe?"%self.channel_idx)=='1'
+    @output_enabled.setter
+    def output_enabled(self,val):
+        if val:
+            self.write("OUTPut%d:STATe ON"%self.channel_idx)
+        else:
+            self.write("OUTPut%d:STATe OFF"%self.channel_idx)
     
-    def getChannel(self):
-        return self._activeCh
+    @property
+    def am(self):
+        return self.ask("SOURCe%d:AM:STATe?"%self.channel_idx)=='1'
+    @am.setter
+    def am(self,val):
+        if val:
+            self.write("SOURCe%d:AM:STATe ON"%self.channel_idx)
+        else:
+            self.write("SOURCe%d:AM:STATe OFF"%self.channel_idx)
     
-    def setChannel(self,ch):
-        self._activeCh = ch
+    @property
+    def fm(self):
+        return self.ask("SOURCe%d:FM:STATe?"%self.channel_idx)=='1'
+    @fm.setter
+    def fm(self,val):
+        if val:
+            self.write("SOURCe%d:FM:STATe ON"%self.channel_idx)
+        else:
+            self.write("SOURCe%d:FM:STATe OFF"%self.channel_idx)
     
-    def setVoltage(self,V):
-        V=float(V)
-        self.write("Source" + str(self._activeCh) + ":VOLTage:AMPL " + str(V))
-        
-    def setFrequency(self, f):
-        f=float(f)
-        self.write("Source" + str(self._activeCh) +":FREQ " + str(f))
-        
-    def setPhase(self, phi):
-        phi=float(phi)
-        self.write("Source" + str(self._activeCh) +"PHAS:ADJ " + str(phi))
-        
-    def setVoltageLow(self,V):
-        self.write("Source" + str(self._activeCh) +"VOLTage:LOW " + str(V))  
-        
-    def setSine(self,V=0.2,f=1e6,phi=0):
-        self.write("SOURCE%d:FUNCTION SIN"%self.getChannel())
-        self.setVoltage(V)
-        self.setFrequency(f)
-        self.setPhase(phi)
-        
-        
-    def setOffset(self,offset = 0.0,ch = 1):
-        self.write("SOUR" + str(ch) + ":VOLTage:OFFS " + str(offset))
+    @property
+    def pm(self):
+        return self.ask("SOURCe%d:PM:STATe?"%self.channel_idx)=='1'
+    @pm.setter
+    def pm(self,val):
+        if val:
+            self.write("SOURCe%d:PM:STATe ON"%self.channel_idx)
+        else:
+            self.write("SOURCe%d:PM:STATe OFF"%self.channel_idx)
+          
+    @property
+    def pwm(self):
+        return self.ask("SOURCe%d:PWM:STATe?"%self.channel_idx)=='1'
+    @pwm.setter
+    def pwm(self,val):
+        if val:
+            self.write("SOURCe%d:PWM:STATe ON"%self.channel_idx)
+        else:
+            self.write("SOURCe%d:PWM:STATe OFF"%self.channel_idx)
+
+    def calibrate():
+        return (int (self.ask("*CAL?")) == 0)
+
+    def phaseinit(self):
+        self.write("SOURce%d:PHASe:INITiate"%self.channel_idx)
+
+    @property
+    def waveform(self):
+        return self.ask("SOURce%d:FUNCtion:SHAPe?"%self.channel_idx)
+    @waveform.setter
+    def waveform(self,val="SIN"):
+        self.write("SOURce%d:FUNCtion:SHAPe %s"%(self.channel_idx,val)) 
+    
+    @property
+    def duty_cycle_high(self):
+        return float(self.ask("SOURce%d:FUNCtion:RAMP:SYMMetry?"%self.channel_idx))
+    @duty_cycle_high.setter
+    def duty_cycle_high(self,val=50.0):
+        self.write("SOURce%d:FUNCtion:RAMP:SYMMetry %f"%(self.channel_idx,val))
+
+    @property
+    def impedance(self):
+        return float(self.ask("OUTPut%d:IMPedance?"%self.channel_idx))
+    @impedance.setter
+    def impedance(self,val=50):
+        self.write("OUTPut%d:IMPedance %fOHM"%(self.channel_idx,val))
+
+    @property
+    def polarity(self):
+        return self.ask("OUTPut%d:POLarity?"%self.channel_idx)
+    @polarity.setter
+    def polarity(self,val="NORMal"):
+        self.write("OUTPut%d:POLarity %s"%(self.channel_idx,val))
+
+    @property
+    def triggerout(self):
+        return self.ask("OUTPut:TRIGger:MODE?")
+    @triggerout.setter
+    def triggerout(self,val="TRIGger"):
+        self.write("OUTPut:TRIGger:MODE %s"%val)
+
+    @property
+    def roscillator(self):
+        return self.ask("SOURce:ROSCillator:SOURce?")
+    @roscillator.setter
+    def roscillator(self,val="EXT"):
+        self.write("SOURce:ROSCillator:SOURce %s"%val)
+
+    "locks voltages of both channels to each other"
+    @property
+    def amplitudelock(self):
+        """
+        locks voltages of both channels to each other
+        """
+        return self.ask("SOURCe%d:VOLTage:CONCurrent:STATe?"%self.channel_idx)=='1'
+    @amplitudelock.setter
+    def amplitudelock(self,val):
+        """
+        locks voltages of both channels to each other
+        """
+        if val:
+            self.write("SOURCe%d:VOLTage:CONCurrent:STATe ON"%self.channel_idx)
+        else:
+            self.write("SOURCe%d:VOLTage:CONCurrent:STATe OFF"%self.channel_idx)
+
+    @property
+    def frequencylock(self):
+        """
+        locks frequencies of both channels to each other
+        """
+        return self.ask("SOURCe%d:FREQuency:CONCurrent:STATe?"%self.channel_idx)=='1'
+    @frequencylock.setter
+    def frequencylock(self,val):
+        """
+        locks frequencies of both channels to each other
+        """
+        if val:
+            self.write("SOURCe%d:FREQuency:CONCurrent:STATe ON"%self.channel_idx)
+        else:
+            self.write("SOURCe%d:FREQuency:CONCurrent:STATe OFF"%self.channel_idx)
+
+#numerical values
+    @property
+    def amplitude(self):
+        """
+        defines the signal amplitude in Vpp 
+        """
+        return float(self.ask("SOURce%d:VOLTage:LEVel:IMMediate:AMPLitude?"%self.channel_idx))
+    @amplitude.setter
+    def amplitude(self,val=0):
+        """
+        defines the signal amplitude in Vpp 
+        """
+        self.write("SOURce%d:VOLTage:LEVel:IMMediate:AMPLitude %fVPP"%(self.channel_idx,val))
+
+    @property
+    def frequency(self):
+        return float(self.ask("SOURCe%d:FREQuency:FIXed?"%self.channel_idx))
+    @frequency.setter
+    def frequency(self,val=0):
+        self.write("SOURCe%d:FREQuency:FIXed %fHz"%(self.channel_idx,val))
+
+    @property
+    def phase(self):
+        return float(self.ask("SOURce%d:PHASe:ADJust?"%self.channel_idx))
+    @phase.setter
+    def phase(self,val=0):
+        self.write("SOURce%d:PHASe:ADJust %f"%(self.channel_idx,val))
+
+    @property
+    def offset(self):
+        return float(self.ask("SOURce%d:VOLTage:LEVel:IMMediate:OFFSet?"%self.channel_idx))
+    @offset.setter
+    def offset(self,val=0):
+        self.write("SOURce%d:VOLTage:LEVel:IMMediate:OFFSet %fV"%(self.channel_idx,val))
 
         
-    def setRamp(self,V=0.2,f=1e6,phi=0):
-        self.write("SOURCE%d:FUNCTION RAMP"%self.getChannel())
-        self.setVoltage(V)
-        self.setFrequency(f)
-        self.setPhase(phi)
-        
-    def setSquare(self,V=0.2,f=1e6,phi=0):
-        self.write("SOURCE%d:FUNCTION SQUARE"%self.getChannel())
-        self.setVoltage(V)
-        self.setFrequency(f)
-        self.setPhase(phi)
-        
-    def initPhase(self): #initialize phase lock between channels
-        self.write("SOUR1:PHAS:INIT")
-                
-    def getFrequency(self):
-        print self.ask("SOURCE%d:FREQUENCY?"%self.getChannel())
-        
-    def getPhase(self):
-        print self.ask("SOURCE%d:PHASE?"%self.getChannel())
-        
-    def getOffset(self):
-        return float( self.ask("SOURCE%d:VOLTage:OFFSet?"%self.getChannel()) )
+#
+#""" BLANK to fill in new properties
+#    @property
+#    def (self):
+#        return float(self.ask("%d?"%self.channel_idx))
+#    @.setter
+#    def (self,val=0):
+#        self.write("%d"%self.channel_idx%val)
+#
 
-    def write_waveform(self,waveform):
-        """waveform should be a numpy array of floats between 0 and 1"""
-        waveform_data = "#" + repr(len(repr(waveform.size*2))) + repr(waveform.size*2) + str((waveform*2**14).astype('>i2').data)
-        self.write("TRACE:DATA EMEMORY,"+waveform_data)
-        self.write("TRAC:COPY USER1,EMEM")
-        self.write("FUNCTION USER1")
+#"""
