@@ -1,22 +1,14 @@
-from pyhardware.drivers.visa import VisaDriver
+from pyhardware.drivers.visa import AFG
 
-import visa
+#import visa
 ### quick and dirty for now, waiting for answers to the question :
 #http://stackoverflow.com/questions/13840997/python-instrument-drivers
 
 
-class AFG(VisaDriver):
-    _supported_models = ["AFG3102", "AFG3022B"]    
+class WW1074(AFG):
+    _supported_models = ["WW1074"]    
     def __init__(self, *args,**kwds):
-        super(AFG, self).__init__(*args, **kwds)
-        self.waveforms = list(["SINusoid","SQUare","PULse","RAMP","PRNoise","DC","SINC","GAUSsian","LORentz","ERISe","EDECay","HAVersine"])
-        self.triggersources = list(["TIMer","EXTernal"])
-        self.triggerslopes = list(["POSitive","NEGative"])
-        self.burstmodes = list(["TRIGgered","GATed"])
-        self.channel_idx = 1
-        self.amplitudelock = False
-        self.frequencylock = False
-        #self.phaseinit()
+        super(WW1074, self).__init__(*args, **kwds)
 
     def recall(self, num='0'):
         self.write("*RCL "+str(num))
@@ -74,7 +66,7 @@ class AFG(VisaDriver):
         else:
             self.write("SOURCe%d:PWM:STATe OFF"%self.channel_idx)
 
-    def calibrate(self):
+    def calibrate():
         return (int (self.ask("*CAL?")) == 0)
 
     def phaseinit(self):
